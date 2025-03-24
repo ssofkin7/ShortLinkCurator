@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { User } from "@shared/schema";
+import { User, LinkWithTags } from "@shared/schema";
 import Sidebar from "@/components/Sidebar";
 import TopBar from "@/components/TopBar";
 import LinkSubmitter from "@/components/LinkSubmitter";
@@ -19,6 +19,11 @@ const HomePage = () => {
   // Fetch current user
   const { data: user, isLoading: userLoading } = useQuery<User>({
     queryKey: ["/api/user"],
+  });
+  
+  // Fetch links
+  const { data: links = [], isLoading: linksLoading } = useQuery<LinkWithTags[]>({
+    queryKey: ["/api/links", activeTab !== "all" ? activeTab : undefined],
   });
 
   // Handle link submission
@@ -65,6 +70,8 @@ const HomePage = () => {
             onTabChange={handleTabChange} 
             viewMode={viewMode}
             onViewModeChange={setViewMode}
+            links={links}
+            isLoading={linksLoading}
           />
           
           {/* "Revisit These Links" Section */}

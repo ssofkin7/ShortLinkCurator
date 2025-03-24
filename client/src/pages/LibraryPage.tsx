@@ -53,6 +53,8 @@ export default function LibraryPage() {
               onTabChange={handleTabChange}
               viewMode={viewMode}
               onViewModeChange={handleViewModeChange}
+              links={links}
+              isLoading={isLinksLoading}
             />
           </div>
         </main>
