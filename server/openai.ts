@@ -1,6 +1,6 @@
 import OpenAI from "openai";
-// Import the title extractor and shared platform utilities
-import { extractVideoTitle } from './services/titleExtractor';
+// Import the metadata extractor and shared platform utilities
+import { extractVideoMetadata } from './services/titleExtractor';
 import { 
   PlatformType, 
   detectPlatform, 
@@ -31,22 +31,30 @@ export async function analyzeVideoContent(
 ): Promise<LinkMetadata> {
   const platform = detectPlatform(url) || 'unknown';
   let defaultTitle = extractDefaultTitleFromUrl(url);
+  let thumbnailUrl: string | undefined = undefined;
   
   try {
-    // First try to get a real title from oEmbed or similar
+    // First try to get metadata from oEmbed or similar
     let title = providedTitle;
     
     if (!title) {
       try {
-        title = await extractVideoTitle(url);
-        console.log(`Title extracted from ${platform}: "${title}"`);
+        // Extract both title and thumbnail from oEmbed
+        const videoMetadata = await extractVideoMetadata(url);
+        title = videoMetadata.title;
+        thumbnailUrl = videoMetadata.thumbnail_url;
+        
+        console.log(`Metadata extracted from ${platform}:`, { 
+          title, 
+          hasThumbnail: !!thumbnailUrl 
+        });
         
         // If title extraction returned a real title, use it as the default
         if (title && title !== 'Untitled Content') {
           defaultTitle = title;
         }
-      } catch (titleError) {
-        console.error('Error extracting video title:', titleError);
+      } catch (extractionError) {
+        console.error('Error extracting video metadata:', extractionError);
       }
     }
     
@@ -61,7 +69,6 @@ export async function analyzeVideoContent(
       - category: A single category that best describes this content (e.g., "Fitness", "Cooking", "Technology", "Fashion", etc.)
       - tags: An array of 3-5 relevant tags for this content
       - duration: If you can detect it, the duration of the video (otherwise null)
-      - thumbnail_url: Leave as null (we'll handle thumbnails separately)
       
       Return ONLY the JSON object, no additional text.
     `;
@@ -86,7 +93,7 @@ export async function analyzeVideoContent(
         category: result?.category || 'Uncategorized',
         tags: Array.isArray(result?.tags) ? result.tags : [],
         duration: result?.duration || undefined,
-        thumbnail_url: undefined // We'll set this separately
+        thumbnail_url: thumbnailUrl // Use the thumbnail from oEmbed
       };
     } catch (parseError) {
       console.error('Error parsing OpenAI response:', parseError);
@@ -96,7 +103,7 @@ export async function analyzeVideoContent(
         category: 'Uncategorized',
         tags: [],
         duration: undefined,
-        thumbnail_url: undefined
+        thumbnail_url: thumbnailUrl
       };
     }
   } catch (error) {
@@ -109,7 +116,7 @@ export async function analyzeVideoContent(
       category: 'Uncategorized',
       tags: [],
       duration: undefined,
-      thumbnail_url: undefined
+      thumbnail_url: thumbnailUrl
     };
   }
 }
