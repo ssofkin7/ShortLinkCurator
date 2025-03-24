@@ -12,7 +12,7 @@ interface SidebarProps {
   isLoading: boolean;
 }
 
-const Sidebar = ({ user, isLoading }: SidebarProps) => {
+const CustomSidebar = ({ user, isLoading }: SidebarProps) => {
   const [location] = useLocation();
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   
@@ -35,7 +35,7 @@ const Sidebar = ({ user, isLoading }: SidebarProps) => {
               <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
             </svg>
           </div>
-          <h1 className="text-xl font-semibold">LinkOrbit</h1>
+          <h1 className="text-xl font-semibold">LinkSnap</h1>
         </div>
         
         <nav className="space-y-1.5">
@@ -139,4 +139,4 @@ const Sidebar = ({ user, isLoading }: SidebarProps) => {
   );
 };
 
-export default Sidebar;
+export default CustomSidebar;
