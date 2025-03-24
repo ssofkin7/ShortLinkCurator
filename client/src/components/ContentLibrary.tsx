@@ -131,6 +131,14 @@ const ContentLibrary = ({
     // Toggle between newest and oldest
     const newSortOrder = sortOrder === "newest" ? "oldest" : "newest";
     setSortOrder(newSortOrder);
+    
+    // Update filtered links with new sort order
+    const sorted = [...filteredLinks].sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return newSortOrder === "newest" ? dateB - dateA : dateA - dateB;
+    });
+    
     toast({
       title: "Sorting applied",
       description: `Sorted by ${newSortOrder === "newest" ? "newest" : "oldest"}`,
@@ -423,7 +431,7 @@ const ContentLibrary = ({
             </svg>
             <span className="ml-2">Loading your content...</span>
           </div>
-        ) : links.length === 0 && activeTab === 'all' ? (
+        ) : links.length === 0 && !searchQuery.trim() && !activeTagFilter && activeTab === 'all' ? (
           <div className="text-center py-10 bg-white rounded-xl border border-gray-200">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto text-gray-400 mb-4">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -433,7 +441,7 @@ const ContentLibrary = ({
             <h3 className="text-lg font-medium text-gray-900 mb-1">No links saved yet</h3>
             <p className="text-gray-500">Paste a link above to get started!</p>
           </div>
-        ) : links.length === 0 && activeTab !== 'all' ? (
+        ) : filteredLinks.length === 0 && activeTab !== 'all' ? (
           // Dynamic empty state based on platform tab
           <div className="text-center py-10 bg-white rounded-xl border border-gray-200">
             {/* Get platform-specific empty state icon */}
@@ -528,7 +536,7 @@ const ContentLibrary = ({
               ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6' 
               : 'grid-cols-1 gap-4'}`}
             >
-              {(searchQuery.trim() || activeTagFilter ? filteredLinks : links).map((link) => (
+              {filteredLinks.map((link) => (
                 <ContentItem 
                   key={link.id} 
                   link={link} 
