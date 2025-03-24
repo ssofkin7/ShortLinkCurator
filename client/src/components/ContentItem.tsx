@@ -304,30 +304,7 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
             {link.title}
           </h3>
           
-          <div className="flex flex-wrap gap-1.5 mb-2">
-            {link.tags.slice(0, 3).map((tag) => (
-              <Badge 
-                key={tag.id} 
-                variant="outline" 
-                className="bg-blue-50 text-blue-800 text-xs border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors group relative"
-                title="Click to filter by this tag"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onTagClick && onTagClick(tag.name, e);
-                }}
-              >
-                {tag.name}
-                <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-                  Filter by tag
-                </span>
-              </Badge>
-            ))}
-            {link.tags.length > 3 && (
-              <Badge variant="outline" className="bg-gray-100 text-gray-700 text-xs border-gray-200">
-                +{link.tags.length - 3}
-              </Badge>
-            )}
-          </div>
+          {/* Tags removed from default view as requested */}
           
           <div className="flex items-center justify-between text-xs text-gray-500">
             <span>{formatDate(link.created_at)}</span>
