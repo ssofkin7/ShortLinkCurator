@@ -146,14 +146,14 @@ const ContentLibrary = ({
           <p className="text-gray-500 text-sm">Browse and manage your saved short-form content</p>
         </div>
         
-        <div className="flex flex-wrap gap-3 md:ml-4">
+        <div className="flex items-center gap-2 flex-wrap">
           {/* View Mode Toggle */}
-          <div className="flex items-center bg-white rounded-lg border border-gray-200 p-1 shadow-sm">
+          <div className="flex bg-gray-100 p-0.5 rounded-lg">
             <Button
               variant={viewMode === "grid" ? "secondary" : "ghost"}
               size="sm"
               onClick={() => onViewModeChange("grid")}
-              className="px-3 py-1.5 rounded-md text-sm font-medium"
+              className="px-3 py-1.5 text-sm font-medium rounded-md h-8"
             >
               <svg className="mr-1.5" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="3" width="7" height="7"></rect>
@@ -167,7 +167,7 @@ const ContentLibrary = ({
               variant={viewMode === "list" ? "secondary" : "ghost"}
               size="sm"
               onClick={() => onViewModeChange("list")}
-              className="px-3 py-1.5 rounded-md text-sm font-medium"
+              className="px-3 py-1.5 text-sm font-medium rounded-md h-8"
             >
               <svg className="mr-1.5" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="8" y1="6" x2="21" y2="6"></line>
@@ -181,23 +181,23 @@ const ContentLibrary = ({
             </Button>
           </div>
           
-          {/* Filter and Sort Controls - Made more prominent */}
-          <div className="flex flex-wrap gap-2 ml-auto">
+          {/* Filter and Sort Controls */}
+          <div className="flex items-center gap-2">
             <Button
-              variant={activeTagFilter ? "default" : "secondary"}
+              variant={activeTagFilter ? "default" : "outline"}
               size="sm"
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium shadow-sm relative"
+              className="flex items-center gap-1 h-8 px-3 text-sm font-medium"
               onClick={() => activeTagFilter && clearTagFilter()}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
               </svg>
-              <span>{activeTagFilter ? `Filtered: ${activeTagFilter}` : "Filter"}</span>
+              <span>{activeTagFilter ? `${activeTagFilter}` : "Filter"}</span>
               {activeTagFilter && (
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 
-                  width="14" 
-                  height="14" 
+                  width="12" 
+                  height="12" 
                   viewBox="0 0 24 24" 
                   fill="none" 
                   stroke="currentColor" 
@@ -213,15 +213,15 @@ const ContentLibrary = ({
             </Button>
             
             <Button
-              variant="secondary"
+              variant="outline"
               size="sm"
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium shadow-sm"
+              className="flex items-center gap-1 h-8 px-3 text-sm font-medium"
               onClick={() => handleSortChange()}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 9l4-4 4 4M7 5v14M21 15l-4 4-4-4M17 19V5"/>
               </svg>
-              <span>Sort: {sortOrder === "newest" ? "Newest" : "Oldest"}</span>
+              <span>{sortOrder === "newest" ? "Newest" : "Oldest"}</span>
             </Button>
           </div>
         </div>
@@ -259,10 +259,10 @@ const ContentLibrary = ({
 
       {/* Content Tabs */}
       <div className="mb-6 border-b border-gray-200">
-        <div className="flex -mb-px gap-1 overflow-x-auto">
+        <div className="flex -mb-px overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent pb-1">
           <Button 
             variant="link" 
-            className={`px-4 py-3 text-sm ${activeTab === 'all' ? 'border-b-2 border-blue-500 text-blue-600 font-medium' : 'border-b-2 border-transparent text-gray-500 hover:text-gray-700'}`}
+            className={`px-4 py-2.5 text-sm whitespace-nowrap ${activeTab === 'all' ? 'border-b-2 border-blue-500 text-blue-600 font-medium' : 'border-b-2 border-transparent text-gray-500 hover:text-gray-700'}`}
             onClick={() => onTabChange('all')}
           >
             All ({counts.all})
