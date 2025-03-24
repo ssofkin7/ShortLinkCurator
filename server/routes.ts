@@ -305,7 +305,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Recommendations
+  // Recommendations based on AI analysis of categories and tags
   app.get("/api/recommendations", authenticate, async (req: Request, res: Response) => {
     try {
       const userId = req.session.userId as number;
@@ -379,6 +379,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Get recommendations error:", error);
       res.status(500).json({ message: "Error generating recommendations" });
+    }
+  });
+  
+  // Route to get not recently viewed links
+  app.get("/api/recommendations/not-viewed", authenticate, async (req: Request, res: Response) => {
+    try {
+      const userId = req.session.userId as number;
+      
+      // Get links that haven't been viewed in a while (oldest last_viewed first)
+      const notViewedLinks = await storage.getRecommendedLinks(userId, 5);
+      
+      if (notViewedLinks.length === 0) {
+        return res.status(200).json([]);
+      }
+      
+      res.status(200).json(notViewedLinks);
+    } catch (error) {
+      console.error("Get not-viewed recommendations error:", error);
+      res.status(500).json({ message: "Error retrieving not viewed links" });
+    }
+  });
+  
+  // Route to update last_viewed timestamp when a link is viewed
+  app.post("/api/links/:id/view", authenticate, async (req: Request, res: Response) => {
+    try {
+      const linkId = parseInt(req.params.id);
+      
+      if (isNaN(linkId)) {
+        return res.status(400).json({ message: "Invalid link ID" });
+      }
+      
+      // Verify the link exists and belongs to the user
+      const userId = req.session.userId as number;
+      const link = await storage.getLinkById(linkId);
+      
+      if (!link || link.user_id !== userId) {
+        return res.status(403).json({ message: "Unauthorized access to this link" });
+      }
+      
+      await storage.updateLastViewed(linkId);
+      res.status(200).json({ message: "Link view timestamp updated" });
+    } catch (error) {
+      console.error("Update last viewed error:", error);
+      res.status(500).json({ message: "Error updating link view timestamp" });
     }
   });
 
