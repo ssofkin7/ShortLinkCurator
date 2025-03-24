@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LinkWithTags } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
+import { useLocation } from "wouter";
 
 const NotViewedRecommendations = () => {
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
 
   // Fetch links that haven't been viewed in a while
   const { data: notViewedLinks = [], isLoading } = useQuery<LinkWithTags[]>({
@@ -32,42 +34,66 @@ const NotViewedRecommendations = () => {
       case 'tiktok':
         return {
           icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 448 512" fill="currentColor" className="text-[#EE1D52]">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 448 512" fill="currentColor" className="text-[#EE1D52]">
               <path d="M448 209.9a210.1 210.1 0 0 1 -122.8-39.3V349.4A162.6 162.6 0 1 1 185 188.3V278.2a74.6 74.6 0 1 0 52.2 71.2V0l88 0a121.2 121.2 0 0 0 1.9 22.2h0A122.2 122.2 0 0 0 381 102.4a121.4 121.4 0 0 0 67 20.1z"/>
             </svg>
           ),
-          text: "TikTok"
+          bgColor: 'bg-[#EE1D52]'
         };
       case 'youtube':
         return {
           icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 576 512" fill="currentColor" className="text-[#FF0000]">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 576 512" fill="currentColor" className="text-[#FF0000]">
               <path d="M549.7 124.1c-6.3-23.7-24.8-42.3-48.3-48.6C458.8 64 288 64 288 64S117.2 64 74.6 75.5c-23.5 6.3-42 24.9-48.3 48.6-11.4 42.9-11.4 132.3-11.4 132.3s0 89.4 11.4 132.3c6.3 23.7 24.8 41.5 48.3 47.8C117.2 448 288 448 288 448s170.8 0 213.4-11.5c23.5-6.3 42-24.2 48.3-47.8 11.4-42.9 11.4-132.3 11.4-132.3s0-89.4-11.4-132.3zm-317.5 213.5V175.2l142.7 81.2-142.7 81.2z"/>
             </svg>
           ),
-          text: "YouTube Shorts"
+          bgColor: 'bg-[#FF0000]'
         };
       case 'instagram':
         return {
           icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 448 512" fill="currentColor" className="text-[#C13584]">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 448 512" fill="currentColor" className="text-[#C13584]">
               <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/>
             </svg>
           ),
-          text: "Instagram Reels"
+          bgColor: 'bg-[#C13584]'
+        };
+      case 'facebook':
+        return {
+          icon: (
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 320 512" fill="currentColor" className="text-[#1877F2]">
+              <path d="M279.1 288l14.2-92.7h-88.9v-60.1c0-25.4 12.4-50.1 52.2-50.1h40.4V6.3S260.4 0 225.4 0c-73.2 0-121.1 44.4-121.1 124.7v70.6H22.9V288h81.4v224h100.2V288z"/>
+            </svg>
+          ),
+          bgColor: 'bg-[#1877F2]'
+        };
+      case 'vimeo':
+        return {
+          icon: (
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 448 512" fill="currentColor" className="text-[#1AB7EA]">
+              <path d="M447.8 153.6c-2 43.6-32.4 103.3-91.4 179.1-60.9 79.2-112.4 118.8-154.6 118.8-26.1 0-48.2-24.1-66.3-72.3C100.3 250 85.3 174.3 56.2 174.3c-3.4 0-15.1 7.1-35.2 21.1L0 168.2c51.6-45.3 100.9-95.7 131.8-98.5 34.9-3.4 56.3 20.5 64.4 71.5 28.7 181.5 41.4 208.9 93.6 126.7 18.7-29.6 28.8-52.1 30.2-67.6 4.8-45.9-35.8-42.8-63.3-31 22-72.1 64.1-107.1 126.2-105.1 45.8 1.2 67.5 31.1 64.9 89.4z"/>
+            </svg>
+          ),
+          bgColor: 'bg-[#1AB7EA]'
         };
       default:
         return {
-          icon: null,
-          text: "Content"
+          icon: (
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 512 512" fill="currentColor">
+              <path d="M320 0H64C28.7 0 0 28.7 0 64v288c0 35.3 28.7 64 64 64h47.5 4.5c16.6 0 32.5-6.6 44.2-18.3l76.2-76.2c13.7-13.7 32.2-21.5 51.5-21.5h76.8c19.3 0 37.8 7.7 51.5 21.5l76.2 76.2c11.8 11.8 27.6 18.3 44.2 18.3h4.5H384c35.3 0 64-28.7 64-64V160c0-35.3-28.7-64-64-64h-8.2c-25.3 0-49.5-10.1-67.3-27.9L274.8 34.3C257 16.5 232.8 6.4 207.5 6.4H192C174.3 6.4 160 20.7 160 38.4V96c0 17.7 14.3 32 32 32h64c17.7 0 32 14.3 32 32s-14.3 32-32 32H128c-17.7 0-32-14.3-32-32V38.4C96 20.7 81.7 6.4 64 6.4H32C14.3 6.4 0 20.7 0 38.4V416c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V384c0-17.7-14.3-32-32-32s-32 14.3-32 32v32c0 17.7-14.3 32-32 32H64c-17.7 0-32-14.3-32-32V64c0-17.7 14.3-32 32-32H320c17.7 0 32 14.3 32 32v32c0 17.7 14.3 32 32 32s32-14.3 32-32V64c0-35.3-28.7-64-64-64z"/>
+            </svg>
+          ),
+          bgColor: 'bg-gray-700'
         };
     }
   };
 
   // Handle clicking on a link
-  const handleLinkClick = (linkId: number) => {
-    updateLastViewed.mutate(linkId);
-    // Here you could also handle navigation to the link or opening it in a new tab
+  const handleLinkClick = (link: LinkWithTags) => {
+    // Update last viewed timestamp
+    updateLastViewed.mutate(link.id);
+    // Open the link in a new tab
+    window.open(link.url, "_blank");
   };
 
   // Format date to show how long ago the link was viewed
@@ -108,7 +134,11 @@ const NotViewedRecommendations = () => {
       <CardContent className="p-0">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-semibold">Revisit These Links</h2>
-          <Button variant="link" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+          <Button 
+            variant="link" 
+            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+            onClick={() => setLocation("/library")}
+          >
             See All
           </Button>
         </div>
@@ -131,7 +161,7 @@ const NotViewedRecommendations = () => {
                   <div 
                     key={link.id} 
                     className="flex gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
-                    onClick={() => handleLinkClick(link.id)}
+                    onClick={() => handleLinkClick(link)}
                   >
                     <div className="w-16 h-16 rounded bg-gray-100 flex-shrink-0 overflow-hidden">
                       {link.thumbnail_url ? (
@@ -150,8 +180,9 @@ const NotViewedRecommendations = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center mb-1">
-                        {platform.icon}
-                        <span className="text-xs text-gray-500 ml-1.5">{platform.text}</span>
+                        <Badge variant="secondary" className={`${platform.bgColor} text-white text-xs p-1 rounded-md flex items-center mr-2`}>
+                          {platform.icon}
+                        </Badge>
                         <span className="text-xs text-gray-400 ml-auto">
                           {formatLastViewed(link.last_viewed)}
                         </span>
