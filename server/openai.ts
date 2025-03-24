@@ -11,8 +11,8 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || 'your-api-key' 
 });
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const MODEL = "gpt-4o";
+// Switched to GPT-3.5-turbo for cost optimization as requested by the user
+const MODEL = "gpt-3.5-turbo";
 
 export interface LinkMetadata {
   title: string;
