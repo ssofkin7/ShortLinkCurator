@@ -174,11 +174,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         url,
         title: metadata.title,
         platform,
-        thumbnail_url: metadata.thumbnail_url,
+        thumbnail_url: metadata.thumbnail_url ?? null,
         category: metadata.category,
-        duration: metadata.duration,
+        duration: metadata.duration ?? null,
         user_id: userId,
-        metadata: metadata
+        metadata: metadata as unknown as Record<string, any>
       });
       
       // Create tags
@@ -220,6 +220,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/links/:id", authenticate, async (req: Request, res: Response) => {
     try {
       const linkId = parseInt(req.params.id);
+      const userId = req.session.userId as number;
       const link = await storage.getLinkById(linkId);
       
       if (!link) {
@@ -227,7 +228,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Verify link belongs to user
-      if (link.user_id !== req.session.userId) {
+      if (link.user_id !== userId) {
         return res.status(403).json({ message: "Unauthorized access to this link" });
       }
       
@@ -241,7 +242,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/links/:id", authenticate, async (req: Request, res: Response) => {
     try {
       const linkId = parseInt(req.params.id);
-      await storage.deleteLink(linkId, req.session.userId);
+      const userId = req.session.userId as number;
+      await storage.deleteLink(linkId, userId);
       res.status(200).json({ message: "Link deleted successfully" });
     } catch (error) {
       console.error("Delete link error:", error);
@@ -253,10 +255,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/tags", authenticate, validate(insertTagSchema), async (req: Request, res: Response) => {
     try {
       const { name, link_id } = req.body;
+      const userId = req.session.userId as number;
       
       // Verify link belongs to user
       const link = await storage.getLinkById(link_id);
-      if (!link || link.user_id !== req.session.userId) {
+      if (!link || link.user_id !== userId) {
         return res.status(403).json({ message: "Unauthorized access to this link" });
       }
       
@@ -286,10 +289,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const linkId = parseInt(req.params.id);
       const { category } = req.body;
+      const userId = req.session.userId as number;
       
       // Verify link belongs to user
       const link = await storage.getLinkById(linkId);
-      if (!link || link.user_id !== req.session.userId) {
+      if (!link || link.user_id !== userId) {
         return res.status(403).json({ message: "Unauthorized access to this link" });
       }
       
@@ -304,7 +308,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Recommendations
   app.get("/api/recommendations", authenticate, async (req: Request, res: Response) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.session.userId as number;
       const links = await storage.getLinksByUserId(userId);
       
       // Default recommendations for new users or when there's an error
@@ -347,9 +351,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       try {
-        // Extract categories and tags from user's links
-        const categories = [...new Set(links.map(link => link.category))];
-        const tags = [...new Set(links.flatMap(link => link.tags.map(tag => tag.name)))];
+        // Extract unique categories and tags using a more compatible approach
+        const categoriesMap: {[key: string]: boolean} = {};
+        const tagsMap: {[key: string]: boolean} = {};
+        
+        // Track unique values
+        links.forEach(link => {
+          categoriesMap[link.category] = true;
+          link.tags.forEach(tag => {
+            tagsMap[tag.name] = true;
+          });
+        });
+        
+        // Convert to arrays
+        const categories = Object.keys(categoriesMap);
+        const tags = Object.keys(tagsMap);
         
         // Generate recommendations using OpenAI
         const recommendations = await generateRecommendations(categories, tags);
