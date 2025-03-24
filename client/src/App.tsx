@@ -6,6 +6,10 @@ import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/HomePage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
+import LibraryPage from "@/pages/LibraryPage";
+import TagsPage from "@/pages/TagsPage";
+import AnalyticsPage from "@/pages/AnalyticsPage";
+import ProfilePage from "@/pages/ProfilePage";
 import { useAuth } from "@/hooks/useAuth";
 
 function Router() {
@@ -16,6 +20,10 @@ function Router() {
       {isAuthenticated ? (
         <>
           <Route path="/" component={HomePage} />
+          <Route path="/library" component={LibraryPage} />
+          <Route path="/tags" component={TagsPage} />
+          <Route path="/analytics" component={AnalyticsPage} />
+          <Route path="/profile" component={ProfilePage} />
         </>
       ) : (
         <>
