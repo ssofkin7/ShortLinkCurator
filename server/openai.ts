@@ -36,8 +36,13 @@ function extractDefaultTitleFromUrl(url: string): string {
     // Try to extract title from URL patterns
     if (url.includes('youtube.com/shorts/')) {
       // YouTube shorts format: https://www.youtube.com/shorts/VIDEO_ID
-      const videoId = url.split('youtube.com/shorts/')[1].split('?')[0];
-      return `YouTube Short: ${videoId}`;
+      const videoId = url.split('youtube.com/shorts/')[1]?.split('?')[0];
+      // For YouTube, use a more user-friendly title format
+      return videoId ? `How to Watch This YouTube Short` : "YouTube Short";
+    } else if (url.includes('youtu.be/')) {
+      // YouTube short link format
+      const videoId = url.split('youtu.be/')[1]?.split('?')[0];
+      return videoId ? `How to Watch This YouTube Video` : "YouTube Video";
     } else if (url.includes('tiktok.com/')) {
       // TikTok format: https://www.tiktok.com/@username/video/VIDEO_ID
       let tiktokTitle = "TikTok Video";
@@ -51,7 +56,7 @@ function extractDefaultTitleFromUrl(url: string): string {
     } else if (url.includes('instagram.com/reel/')) {
       // Instagram reels format: https://www.instagram.com/reel/CODE/
       const code = url.split('instagram.com/reel/')[1]?.split('/')[0];
-      return code ? `Instagram Reel: ${code}` : "Instagram Reel";
+      return code ? `Instagram Reel Content` : "Instagram Reel";
     }
   } catch (e) {
     console.log('Error extracting title from URL:', e);
@@ -96,17 +101,30 @@ export async function analyzeVideoContent(
       response_format: { type: "json_object" }
     });
 
-    const result = JSON.parse(response.choices[0].message.content);
-    
-    // Ensure proper typing and defaults
-    return {
-      title: result.title || defaultTitle,
-      platform: platform as PlatformType,
-      category: result.category || 'Uncategorized',
-      tags: Array.isArray(result.tags) ? result.tags : [],
-      duration: result.duration || undefined,
-      thumbnail_url: undefined // We'll set this separately
-    };
+    try {
+      const content = response.choices[0].message.content || '{}';
+      const result = JSON.parse(content);
+      
+      // Ensure proper typing and defaults
+      return {
+        title: result?.title || defaultTitle,
+        platform: platform as PlatformType,
+        category: result?.category || 'Uncategorized',
+        tags: Array.isArray(result?.tags) ? result.tags : [],
+        duration: result?.duration || undefined,
+        thumbnail_url: undefined // We'll set this separately
+      };
+    } catch (parseError) {
+      console.error('Error parsing OpenAI response:', parseError);
+      return {
+        title: defaultTitle,
+        platform: platform as PlatformType,
+        category: 'Uncategorized',
+        tags: [],
+        duration: undefined,
+        thumbnail_url: undefined
+      };
+    }
   } catch (error) {
     console.error('Error analyzing video content:', error);
     
@@ -152,14 +170,21 @@ export async function generateRecommendations(
       response_format: { type: "json_object" }
     });
 
-    const result = JSON.parse(response.choices[0].message.content);
-    if (Array.isArray(result)) {
-      return result.slice(0, 3);
-    } else if (result.recommendations && Array.isArray(result.recommendations)) {
-      return result.recommendations.slice(0, 3);
+    try {
+      const content = response.choices[0].message.content || '{}';
+      const result = JSON.parse(content);
+      
+      if (Array.isArray(result)) {
+        return result.slice(0, 3);
+      } else if (result.recommendations && Array.isArray(result.recommendations)) {
+        return result.recommendations.slice(0, 3);
+      }
+      
+      return [];
+    } catch (parseError) {
+      console.error('Error parsing OpenAI recommendations response:', parseError);
+      return [];
     }
-    
-    return [];
   } catch (error) {
     console.error('Error generating recommendations:', error);
     return [];
