@@ -275,7 +275,20 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
   if (viewMode === "list") {
     return (
       <Card className="flex items-center p-4 hover:shadow-md transition-shadow">
-        <div className="w-24 h-16 rounded overflow-hidden flex-shrink-0 mr-4">
+        <div 
+          className="w-24 h-16 rounded overflow-hidden flex-shrink-0 mr-4 cursor-pointer relative group"
+          onClick={(e) => {
+            e.stopPropagation();
+            window.open(link.url, "_blank");
+          }}
+        >
+          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+          </div>
           <img 
             src={getThumbnailImage()} 
             className="w-full h-full object-cover" 
@@ -361,7 +374,20 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
 
   return (
     <Card className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-      <div className="relative">
+      <div 
+        className="relative cursor-pointer group"
+        onClick={(e) => {
+          e.stopPropagation();
+          window.open(link.url, "_blank");
+        }}
+      >
+        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center z-10">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+        </div>
         <img 
           src={getThumbnailImage()} 
           className="w-full aspect-video object-cover" 
