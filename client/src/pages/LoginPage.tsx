@@ -105,7 +105,7 @@ export default function LoginPage() {
           <p className="text-sm text-gray-600">
             Don't have an account?{" "}
             <Link href="/register">
-              <a className="text-blue-600 hover:text-blue-800 font-medium">Sign up</a>
+              <span className="text-blue-600 hover:text-blue-800 font-medium cursor-pointer">Sign up</span>
             </Link>
           </p>
         </CardFooter>
