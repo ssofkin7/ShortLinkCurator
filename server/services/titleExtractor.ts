@@ -92,7 +92,7 @@ async function extractYouTubeMetadata(url: string): Promise<ContentMetadata> {
       const response = await axios.get(oembedUrl);
       
       if (response.data) {
-        let metadata: VideoMetadata = { title: extractDefaultTitleFromUrl(url) };
+        let metadata: ContentMetadata = { title: extractDefaultTitleFromUrl(url) };
         
         if (response.data.title) {
           metadata.title = response.data.title;
@@ -131,7 +131,7 @@ async function extractYouTubeMetadata(url: string): Promise<ContentMetadata> {
  * TikTok doesn't have a reliable oEmbed endpoint,
  * so we extract from the URL or use a default.
  */
-async function extractTikTokMetadata(url: string): Promise<VideoMetadata> {
+async function extractTikTokMetadata(url: string): Promise<ContentMetadata> {
   try {
     // Try TikTok oEmbed first (it exists but is not always reliable)
     const oembedUrl = `https://www.tiktok.com/oembed?url=${encodeURIComponent(url)}`;
@@ -139,7 +139,7 @@ async function extractTikTokMetadata(url: string): Promise<VideoMetadata> {
     try {
       const response = await axios.get(oembedUrl);
       if (response.data) {
-        let metadata: VideoMetadata = { title: extractDefaultTitleFromUrl(url) };
+        let metadata: ContentMetadata = { title: extractDefaultTitleFromUrl(url) };
         
         if (response.data.title) {
           metadata.title = response.data.title;
@@ -174,7 +174,7 @@ async function extractTikTokMetadata(url: string): Promise<VideoMetadata> {
 /**
  * Attempts to extract metadata from an Instagram Reel.
  */
-async function extractInstagramMetadata(url: string): Promise<VideoMetadata> {
+async function extractInstagramMetadata(url: string): Promise<ContentMetadata> {
   try {
     // Try Instagram oEmbed
     const oembedUrl = `https://api.instagram.com/oembed/?url=${encodeURIComponent(url)}`;
@@ -182,7 +182,7 @@ async function extractInstagramMetadata(url: string): Promise<VideoMetadata> {
     try {
       const response = await axios.get(oembedUrl);
       if (response.data) {
-        let metadata: VideoMetadata = { title: extractDefaultTitleFromUrl(url) };
+        let metadata: ContentMetadata = { title: extractDefaultTitleFromUrl(url) };
         
         if (response.data.title) {
           metadata.title = response.data.title;
@@ -217,7 +217,7 @@ async function extractInstagramMetadata(url: string): Promise<VideoMetadata> {
 /**
  * Attempts to extract metadata from a Facebook video.
  */
-async function extractFacebookMetadata(url: string): Promise<VideoMetadata> {
+async function extractFacebookMetadata(url: string): Promise<ContentMetadata> {
   try {
     // Try Facebook oEmbed (requires access token for production use)
     const oembedUrl = `https://graph.facebook.com/v18.0/oembed_video?url=${encodeURIComponent(url)}&format=json`;
@@ -225,7 +225,7 @@ async function extractFacebookMetadata(url: string): Promise<VideoMetadata> {
     try {
       const response = await axios.get(oembedUrl);
       if (response.data) {
-        let metadata: VideoMetadata = { title: extractDefaultTitleFromUrl(url) };
+        let metadata: ContentMetadata = { title: extractDefaultTitleFromUrl(url) };
         
         if (response.data.title) {
           metadata.title = response.data.title;
@@ -272,7 +272,7 @@ async function extractFacebookMetadata(url: string): Promise<VideoMetadata> {
 /**
  * Attempts to extract metadata from a Vimeo video.
  */
-async function extractVimeoMetadata(url: string): Promise<VideoMetadata> {
+async function extractVimeoMetadata(url: string): Promise<ContentMetadata> {
   try {
     // Vimeo has a reliable oEmbed endpoint
     const oembedUrl = `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(url)}`;
@@ -280,7 +280,7 @@ async function extractVimeoMetadata(url: string): Promise<VideoMetadata> {
     try {
       const response = await axios.get(oembedUrl);
       if (response.data) {
-        let metadata: VideoMetadata = { title: extractDefaultTitleFromUrl(url) };
+        let metadata: ContentMetadata = { title: extractDefaultTitleFromUrl(url) };
         
         if (response.data.title) {
           metadata.title = response.data.title;
@@ -319,6 +319,218 @@ async function extractVimeoMetadata(url: string): Promise<VideoMetadata> {
     return { title: extractDefaultTitleFromUrl(url) };
   } catch (error) {
     console.error('Vimeo metadata extraction error:', error);
+    return { title: extractDefaultTitleFromUrl(url) };
+  }
+}
+
+/**
+ * Attempts to extract metadata from a Twitter/X post.
+ */
+async function extractTwitterMetadata(url: string): Promise<ContentMetadata> {
+  try {
+    // Twitter/X doesn't have a reliable public oEmbed endpoint without auth
+    
+    // Extract username and tweet ID if possible
+    const tweetMatch = url.match(/\/status\/(\d+)/);
+    const userMatch = url.match(/(?:twitter|x)\.com\/([^\/]+)/);
+    
+    if (tweetMatch && tweetMatch[1] && userMatch && userMatch[1]) {
+      return { 
+        title: `Tweet by @${userMatch[1]}`,
+        // No reliable thumbnail extraction without API access
+      };
+    }
+    
+    return { title: extractDefaultTitleFromUrl(url) };
+  } catch (error) {
+    console.error('Twitter metadata extraction error:', error);
+    return { title: extractDefaultTitleFromUrl(url) };
+  }
+}
+
+/**
+ * Attempts to extract metadata from a LinkedIn post or article.
+ */
+async function extractLinkedInMetadata(url: string): Promise<ContentMetadata> {
+  try {
+    // LinkedIn doesn't have a public oEmbed endpoint without auth
+    
+    // Extract post type and other info if possible
+    if (url.includes('/pulse/')) {
+      // This is a LinkedIn article
+      const urlObj = new URL(url);
+      const pathParts = urlObj.pathname.split('/').filter(Boolean);
+      
+      if (pathParts.length > 1) {
+        const slug = pathParts[pathParts.length - 1];
+        const title = slug
+          .split('-')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+          
+        return { title: title || 'LinkedIn Article' };
+      }
+      
+      return { title: 'LinkedIn Article' };
+    } else if (url.includes('/posts/')) {
+      // This is a LinkedIn post
+      const userMatch = url.match(/linkedin\.com\/in\/([^\/]+)/);
+      
+      if (userMatch && userMatch[1]) {
+        return { title: `LinkedIn Post by ${userMatch[1]}` };
+      }
+      
+      return { title: 'LinkedIn Post' };
+    }
+    
+    return { title: extractDefaultTitleFromUrl(url) };
+  } catch (error) {
+    console.error('LinkedIn metadata extraction error:', error);
+    return { title: extractDefaultTitleFromUrl(url) };
+  }
+}
+
+/**
+ * Attempts to extract metadata from a Reddit post.
+ */
+async function extractRedditMetadata(url: string): Promise<ContentMetadata> {
+  try {
+    // Try to extract post info
+    const subredditMatch = url.match(/\/r\/([^\/]+)/);
+    const postMatch = url.match(/\/comments\/([^\/]+)/);
+    
+    if (subredditMatch && subredditMatch[1] && postMatch && postMatch[1]) {
+      return { 
+        title: `r/${subredditMatch[1]} Reddit Post`,
+        // No reliable thumbnail extraction without API access
+      };
+    } else if (subredditMatch && subredditMatch[1]) {
+      return { title: `r/${subredditMatch[1]} Subreddit Link` };
+    }
+    
+    return { title: extractDefaultTitleFromUrl(url) };
+  } catch (error) {
+    console.error('Reddit metadata extraction error:', error);
+    return { title: extractDefaultTitleFromUrl(url) };
+  }
+}
+
+/**
+ * Attempts to extract metadata from a Medium article.
+ */
+async function extractMediumMetadata(url: string): Promise<ContentMetadata> {
+  try {
+    // Try Medium oEmbed API
+    const oembedUrl = `https://medium.com/oembed?url=${encodeURIComponent(url)}&format=json`;
+    
+    try {
+      const response = await axios.get(oembedUrl);
+      if (response.data && response.data.title) {
+        return { 
+          title: response.data.title,
+          thumbnail_url: response.data.thumbnail_url
+        };
+      }
+    } catch (oembedError) {
+      console.log('Medium oEmbed failed, using default extraction');
+    }
+    
+    // Try to extract a title from the path
+    const urlObj = new URL(url);
+    const pathParts = urlObj.pathname.split('/').filter(Boolean);
+    
+    if (pathParts.length > 0) {
+      const slug = pathParts[pathParts.length - 1];
+      if (slug && !slug.includes('.')) {
+        const title = slug
+          .split('-')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+          
+        return { title: title || 'Medium Article' };
+      }
+    }
+    
+    return { title: 'Medium Article' };
+  } catch (error) {
+    console.error('Medium metadata extraction error:', error);
+    return { title: extractDefaultTitleFromUrl(url) };
+  }
+}
+
+/**
+ * Attempts to extract metadata from a Substack article.
+ */
+async function extractSubstackMetadata(url: string): Promise<ContentMetadata> {
+  try {
+    // Extract publication and post slug
+    const urlObj = new URL(url);
+    const hostname = urlObj.hostname;
+    const pathParts = urlObj.pathname.split('/').filter(Boolean);
+    
+    if (hostname.includes('substack.com') && pathParts.length > 0) {
+      // This is likely a post
+      if (pathParts[0] === 'p' && pathParts.length > 1) {
+        const slug = pathParts[1];
+        const title = slug
+          .split('-')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+          
+        const publication = hostname.replace('.substack.com', '');
+        return { 
+          title: `${title} | ${publication} on Substack`,
+          // No reliable thumbnail extraction without scraping
+        };
+      }
+    }
+    
+    return { title: extractDefaultTitleFromUrl(url) };
+  } catch (error) {
+    console.error('Substack metadata extraction error:', error);
+    return { title: extractDefaultTitleFromUrl(url) };
+  }
+}
+
+/**
+ * Attempts to extract metadata from a GitHub repository.
+ */
+async function extractGitHubMetadata(url: string): Promise<ContentMetadata> {
+  try {
+    // Extract user/org and repo name
+    const urlObj = new URL(url);
+    const pathParts = urlObj.pathname.split('/').filter(Boolean);
+    
+    if (pathParts.length >= 2) {
+      const owner = pathParts[0];
+      const repo = pathParts[1];
+      
+      // Try GitHub API if possible
+      try {
+        const apiUrl = `https://api.github.com/repos/${owner}/${repo}`;
+        const response = await axios.get(apiUrl);
+        
+        if (response.data && response.data.name) {
+          let title = `${response.data.name}`;
+          if (response.data.description) {
+            title += `: ${response.data.description}`;
+          }
+          
+          return { 
+            title: title,
+            thumbnail_url: response.data.owner?.avatar_url
+          };
+        }
+      } catch (apiError) {
+        console.log('GitHub API failed, using default title');
+      }
+      
+      return { title: `${owner}/${repo} on GitHub` };
+    }
+    
+    return { title: 'GitHub Repository' };
+  } catch (error) {
+    console.error('GitHub metadata extraction error:', error);
     return { title: extractDefaultTitleFromUrl(url) };
   }
 }
