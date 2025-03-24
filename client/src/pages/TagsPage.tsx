@@ -184,7 +184,7 @@ export default function TagsPage() {
           <TopBar user={user} />
           
           <main className="flex-1 overflow-auto">
-            <div className="container mx-auto px-4 py-6">
+            <div className="container mx-auto px-4 py-6 h-full">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <h1 className="text-2xl font-bold">Tag Management</h1>
                 
@@ -249,7 +249,7 @@ export default function TagsPage() {
                   </CardContent>
                 </Card>
               ) : (
-                <Tabs defaultValue="all" className="space-y-6">
+                <Tabs defaultValue="all" className="space-y-6 flex flex-col min-h-[calc(100vh-220px)]">
                   <TabsList className="grid w-full grid-cols-3 mb-2">
                     <TabsTrigger value="all">All Tags ({allTags.length})</TabsTrigger>
                     <TabsTrigger value="most-used">Most Used</TabsTrigger>
@@ -257,12 +257,12 @@ export default function TagsPage() {
                   </TabsList>
                   
                   {/* All Tags Tab */}
-                  <TabsContent value="all" className="space-y-6">
-                    <Card>
+                  <TabsContent value="all" className="space-y-6 flex-1">
+                    <Card className="h-full flex flex-col">
                       <CardHeader className="bg-gray-50 pb-3">
                         <CardTitle className="text-lg">All Tags</CardTitle>
                       </CardHeader>
-                      <CardContent className="pt-4">
+                      <CardContent className="pt-4 flex-1">
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
                           {filteredTags.map((tag) => {
                             const tagLinks = linksByTag.get(tag.id) || [];
@@ -307,12 +307,12 @@ export default function TagsPage() {
                   </TabsContent>
                   
                   {/* Most Used Tags Tab */}
-                  <TabsContent value="most-used" className="space-y-6">
-                    <Card>
+                  <TabsContent value="most-used" className="space-y-6 flex-1">
+                    <Card className="h-full flex flex-col">
                       <CardHeader className="bg-gray-50 pb-3">
                         <CardTitle className="text-lg">Most Used Tags</CardTitle>
                       </CardHeader>
-                      <CardContent className="pt-4">
+                      <CardContent className="pt-4 flex-1">
                         {mostUsedTags.length > 0 ? (
                           <div className="space-y-4">
                             {mostUsedTags.map((tag) => {
@@ -321,7 +321,7 @@ export default function TagsPage() {
                               const usagePercentage = (tagLinks.length / links.length) * 100;
                               
                               return (
-                                <div key={tag.id} className="flex items-center space-x-4">
+                                <div key={tag.id} className="flex items-center space-x-4 p-3 border rounded-md hover:shadow-sm transition-shadow">
                                   <Badge 
                                     variant="outline" 
                                     className={`${tagColor} px-2 py-0.5 mr-2 min-w-[32px] text-center`}
@@ -330,7 +330,7 @@ export default function TagsPage() {
                                   </Badge>
                                   <div className="flex-1" onClick={() => navigateToLibrary(tag.name)}>
                                     <h3 className="font-medium text-sm cursor-pointer">{tag.name}</h3>
-                                    <div className="w-full mt-1">
+                                    <div className="w-full mt-2">
                                       <Progress value={usagePercentage} className="h-2" />
                                     </div>
                                   </div>
@@ -358,12 +358,12 @@ export default function TagsPage() {
                   </TabsContent>
                   
                   {/* Recent Tags Tab */}
-                  <TabsContent value="recent" className="space-y-6">
-                    <Card>
+                  <TabsContent value="recent" className="space-y-6 flex-1">
+                    <Card className="h-full flex flex-col">
                       <CardHeader className="bg-gray-50 pb-3">
                         <CardTitle className="text-lg">Recently Used Tags</CardTitle>
                       </CardHeader>
-                      <CardContent className="pt-4">
+                      <CardContent className="pt-4 flex-1">
                         {recentTags.length > 0 ? (
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {recentTags.map((tag) => {
@@ -371,7 +371,7 @@ export default function TagsPage() {
                               const tagColor = getTagColor(tag.name);
                               
                               return (
-                                <div key={tag.id} className="flex items-center p-3 border rounded-md">
+                                <div key={tag.id} className="flex items-center p-3 border rounded-md hover:shadow-md transition-shadow">
                                   <div className="flex-1" onClick={() => navigateToLibrary(tag.name)}>
                                     <h3 className="font-medium cursor-pointer">{tag.name}</h3>
                                     <div className="flex items-center mt-1">
@@ -382,7 +382,7 @@ export default function TagsPage() {
                                         {tagLinks.length} items
                                       </Badge>
                                       <span className="text-xs text-gray-500">
-                                        Latest content: {
+                                        Latest: {
                                           tagLinks.length > 0 
                                           ? new Date(Math.max(...tagLinks.map(link => new Date(link.created_at).getTime()))).toLocaleDateString()
                                           : 'N/A'
@@ -393,7 +393,7 @@ export default function TagsPage() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="h-8 w-8 rounded-full p-0 text-gray-400 hover:text-red-500"
+                                    className="h-8 w-8 rounded-full p-0 text-gray-400 hover:text-red-500 ml-2"
                                     onClick={() => handleDeleteTag(tag.id)}
                                   >
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
