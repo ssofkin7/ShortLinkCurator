@@ -21,7 +21,7 @@ const SessionStore = MemoryStore(session);
 
 // Authentication middleware
 const authenticate = (req: Request, res: Response, next: Function) => {
-  if (!req.session.userId) {
+  if (!req.session || req.session.userId === undefined) {
     return res.status(401).json({ message: "Unauthorized" });
   }
   next();
@@ -112,7 +112,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/user", authenticate, async (req: Request, res: Response) => {
     try {
-      const user = await storage.getUser(req.session.userId);
+      // The authenticate middleware already checks if userId exists
+      const userId = req.session.userId as number;
+      const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -139,7 +141,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/links", authenticate, async (req: Request, res: Response) => {
     try {
       const { url } = req.body;
-      const userId = req.session.userId;
+      const userId = req.session.userId as number;
       
       // Check if user is on free tier and has reached the limit
       const user = await storage.getUser(userId);
@@ -198,7 +200,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/links", authenticate, async (req: Request, res: Response) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.session.userId as number;
       const platform = req.query.platform as string;
       
       let links;
