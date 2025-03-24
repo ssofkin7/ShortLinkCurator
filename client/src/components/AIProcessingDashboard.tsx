@@ -150,7 +150,12 @@ const AIProcessingDashboard = ({ url, onComplete }: AIProcessingDashboardProps) 
                 {isLoading ? (
                   <Skeleton className="h-4 w-48" />
                 ) : (
-                  <div className="font-medium">Analyzed Content Title</div>
+                  <div className="font-medium">
+                    {url.includes('youtube.com/shorts') ? 'YouTube Short' : 
+                     url.includes('tiktok.com') ? 'TikTok Video' : 
+                     url.includes('instagram.com') ? 'Instagram Reel' : 
+                     'Short-form Video Content'}
+                  </div>
                 )}
               </div>
               <div className="flex items-center">

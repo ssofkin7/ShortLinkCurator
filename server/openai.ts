@@ -30,6 +30,37 @@ export function detectPlatform(url: string): PlatformType | null {
   return null;
 }
 
+// Helper function to extract default title from URL
+function extractDefaultTitleFromUrl(url: string): string {
+  try {
+    // Try to extract title from URL patterns
+    if (url.includes('youtube.com/shorts/')) {
+      // YouTube shorts format: https://www.youtube.com/shorts/VIDEO_ID
+      const videoId = url.split('youtube.com/shorts/')[1].split('?')[0];
+      return `YouTube Short: ${videoId}`;
+    } else if (url.includes('tiktok.com/')) {
+      // TikTok format: https://www.tiktok.com/@username/video/VIDEO_ID
+      let tiktokTitle = "TikTok Video";
+      if (url.includes('@')) {
+        const username = url.split('@')[1]?.split('/')[0];
+        if (username) {
+          tiktokTitle = `TikTok by @${username}`;
+        }
+      }
+      return tiktokTitle;
+    } else if (url.includes('instagram.com/reel/')) {
+      // Instagram reels format: https://www.instagram.com/reel/CODE/
+      const code = url.split('instagram.com/reel/')[1]?.split('/')[0];
+      return code ? `Instagram Reel: ${code}` : "Instagram Reel";
+    }
+  } catch (e) {
+    console.log('Error extracting title from URL:', e);
+  }
+  
+  // Fallback
+  return 'Short-form video';
+}
+
 // Extract metadata from video title and description
 export async function analyzeVideoContent(
   url: string, 
@@ -37,6 +68,7 @@ export async function analyzeVideoContent(
   description: string = ''
 ): Promise<LinkMetadata> {
   const platform = detectPlatform(url) || 'unknown';
+  const defaultTitle = extractDefaultTitleFromUrl(url);
   
   try {
     const prompt = `
@@ -46,7 +78,7 @@ export async function analyzeVideoContent(
       Description: ${description}
       
       Return a JSON object with the following fields:
-      - title: The most likely title for this content (use the provided title or generate a descriptive one if empty)
+      - title: The most likely title for this content. Be descriptive and concise (15-50 characters).
       - category: A single category that best describes this content (e.g., "Fitness", "Cooking", "Technology", "Fashion", etc.)
       - tags: An array of 3-5 relevant tags for this content
       - duration: If you can detect it, the duration of the video (otherwise null)
@@ -68,7 +100,7 @@ export async function analyzeVideoContent(
     
     // Ensure proper typing and defaults
     return {
-      title: result.title || title || 'Untitled video',
+      title: result.title || defaultTitle,
       platform: platform as PlatformType,
       category: result.category || 'Uncategorized',
       tags: Array.isArray(result.tags) ? result.tags : [],
@@ -80,7 +112,7 @@ export async function analyzeVideoContent(
     
     // Return basic metadata if AI analysis fails
     return {
-      title: title || 'Untitled video',
+      title: defaultTitle,
       platform: platform as PlatformType,
       category: 'Uncategorized',
       tags: [],
