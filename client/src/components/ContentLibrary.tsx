@@ -50,16 +50,35 @@ const ContentLibrary = ({
     // Apply search filter if there's a search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim();
-      result = result.filter(link => 
-        // Search in title
-        link.title.toLowerCase().includes(query) ||
-        // Search in URL
-        link.url.toLowerCase().includes(query) ||
-        // Search in tags
-        link.tags.some(tag => tag.name.toLowerCase().includes(query)) ||
-        // Search in category
-        (link.category && link.category.toLowerCase().includes(query))
-      );
+      console.log("Search query:", query);
+      console.log("Links before filtering:", result.length);
+      
+      result = result.filter(link => {
+        // For debugging
+        const matchesTitle = link.title && link.title.toLowerCase().includes(query);
+        const matchesUrl = link.url && link.url.toLowerCase().includes(query);
+        const matchesTags = link.tags.some(tag => tag.name.toLowerCase().includes(query));
+        const matchesCategory = link.category && link.category.toLowerCase().includes(query);
+        
+        console.log("Link:", link.title);
+        console.log("- Matches title:", matchesTitle);
+        console.log("- Matches URL:", matchesUrl);
+        console.log("- Matches tags:", matchesTags);
+        console.log("- Matches category:", matchesCategory);
+        
+        return (
+          // Search in title
+          matchesTitle ||
+          // Search in URL
+          matchesUrl ||
+          // Search in tags
+          matchesTags ||
+          // Search in category
+          matchesCategory
+        );
+      });
+      
+      console.log("Links after filtering:", result.length);
     }
     
     setFilteredLinks(result);
@@ -480,6 +499,11 @@ const ContentLibrary = ({
             )}
 
             <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'} gap-5`}>
+              {console.log("Rendering with searchQuery:", searchQuery)}
+              {console.log("Active Tag Filter:", activeTagFilter)}
+              {console.log("Filtered Links:", filteredLinks.length)}
+              {console.log("All Links:", links.length)}
+              {console.log("Using filtered links?", searchQuery.trim() || activeTagFilter)}
               {(searchQuery.trim() || activeTagFilter ? filteredLinks : links).map((link) => (
                 <ContentItem 
                   key={link.id} 
