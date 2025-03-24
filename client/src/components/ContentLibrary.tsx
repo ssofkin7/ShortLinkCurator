@@ -13,13 +13,17 @@ interface ContentLibraryProps {
   onTabChange: (tab: string) => void;
   viewMode: "grid" | "list";
   onViewModeChange: (mode: "grid" | "list") => void;
+  links?: LinkWithTags[]; // Make links optional so we can still fetch them if not provided
+  isLoading?: boolean;
 }
 
 const ContentLibrary = ({ 
   activeTab, 
   onTabChange,
   viewMode,
-  onViewModeChange
+  onViewModeChange,
+  links: externalLinks,
+  isLoading: externalLoading
 }: ContentLibraryProps) => {
   const { toast } = useToast();
   const [selectedLink, setSelectedLink] = useState<LinkWithTags | null>(null);
@@ -28,10 +32,15 @@ const ContentLibrary = ({
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [filteredLinks, setFilteredLinks] = useState<LinkWithTags[]>([]);
 
-  // Fetch links
-  const { data: links = [], isLoading } = useQuery<LinkWithTags[]>({
+  // Fetch links only if they're not provided as props
+  const { data: fetchedLinks = [], isLoading: isFetchLoading } = useQuery<LinkWithTags[]>({
     queryKey: ["/api/links", activeTab !== "all" ? activeTab : undefined],
+    enabled: !externalLinks, // Only fetch if links are not provided as props
   });
+  
+  // Use external links if provided, otherwise use fetched links
+  const links = externalLinks || fetchedLinks;
+  const isLoading = externalLoading !== undefined ? externalLoading : isFetchLoading;
 
   // Filter links when active tag, platform, or search query changes
   useEffect(() => {
@@ -50,8 +59,6 @@ const ContentLibrary = ({
     // Apply search filter if there's a search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim();
-      console.log("Search query:", query);
-      console.log("Links before filtering:", result.length);
       
       result = result.filter(link => {
         // For debugging
@@ -59,12 +66,6 @@ const ContentLibrary = ({
         const matchesUrl = link.url && link.url.toLowerCase().includes(query);
         const matchesTags = link.tags.some(tag => tag.name.toLowerCase().includes(query));
         const matchesCategory = link.category && link.category.toLowerCase().includes(query);
-        
-        console.log("Link:", link.title);
-        console.log("- Matches title:", matchesTitle);
-        console.log("- Matches URL:", matchesUrl);
-        console.log("- Matches tags:", matchesTags);
-        console.log("- Matches category:", matchesCategory);
         
         return (
           // Search in title
@@ -77,8 +78,6 @@ const ContentLibrary = ({
           matchesCategory
         );
       });
-      
-      console.log("Links after filtering:", result.length);
     }
     
     setFilteredLinks(result);
@@ -499,11 +498,6 @@ const ContentLibrary = ({
             )}
 
             <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'} gap-5`}>
-              {console.log("Rendering with searchQuery:", searchQuery)}
-              {console.log("Active Tag Filter:", activeTagFilter)}
-              {console.log("Filtered Links:", filteredLinks.length)}
-              {console.log("All Links:", links.length)}
-              {console.log("Using filtered links?", searchQuery.trim() || activeTagFilter)}
               {(searchQuery.trim() || activeTagFilter ? filteredLinks : links).map((link) => (
                 <ContentItem 
                   key={link.id} 
