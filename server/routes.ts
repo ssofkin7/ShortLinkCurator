@@ -297,14 +297,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.session.userId;
       const links = await storage.getLinksByUserId(userId);
       
-      // Extract categories and tags from user's links
-      const categories = [...new Set(links.map(link => link.category))];
-      const tags = [...new Set(links.flatMap(link => link.tags.map(tag => tag.name)))];
+      // Default recommendations for new users or when there's an error
+      const defaultRecommendations = [
+        {
+          title: "5-Minute Morning Yoga Routine for Energy",
+          platform: "youtube" as const,
+          category: "Fitness",
+          reason: "Popular short workout for quick energy boost"
+        },
+        {
+          title: "Easy 15-Minute Pasta Recipe Anyone Can Make",
+          platform: "tiktok" as const,
+          category: "Cooking",
+          reason: "Quick and simple recipe perfect for beginners"
+        },
+        {
+          title: "3 Productivity Hacks That Changed My Life",
+          platform: "instagram" as const,
+          category: "Productivity",
+          reason: "Trending time management tips for busy people"
+        },
+        {
+          title: "Learn Basic Coding in 60 Seconds",
+          platform: "youtube" as const,
+          category: "Education",
+          reason: "Bite-sized learning for tech beginners"
+        },
+        {
+          title: "DIY Home Organization Ideas",
+          platform: "tiktok" as const,
+          category: "Lifestyle",
+          reason: "Creative storage solutions for small spaces"
+        }
+      ];
       
-      // Generate recommendations using OpenAI
-      const recommendations = await generateRecommendations(categories, tags);
+      // If user has no links or very few, return default recommendations
+      if (links.length < 2) {
+        return res.status(200).json(defaultRecommendations);
+      }
       
-      res.status(200).json(recommendations);
+      try {
+        // Extract categories and tags from user's links
+        const categories = [...new Set(links.map(link => link.category))];
+        const tags = [...new Set(links.flatMap(link => link.tags.map(tag => tag.name)))];
+        
+        // Generate recommendations using OpenAI
+        const recommendations = await generateRecommendations(categories, tags);
+        
+        res.status(200).json(recommendations);
+      } catch (openAiError) {
+        console.error("OpenAI recommendation error:", openAiError);
+        // Fall back to default recommendations if OpenAI fails
+        res.status(200).json(defaultRecommendations);
+      }
     } catch (error) {
       console.error("Get recommendations error:", error);
       res.status(500).json({ message: "Error generating recommendations" });
