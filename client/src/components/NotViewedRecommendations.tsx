@@ -179,11 +179,8 @@ const NotViewedRecommendations = () => {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center mb-1">
-                        <Badge variant="secondary" className={`${platform.bgColor} text-white text-xs p-1 rounded-md flex items-center mr-2`}>
-                          {platform.icon}
-                        </Badge>
-                        <span className="text-xs text-gray-400 ml-auto">
+                      <div className="flex items-center justify-end mb-1">
+                        <span className="text-xs text-gray-400">
                           {formatLastViewed(link.last_viewed)}
                         </span>
                       </div>
