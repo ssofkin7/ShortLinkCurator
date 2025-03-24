@@ -166,6 +166,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
+      // Check if user already has this link in their library
+      const userLinks = await storage.getLinksByUserId(userId);
+      const duplicateLink = userLinks.find(link => link.url === url);
+      
+      if (duplicateLink) {
+        return res.status(409).json({
+          message: "This link already exists in your library",
+          existingLink: duplicateLink
+        });
+      }
+      
       // AI Caching: Check if this URL has been processed before by any user
       // We can reuse the metadata to avoid redundant AI API calls
       const existingLink = await storage.getLinkByUrl(url);

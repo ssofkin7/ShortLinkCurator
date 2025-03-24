@@ -26,12 +26,28 @@ const LinkSubmitter = ({ onSubmit }: LinkSubmitterProps) => {
       });
       queryClient.invalidateQueries({ queryKey: ["/api/links"] });
     },
-    onError: (error) => {
-      toast({
-        title: "Failed to add link",
-        description: error instanceof Error ? error.message : "Please try again",
-        variant: "destructive",
-      });
+    onError: (error: any) => {
+      // Check for 409 status code which indicates a duplicate link
+      if (error?.response?.status === 409) {
+        // Customize the toast for duplicate links
+        toast({
+          title: "Duplicate Link",
+          description: "This link already exists in your library.",
+          variant: "warning",
+        });
+        
+        // Still invalidate the query to ensure library is refreshed
+        queryClient.invalidateQueries({ queryKey: ["/api/links"] });
+        
+        // Reset the input field
+        setUrl("");
+      } else {
+        toast({
+          title: "Failed to add link",
+          description: error instanceof Error ? error.message : "Please try again",
+          variant: "destructive",
+        });
+      }
     }
   });
 
