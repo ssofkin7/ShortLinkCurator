@@ -95,15 +95,28 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
 
   const platformBadge = getPlatformBadge();
 
-  // Placeholder thumbnail logic (in a real app, we'd use the actual thumbnail)
-  const getPlaceholderImage = () => {
-    const platformImages = {
-      tiktok: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=800&h=450&fit=crop',
-      youtube: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&h=450&fit=crop',
-      instagram: 'https://images.unsplash.com/photo-1539683255143-73a6b838b106?w=800&h=450&fit=crop',
+  // Get thumbnail for the link
+  const getThumbnailImage = () => {
+    // Default placeholder based on platform
+    const generatePlaceholder = (text: string) => {
+      return `https://placehold.co/800x450?text=${encodeURIComponent(text)}`;
     };
     
-    return link.thumbnail_url || platformImages[link.platform as keyof typeof platformImages] || 'https://placehold.co/800x450?text=No+Thumbnail';
+    if (link.thumbnail_url) {
+      return link.thumbnail_url;
+    }
+    
+    // Fallback to platform-specific placeholder
+    switch (link.platform) {
+      case 'tiktok':
+        return generatePlaceholder('TikTok Video');
+      case 'youtube':
+        return generatePlaceholder('YouTube Short');
+      case 'instagram':
+        return generatePlaceholder('Instagram Reel');
+      default:
+        return generatePlaceholder('No Thumbnail');
+    }
   };
 
   if (viewMode === "list") {
@@ -111,7 +124,7 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
       <Card className="flex items-center p-4 hover:shadow-md transition-shadow">
         <div className="w-24 h-16 rounded overflow-hidden flex-shrink-0 mr-4">
           <img 
-            src={getPlaceholderImage()} 
+            src={getThumbnailImage()} 
             className="w-full h-full object-cover" 
             alt={link.title} 
           />
@@ -198,7 +211,7 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
     <Card className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
       <div className="relative">
         <img 
-          src={getPlaceholderImage()} 
+          src={getThumbnailImage()} 
           className="w-full aspect-video object-cover" 
           alt={link.title} 
         />
