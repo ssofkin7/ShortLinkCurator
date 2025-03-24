@@ -6,7 +6,7 @@ import TopBar from "@/components/TopBar";
 import LinkSubmitter from "@/components/LinkSubmitter";
 import AIProcessingDashboard from "@/components/AIProcessingDashboard";
 import ContentLibrary from "@/components/ContentLibrary";
-import Recommendations from "@/components/Recommendations";
+// Removed Recommendations import
 import NotViewedRecommendations from "@/components/NotViewedRecommendations";
 import MobileNavigation from "@/components/MobileNavigation";
 import { queryClient } from "@/lib/queryClient";
@@ -69,9 +69,6 @@ const HomePage = () => {
           
           {/* "Revisit These Links" Section */}
           <NotViewedRecommendations />
-          
-          {/* "Recommended for You" Section */}
-          <Recommendations />
         </div>
       </main>
       

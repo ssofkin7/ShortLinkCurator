@@ -34,12 +34,10 @@ const ContentLibrary = ({
 
   // Filter links when active tag or platform changes
   useEffect(() => {
-    let result = [...links];
+    // Skip if links aren't loaded yet
+    if (!links || links.length === 0) return;
     
-    // Apply platform filter
-    if (activeTab !== 'all') {
-      result = result.filter(link => link.platform === activeTab);
-    }
+    let result = [...links];
     
     // Apply tag filter if active
     if (activeTagFilter) {
@@ -49,7 +47,7 @@ const ContentLibrary = ({
     }
     
     setFilteredLinks(result);
-  }, [links, activeTab, activeTagFilter]);
+  }, [links, activeTagFilter]);
 
   // Calculate counts by platform
   const counts = {
