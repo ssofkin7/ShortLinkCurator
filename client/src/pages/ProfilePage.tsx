@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import CustomSidebar from "@/components/Sidebar";
@@ -31,12 +31,23 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import TopBar from "@/components/TopBar";
 import MobileNavigation from "@/components/MobileNavigation";
+import { apiRequest } from "@/lib/queryClient";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const profileSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
   email: z.string().email("Please enter a valid email address"),
   bio: z.string().optional(),
   displayName: z.string().optional(),
+});
+
+const passwordSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string().min(8, "Please confirm your password"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
 });
 
 const notificationSchema = z.object({
@@ -47,49 +58,160 @@ const notificationSchema = z.object({
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
+type PasswordFormValues = z.infer<typeof passwordSchema>;
 type NotificationFormValues = z.infer<typeof notificationSchema>;
 
 export default function ProfilePage() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, refetchUser } = useAuth();
   const [activeTab, setActiveTab] = useState("profile");
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
+  // Profile form
   const profileForm = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       username: user?.username || "",
       email: user?.email || "",
-      bio: "",
-      displayName: "",
+      bio: user?.bio || "",
+      displayName: user?.display_name || "",
     },
   });
 
+  // Password form
+  const passwordForm = useForm<PasswordFormValues>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
+  });
+
+  // Notification preferences form
   const notificationForm = useForm<NotificationFormValues>({
     resolver: zodResolver(notificationSchema),
     defaultValues: {
-      emailNotifications: true,
-      newContentAlerts: true,
-      weeklyDigest: true,
-      platformUpdates: false,
+      emailNotifications: user?.notification_preferences?.email_notifications ?? true,
+      newContentAlerts: user?.notification_preferences?.new_content_alerts ?? true,
+      weeklyDigest: user?.notification_preferences?.weekly_digest ?? true,
+      platformUpdates: user?.notification_preferences?.platform_updates ?? false,
+    },
+  });
+
+  // Update form values when user data loads
+  useEffect(() => {
+    if (user && !isLoading) {
+      profileForm.reset({
+        username: user.username || "",
+        email: user.email || "",
+        bio: user.bio || "",
+        displayName: user.display_name || "",
+      });
+
+      notificationForm.reset({
+        emailNotifications: user.notification_preferences?.email_notifications ?? true,
+        newContentAlerts: user.notification_preferences?.new_content_alerts ?? true,
+        weeklyDigest: user.notification_preferences?.weekly_digest ?? true,
+        platformUpdates: user.notification_preferences?.platform_updates ?? false,
+      });
+    }
+  }, [user, isLoading, profileForm, notificationForm]);
+
+  // Profile update mutation
+  const profileMutation = useMutation({
+    mutationFn: async (data: ProfileFormValues) => {
+      return apiRequest('/api/profile', {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Profile updated",
+        description: "Your profile information has been updated successfully.",
+      });
+      refetchUser();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update profile. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Profile update error:", error);
+    },
+  });
+
+  // Password update mutation
+  const passwordMutation = useMutation({
+    mutationFn: async (data: { currentPassword: string, newPassword: string }) => {
+      return apiRequest('/api/profile/password', {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Password updated",
+        description: "Your password has been changed successfully.",
+      });
+      passwordForm.reset();
+    },
+    onError: (error: any) => {
+      if (error.status === 401) {
+        toast({
+          title: "Error",
+          description: "Current password is incorrect.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to update password. Please try again.",
+          variant: "destructive",
+        });
+      }
+      console.error("Password update error:", error);
+    },
+  });
+
+  // Notification preferences mutation
+  const notificationMutation = useMutation({
+    mutationFn: async (data: NotificationFormValues) => {
+      return apiRequest('/api/profile/notifications', {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Preferences updated",
+        description: "Your notification preferences have been updated successfully.",
+      });
+      refetchUser();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update notification preferences. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Notification preferences update error:", error);
     },
   });
 
   const onProfileSubmit = (data: ProfileFormValues) => {
-    // In a real app, you would call an API to update the profile
-    console.log("Profile data:", data);
-    toast({
-      title: "Profile updated",
-      description: "Your profile information has been updated successfully.",
-    });
+    profileMutation.mutate(data);
+  };
+
+  const onPasswordSubmit = (data: PasswordFormValues) => {
+    const { currentPassword, newPassword } = data;
+    passwordMutation.mutate({ currentPassword, newPassword });
   };
 
   const onNotificationSubmit = (data: NotificationFormValues) => {
-    // In a real app, you would call an API to update notification preferences
-    console.log("Notification data:", data);
-    toast({
-      title: "Preferences updated",
-      description: "Your notification preferences have been updated successfully.",
-    });
+    notificationMutation.mutate(data);
   };
 
   return (
@@ -344,39 +466,76 @@ export default function ProfilePage() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="current-password">Current Password</Label>
-                          <Input
-                            id="current-password"
-                            type="password"
-                            placeholder="••••••••"
+                      <Form {...passwordForm}>
+                        <form
+                          onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
+                          className="space-y-4"
+                        >
+                          <FormField
+                            control={passwordForm.control}
+                            name="currentPassword"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Current Password</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    type="password"
+                                    placeholder="••••••••"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
                           />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="new-password">New Password</Label>
-                          <Input
-                            id="new-password"
-                            type="password"
-                            placeholder="••••••••"
+
+                          <FormField
+                            control={passwordForm.control}
+                            name="newPassword"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>New Password</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    type="password"
+                                    placeholder="••••••••"
+                                  />
+                                </FormControl>
+                                <FormDescription>
+                                  Must be at least 8 characters with a number.
+                                </FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
                           />
-                          <p className="text-xs text-gray-500">
-                            Password must be at least 8 characters and include a number.
-                          </p>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="confirm-password">Confirm New Password</Label>
-                          <Input
-                            id="confirm-password"
-                            type="password"
-                            placeholder="••••••••"
+
+                          <FormField
+                            control={passwordForm.control}
+                            name="confirmPassword"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Confirm New Password</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    type="password"
+                                    placeholder="••••••••"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
                           />
-                        </div>
-                        
-                        <Button>Change Password</Button>
-                      </div>
+
+                          <Button 
+                            type="submit"
+                            disabled={passwordMutation.isPending}
+                          >
+                            {passwordMutation.isPending ? "Updating..." : "Change Password"}
+                          </Button>
+                        </form>
+                      </Form>
                       
                       <div className="pt-6 border-t border-gray-200">
                         <h3 className="font-medium text-base mb-4">Account Management</h3>
