@@ -7,6 +7,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import TopBar from "@/components/TopBar";
 import { useAuth } from "@/hooks/useAuth";
 import MobileNavigation from "@/components/MobileNavigation";
+import { 
+  BarChart, Bar, 
+  PieChart, Pie, Cell, 
+  LineChart, Line, 
+  XAxis, YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend, 
+  ResponsiveContainer 
+} from "recharts";
 
 export default function AnalyticsPage() {
   const { user, isLoading: isUserLoading } = useAuth();
@@ -61,6 +71,33 @@ export default function AnalyticsPage() {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
+  
+  // Prepare data for platform pie chart
+  const platformData = Object.entries(platformCounts).map(([name, value]) => ({
+    name: name.charAt(0).toUpperCase() + name.slice(1), // Capitalize first letter
+    value
+  }));
+  
+  // Prepare data for category bar chart - take top 5 categories only
+  const categoryData = Object.entries(categoryCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([name, value]) => ({
+      name: name.length > 15 ? name.substring(0, 12) + '...' : name, // Truncate long names
+      value
+    }));
+    
+  // Colors for platform pie chart
+  const PLATFORM_COLORS = {
+    youtube: '#FF0000',
+    tiktok: '#000000',
+    instagram: '#E1306C',
+    facebook: '#4267B2',
+    vimeo: '#1AB7EA',
+    other: '#CCCCCC'
+  };
+  
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
@@ -142,12 +179,61 @@ export default function AnalyticsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-[250px] flex items-center justify-center">
-                  <div className="text-center">
-                    <p className="mb-2 text-lg font-medium">Activity Chart</p>
-                    <p className="text-gray-500">Charts feature coming soon</p>
+                {isLoading || links.length === 0 ? (
+                  <div className="h-[250px] flex items-center justify-center">
+                    <div className="text-center">
+                      <p className="text-gray-500">
+                        {isLoading ? "Loading data..." : "No content data available"}
+                      </p>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="h-[250px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart
+                        data={activityData}
+                        margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                        <XAxis 
+                          dataKey="date" 
+                          tickFormatter={(dateString) => {
+                            const date = new Date(dateString);
+                            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                          }}
+                          tick={{ fontSize: 12 }}
+                          tickMargin={5}
+                          // For larger datasets, show fewer ticks
+                          interval={timeFrame === "7days" ? 0 : timeFrame === "30days" ? 3 : 7}
+                        />
+                        <YAxis 
+                          allowDecimals={false}
+                          tick={{ fontSize: 12 }}
+                          tickMargin={5}
+                        />
+                        <Tooltip
+                          formatter={(value: number) => [`${value} items`, "Content Added"]}
+                          labelFormatter={(dateString) => formatDate(dateString)}
+                          contentStyle={{ 
+                            backgroundColor: "white", 
+                            border: "1px solid #e2e8f0",
+                            borderRadius: "6px",
+                            boxShadow: "0 2px 6px rgba(0,0,0,0.1)"
+                          }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="count"
+                          name="Content Added"
+                          stroke="#3b82f6"
+                          strokeWidth={2}
+                          dot={{ r: 3, fill: "#3b82f6" }}
+                          activeDot={{ r: 6, fill: "#2563eb" }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -159,12 +245,54 @@ export default function AnalyticsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-[250px] flex items-center justify-center">
-                  <div className="text-center">
-                    <p className="mb-2 text-lg font-medium">Platform Distribution</p>
-                    <p className="text-gray-500">Charts feature coming soon</p>
+                {isLoading || links.length === 0 ? (
+                  <div className="h-[250px] flex items-center justify-center">
+                    <div className="text-center">
+                      <p className="text-gray-500">
+                        {isLoading ? "Loading data..." : "No platform data available"}
+                      </p>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="h-[250px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={platformData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                          nameKey="name"
+                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        >
+                          {platformData.map((entry, index) => {
+                            const platform = entry.name.toLowerCase();
+                            const color = PLATFORM_COLORS[platform as keyof typeof PLATFORM_COLORS] || PLATFORM_COLORS.other;
+                            return <Cell key={`cell-${index}`} fill={color} />;
+                          })}
+                        </Pie>
+                        <Tooltip 
+                          formatter={(value: number) => [`${value} items`, "Count"]}
+                          contentStyle={{ 
+                            backgroundColor: "white", 
+                            border: "1px solid #e2e8f0",
+                            borderRadius: "6px",
+                            boxShadow: "0 2px 6px rgba(0,0,0,0.1)"
+                          }}
+                        />
+                        <Legend 
+                          layout="horizontal" 
+                          verticalAlign="bottom" 
+                          align="center"
+                          formatter={(value) => <span style={{ fontSize: 12 }}>{value}</span>}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -178,12 +306,57 @@ export default function AnalyticsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-[250px] flex items-center justify-center">
-                  <div className="text-center">
-                    <p className="mb-2 text-lg font-medium">Category Distribution</p>
-                    <p className="text-gray-500">Charts feature coming soon</p>
+                {isLoading || links.length === 0 || categoryData.length === 0 ? (
+                  <div className="h-[250px] flex items-center justify-center">
+                    <div className="text-center">
+                      <p className="text-gray-500">
+                        {isLoading 
+                          ? "Loading data..." 
+                          : links.length === 0 
+                            ? "No content data available"
+                            : "No category data available"}
+                      </p>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="h-[250px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={categoryData}
+                        layout="vertical"
+                        margin={{ top: 5, right: 5, left: 35, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} opacity={0.3} />
+                        <XAxis type="number" tick={{ fontSize: 12 }} />
+                        <YAxis 
+                          dataKey="name" 
+                          type="category" 
+                          tick={{ fontSize: 12 }}
+                          width={100}
+                        />
+                        <Tooltip
+                          formatter={(value: number) => [`${value} items`, "Content Count"]}
+                          contentStyle={{ 
+                            backgroundColor: "white", 
+                            border: "1px solid #e2e8f0",
+                            borderRadius: "6px",
+                            boxShadow: "0 2px 6px rgba(0,0,0,0.1)"
+                          }}
+                        />
+                        <Bar 
+                          dataKey="value" 
+                          name="Content Count"
+                          fill="#8884d8" 
+                          radius={[0, 4, 4, 0]}
+                        >
+                          {categoryData.map((_, index) => 
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          )}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
