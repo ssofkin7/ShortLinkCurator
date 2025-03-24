@@ -1,7 +1,8 @@
 import express, { type Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { analyzeVideoContent, detectPlatform, generateRecommendations } from "./openai";
+import { analyzeVideoContent, generateRecommendations } from "./openai";
+import { detectPlatform } from "./utils/platformUtils";
 import { insertUserSchema, insertLinkSchema, insertTagSchema } from "../shared/schema";
 import { z } from "zod";
 import bcrypt from "bcryptjs";

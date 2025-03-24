@@ -1,6 +1,11 @@
 import OpenAI from "openai";
-// Import the title extractor that we'll use later
+// Import the title extractor and shared platform utilities
 import { extractVideoTitle } from './services/titleExtractor';
+import { 
+  PlatformType, 
+  detectPlatform, 
+  extractDefaultTitleFromUrl 
+} from './utils/platformUtils';
 
 const openai = new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY || 'your-api-key' 
@@ -8,8 +13,6 @@ const openai = new OpenAI({
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const MODEL = "gpt-4o";
-
-type PlatformType = 'tiktok' | 'youtube' | 'instagram';
 
 interface LinkMetadata {
   title: string;
@@ -19,56 +22,6 @@ interface LinkMetadata {
   duration?: string;
   thumbnail_url?: string;
 }
-
-// Extracts platform from URL
-export function detectPlatform(url: string): PlatformType | null {
-  if (url.includes('tiktok.com')) {
-    return 'tiktok';
-  } else if (url.includes('youtube.com/shorts') || url.includes('youtu.be')) {
-    return 'youtube';
-  } else if (url.includes('instagram.com/reel')) {
-    return 'instagram';
-  }
-  return null;
-}
-
-// Helper function to extract default title from URL
-function extractDefaultTitleFromUrl(url: string): string {
-  try {
-    // Try to extract title from URL patterns
-    if (url.includes('youtube.com/shorts/')) {
-      // YouTube shorts format: https://www.youtube.com/shorts/VIDEO_ID
-      const videoId = url.split('youtube.com/shorts/')[1]?.split('?')[0];
-      // For YouTube, use a more user-friendly title format
-      return videoId ? `How to Watch This YouTube Short` : "YouTube Short";
-    } else if (url.includes('youtu.be/')) {
-      // YouTube short link format
-      const videoId = url.split('youtu.be/')[1]?.split('?')[0];
-      return videoId ? `How to Watch This YouTube Video` : "YouTube Video";
-    } else if (url.includes('tiktok.com/')) {
-      // TikTok format: https://www.tiktok.com/@username/video/VIDEO_ID
-      let tiktokTitle = "TikTok Video";
-      if (url.includes('@')) {
-        const username = url.split('@')[1]?.split('/')[0];
-        if (username) {
-          tiktokTitle = `TikTok by @${username}`;
-        }
-      }
-      return tiktokTitle;
-    } else if (url.includes('instagram.com/reel/')) {
-      // Instagram reels format: https://www.instagram.com/reel/CODE/
-      const code = url.split('instagram.com/reel/')[1]?.split('/')[0];
-      return code ? `Instagram Reel Content` : "Instagram Reel";
-    }
-  } catch (e) {
-    console.log('Error extracting title from URL:', e);
-  }
-  
-  // Fallback
-  return 'Short-form video';
-}
-
-// Extract metadata from video title and description
 
 // Extract metadata from video title and description
 export async function analyzeVideoContent(
