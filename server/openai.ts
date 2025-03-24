@@ -72,9 +72,14 @@ export async function analyzeVideoContent(
     // Use the original title for display, but optimize it for the AI to reduce tokens
     const optimizedTitle = optimizeTitleForAI(title || defaultTitle);
     
+    // Determine if this is a short-form video or regular video
+    const isShortForm = platform === 'tiktok' || 
+                        url.includes('/shorts/') || 
+                        url.includes('/reel/');
+                        
     // Shorten the prompt to reduce input tokens
     const prompt = `
-      Analyze: ${platform} video
+      Analyze: ${platform} ${isShortForm ? 'short-form video' : 'video'}
       Title: ${optimizedTitle}
       URL: ${url}
       
@@ -88,7 +93,7 @@ export async function analyzeVideoContent(
     const response = await openai.chat.completions.create({
       model: MODEL,
       messages: [
-        { role: "system", content: "You categorize short-form videos concisely." },
+        { role: "system", content: "You categorize videos concisely. For short-form content like TikTok or YouTube Shorts, provide brief tags. For regular videos, provide more detailed categorization." },
         { role: "user", content: prompt }
       ],
       response_format: { type: "json_object" },
@@ -146,13 +151,13 @@ export async function generateRecommendations(
     
     // Create a shorter, more concise prompt
     const prompt = `
-      Suggest 3 short videos based on:
+      Suggest 3 videos based on:
       Categories: ${topCategories.join(', ')}
       Tags: ${topTags.join(', ')}
       
       Return only JSON array with 3 suggestions:
       - title: brief engaging title
-      - platform: "tiktok", "youtube", or "instagram"
+      - platform: "tiktok", "youtube", "instagram", "facebook", or "vimeo"
       - category: main category
       - reason: why it's recommended (brief)
     `;
@@ -160,7 +165,7 @@ export async function generateRecommendations(
     const response = await openai.chat.completions.create({
       model: MODEL,
       messages: [
-        { role: "system", content: "You provide concise video recommendations." },
+        { role: "system", content: "You provide concise video recommendations for both short-form and regular videos from platforms including YouTube, TikTok, Instagram, Facebook, and Vimeo." },
         { role: "user", content: prompt }
       ],
       response_format: { type: "json_object" },
