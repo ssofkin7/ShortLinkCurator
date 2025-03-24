@@ -21,6 +21,7 @@ export const links = pgTable("links", {
   duration: text("duration"),
   user_id: integer("user_id").notNull().references(() => users.id),
   created_at: timestamp("created_at").defaultNow().notNull(),
+  last_viewed: timestamp("last_viewed").defaultNow(),
   metadata: json("metadata").$type<Record<string, any>>(),
 });
 
@@ -45,6 +46,7 @@ export const insertLinkSchema = createInsertSchema(links).pick({
   category: true,
   duration: true,
   user_id: true,
+  last_viewed: true,
   metadata: true,
 });
 

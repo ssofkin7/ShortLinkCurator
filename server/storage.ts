@@ -22,6 +22,8 @@ export interface IStorage {
   getLinksByPlatform(userId: number, platform: string): Promise<LinkWithTags[]>;
   getLinkCount(userId: number): Promise<number>;
   deleteLink(id: number, userId: number): Promise<void>;
+  updateLastViewed(linkId: number): Promise<void>;
+  getRecommendedLinks(userId: number, limit?: number): Promise<LinkWithTags[]>;
   
   // Tag operations
   createTag(tag: InsertTag): Promise<Tag>;
@@ -76,13 +78,15 @@ export class MemStorage implements IStorage {
   async createLink(insertLink: InsertLink): Promise<Link> {
     const id = this.currentLinkId++;
     const created_at = new Date();
+    const last_viewed = new Date();
     
     // Ensure null values for optional fields
     const sanitizedLink = {
       ...insertLink,
       thumbnail_url: insertLink.thumbnail_url ?? null,
       duration: insertLink.duration ?? null,
-      metadata: insertLink.metadata ?? null
+      metadata: insertLink.metadata ?? null,
+      last_viewed: insertLink.last_viewed ?? last_viewed
     };
     
     const link: Link = { ...sanitizedLink, id, created_at };
@@ -163,6 +167,31 @@ export class MemStorage implements IStorage {
       this.links.set(linkId, link);
     }
   }
+
+  async updateLastViewed(linkId: number): Promise<void> {
+    const link = this.links.get(linkId);
+    if (link) {
+      link.last_viewed = new Date();
+      this.links.set(linkId, link);
+    }
+  }
+
+  async getRecommendedLinks(userId: number, limit: number = 5): Promise<LinkWithTags[]> {
+    const userLinks = Array.from(this.links.values())
+      .filter(link => link.user_id === userId)
+      .sort((a, b) => {
+        // Sort by last_viewed (oldest first)
+        const aLastViewed = a.last_viewed ? a.last_viewed.getTime() : 0;
+        const bLastViewed = b.last_viewed ? b.last_viewed.getTime() : 0;
+        return aLastViewed - bLastViewed;
+      })
+      .slice(0, limit);
+    
+    return Promise.all(userLinks.map(async link => {
+      const linkTags = await this.getTagsByLinkId(link.id);
+      return { ...link, tags: linkTags };
+    }));
+  }
 }
 
 // Database implementation using Supabase
@@ -188,12 +217,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createLink(insertLink: InsertLink): Promise<Link> {
+    const last_viewed = new Date();
     // Ensure null values for optional fields
     const sanitizedLink = {
       ...insertLink,
       thumbnail_url: insertLink.thumbnail_url ?? null,
       duration: insertLink.duration ?? null,
-      metadata: insertLink.metadata ?? null
+      metadata: insertLink.metadata ?? null,
+      last_viewed: insertLink.last_viewed ?? last_viewed
     };
     
     const [link] = await db.insert(links).values(sanitizedLink).returning();
@@ -269,6 +300,25 @@ export class DatabaseStorage implements IStorage {
     await db.update(links)
       .set({ category })
       .where(eq(links.id, linkId));
+  }
+  
+  async updateLastViewed(linkId: number): Promise<void> {
+    await db.update(links)
+      .set({ last_viewed: new Date() })
+      .where(eq(links.id, linkId));
+  }
+  
+  async getRecommendedLinks(userId: number, limit: number = 5): Promise<LinkWithTags[]> {
+    // Get links sorted by last_viewed (oldest first)
+    const recommendedLinks = await db.select().from(links)
+      .where(eq(links.user_id, userId))
+      .orderBy(links.last_viewed)
+      .limit(limit);
+    
+    return Promise.all(recommendedLinks.map(async (link) => {
+      const linkTags = await this.getTagsByLinkId(link.id);
+      return { ...link, tags: linkTags };
+    }));
   }
 }
 
