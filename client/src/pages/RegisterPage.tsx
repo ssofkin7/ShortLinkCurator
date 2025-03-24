@@ -61,7 +61,7 @@ export default function RegisterPage() {
                 <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
               </svg>
             </div>
-            <h1 className="text-xl font-semibold">LinkOrbit</h1>
+            <h1 className="text-xl font-semibold">LinkSnap</h1>
           </div>
           <CardTitle className="text-2xl">Create an account</CardTitle>
           <CardDescription>

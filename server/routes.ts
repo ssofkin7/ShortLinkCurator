@@ -9,6 +9,13 @@ import bcrypt from "bcryptjs";
 import session from "express-session";
 import MemoryStore from "memorystore";
 
+// Extend Express Session
+declare module 'express-session' {
+  interface SessionData {
+    userId: number;
+  }
+}
+
 // Create session store
 const SessionStore = MemoryStore(session);
 
