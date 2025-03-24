@@ -138,15 +138,31 @@ const TopBar = ({ user }: TopBarProps) => {
           {user ? (
             <Popover>
               <PopoverTrigger asChild>
-                <div className="h-9 w-9 rounded-lg md:hidden bg-blue-100 flex items-center justify-center text-blue-600 font-semibold cursor-pointer">
-                  {user.username.charAt(0).toUpperCase()}
+                <div className="h-9 w-9 rounded-lg md:hidden bg-blue-100 flex items-center justify-center text-blue-600 font-semibold cursor-pointer overflow-hidden">
+                  {user.avatar_url ? (
+                    <img 
+                      src={user.avatar_url} 
+                      alt={`${user.username}'s avatar`}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span>{user.username.charAt(0).toUpperCase()}</span>
+                  )}
                 </div>
               </PopoverTrigger>
               <PopoverContent className="w-56" align="end">
                 <div className="grid gap-3">
                   <div className="flex items-center gap-3 pb-2 border-b border-gray-100">
-                    <div className="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold">
-                      {user.username.charAt(0).toUpperCase()}
+                    <div className="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold overflow-hidden">
+                      {user.avatar_url ? (
+                        <img 
+                          src={user.avatar_url} 
+                          alt={`${user.username}'s avatar`}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span>{user.username.charAt(0).toUpperCase()}</span>
+                      )}
                     </div>
                     <div>
                       <p className="text-sm font-medium">{user.username}</p>

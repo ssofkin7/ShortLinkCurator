@@ -41,6 +41,7 @@ const profileSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   bio: z.string().optional(),
   displayName: z.string().optional(),
+  avatar_url: z.string().optional(),
 });
 
 const passwordSchema = z.object({
@@ -77,6 +78,7 @@ export default function ProfilePage() {
       email: user?.email || "",
       bio: user?.bio || "",
       displayName: user?.display_name || "",
+      avatar_url: user?.avatar_url || "",
     },
   });
 
@@ -109,6 +111,7 @@ export default function ProfilePage() {
         email: user.email || "",
         bio: user.bio || "",
         displayName: user.display_name || "",
+        avatar_url: user.avatar_url || "",
       });
 
       notificationForm.reset({
@@ -279,12 +282,17 @@ export default function ProfilePage() {
                                           size="icon" 
                                           className="h-8 w-8 rounded-full bg-primary hover:bg-primary/90 text-white"
                                           onClick={() => {
-                                            // Show toast about avatar feature
-                                            toast({
-                                              title: "Feature coming soon",
-                                              description: "Avatar upload will be available in the next update.",
-                                              variant: "default"
-                                            });
+                                            // Open dialog to set avatar URL
+                                            const avatarUrl = prompt("Enter the URL for your avatar image:", profileForm.getValues().avatar_url || "");
+                                            if (avatarUrl !== null) {
+                                              profileForm.setValue("avatar_url", avatarUrl);
+                                              // Show toast about avatar URL being set
+                                              toast({
+                                                title: "Avatar URL set",
+                                                description: "Your avatar URL has been set. Save your profile to apply changes.",
+                                                variant: "default"
+                                              });
+                                            }
                                           }}
                                         >
                                           <Camera className="h-4 w-4" />
@@ -374,6 +382,19 @@ export default function ProfilePage() {
                                   Tell others a little about yourself.
                                 </FormDescription>
                                 <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          {/* Hidden avatar_url field */}
+                          <FormField
+                            control={profileForm.control}
+                            name="avatar_url"
+                            render={({ field }) => (
+                              <FormItem className="hidden">
+                                <FormControl>
+                                  <Input {...field} type="hidden" />
+                                </FormControl>
                               </FormItem>
                             )}
                           />

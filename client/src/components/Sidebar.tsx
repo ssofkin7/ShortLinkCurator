@@ -111,8 +111,16 @@ const CustomSidebar = ({ user, isLoading }: SidebarProps) => {
               </>
             ) : user ? (
               <>
-                <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold">
-                  {user.username.charAt(0).toUpperCase()}
+                <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold overflow-hidden">
+                  {user.avatar_url ? (
+                    <img 
+                      src={user.avatar_url} 
+                      alt={`${user.username}'s avatar`} 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span>{user.username.charAt(0).toUpperCase()}</span>
+                  )}
                 </div>
                 <div>
                   <p className="text-sm font-medium">{user.username}</p>
