@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, MouseEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { User, LinkWithTags } from "@shared/schema";
 import Sidebar from "@/components/Sidebar";
@@ -93,11 +93,23 @@ const HomePage = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {recentLinks.slice(0, 4).map((link) => (
-                  <div key={link.id} onClick={() => window.open(link.url, "_blank")} className="cursor-pointer">
+                  <div 
+                    key={link.id} 
+                    onClick={() => window.open(link.url, "_blank")} 
+                    className="cursor-pointer"
+                  >
                     <ContentItem 
                       link={link} 
                       viewMode="grid" 
-                      onEditTags={() => handleOpenTagModal(link)}
+                      onEditTags={(e) => {
+                        // Stop the click from opening the link
+                        if (e) e.stopPropagation();
+                        handleOpenTagModal(link);
+                      }}
+                      onTagClick={(tagName, e) => {
+                        // Prevent navigation when clicking on tags
+                        if (e) e.stopPropagation();
+                      }}
                     />
                   </div>
                 ))}

@@ -17,8 +17,8 @@ import {
 interface ContentItemProps {
   link: LinkWithTags;
   viewMode: "grid" | "list";
-  onEditTags: () => void;
-  onTagClick?: (tagName: string) => void;
+  onEditTags: (e?: React.MouseEvent) => void;
+  onTagClick?: (tagName: string, e?: React.MouseEvent) => void;
 }
 
 const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProps) => {

@@ -503,8 +503,14 @@ const ContentLibrary = ({
                   key={link.id} 
                   link={link} 
                   viewMode={viewMode}
-                  onEditTags={() => handleOpenTagModal(link)}
-                  onTagClick={handleTagClick}
+                  onEditTags={(e) => {
+                    if (e) e.stopPropagation();
+                    handleOpenTagModal(link);
+                  }}
+                  onTagClick={(tagName, e) => {
+                    if (e) e.stopPropagation();
+                    handleTagClick(tagName);
+                  }}
                 />
               ))}
             </div>
