@@ -34,13 +34,13 @@ function optimizeTitleForAI(title: string): string {
     .trim();
 }
 
-// Extract metadata from video title and description
+// Extract metadata from content title and description
 export async function analyzeVideoContent(
   url: string, 
   providedTitle: string = '', 
   description: string = ''
 ): Promise<LinkMetadata> {
-  const platform = detectPlatform(url) || 'unknown';
+  const platform = detectPlatform(url);
   let defaultTitle = extractDefaultTitleFromUrl(url);
   let thumbnailUrl: string | undefined = undefined;
   
@@ -50,36 +50,83 @@ export async function analyzeVideoContent(
     
     if (!title) {
       try {
-        // Extract both title and thumbnail from oEmbed
-        const videoMetadata = await extractVideoMetadata(url);
-        title = videoMetadata.title;
-        thumbnailUrl = videoMetadata.thumbnail_url;
-        
-        console.log(`Metadata extracted from ${platform}:`, { 
-          title, 
-          hasThumbnail: !!thumbnailUrl 
-        });
-        
-        // If title extraction returned a real title, use it as the default
-        if (title && title !== 'Untitled Content') {
-          defaultTitle = title;
+        // For video platforms, try to extract both title and thumbnail from oEmbed
+        if (['youtube', 'vimeo', 'facebook', 'instagram', 'tiktok'].includes(platform)) {
+          const videoMetadata = await extractVideoMetadata(url);
+          title = videoMetadata.title;
+          thumbnailUrl = videoMetadata.thumbnail_url;
+          
+          console.log(`Metadata extracted from ${platform}:`, { 
+            title, 
+            hasThumbnail: !!thumbnailUrl 
+          });
+          
+          // If title extraction returned a real title, use it as the default
+          if (title && title !== 'Untitled Content') {
+            defaultTitle = title;
+          }
         }
       } catch (extractionError) {
-        console.error('Error extracting video metadata:', extractionError);
+        console.error('Error extracting content metadata:', extractionError);
       }
     }
     
     // Use the original title for display, but optimize it for the AI to reduce tokens
     const optimizedTitle = optimizeTitleForAI(title || defaultTitle);
     
-    // Determine if this is a short-form video or regular video
-    const isShortForm = platform === 'tiktok' || 
-                        url.includes('/shorts/') || 
-                        url.includes('/reel/');
+    // Determine content type based on platform
+    let contentType: string;
+    
+    switch (platform) {
+      // Video platforms
+      case 'youtube':
+        contentType = url.includes('/shorts/') ? 'short-form video' : 'video';
+        break;
+      case 'tiktok':
+        contentType = 'short-form video';
+        break;
+      case 'instagram':
+        contentType = url.includes('/reel/') ? 'short-form video' : 'post';
+        break;
+      case 'facebook':
+      case 'vimeo':
+        contentType = 'video';
+        break;
+        
+      // Social media platforms
+      case 'twitter':
+        contentType = 'tweet';
+        break;
+      case 'linkedin':
+        contentType = 'post';
+        break;
+      case 'reddit':
+        contentType = 'post';
+        break;
+        
+      // Content platforms
+      case 'medium':
+      case 'substack':
+        contentType = 'article';
+        break;
+      case 'github':
+        contentType = 'repository';
+        break;
+        
+      // Generic types
+      case 'article':
+        contentType = 'article';
+        break;
+      case 'document':
+        contentType = 'document';
+        break;
+      default:
+        contentType = 'webpage';
+    }
                         
     // Shorten the prompt to reduce input tokens
     const prompt = `
-      Analyze: ${platform} ${isShortForm ? 'short-form video' : 'video'}
+      Analyze: ${platform} ${contentType}
       Title: ${optimizedTitle}
       URL: ${url}
       
@@ -87,13 +134,16 @@ export async function analyzeVideoContent(
       - title: ${title ? "Use exactly: " + title : "Brief descriptive title"} 
       - category: Single best category
       - tags: 3-5 relevant tags
-      - duration: If detectable (null if not)
+      - duration: Include only for video content (null if not applicable)
     `;
 
     const response = await openai.chat.completions.create({
       model: MODEL,
       messages: [
-        { role: "system", content: "You categorize videos concisely. For short-form content like TikTok or YouTube Shorts, provide brief tags. For regular videos, provide more detailed categorization." },
+        { 
+          role: "system", 
+          content: "You categorize content concisely. Provide appropriate categories and tags for various types of content including videos, articles, social media posts, documents, and webpages." 
+        },
         { role: "user", content: prompt }
       ],
       response_format: { type: "json_object" },
@@ -151,13 +201,13 @@ export async function generateRecommendations(
     
     // Create a shorter, more concise prompt
     const prompt = `
-      Suggest 3 videos based on:
+      Suggest 3 content items based on:
       Categories: ${topCategories.join(', ')}
       Tags: ${topTags.join(', ')}
       
-      Return only JSON array with 3 suggestions:
+      Return only JSON array with 3 suggestions including a mix of videos, articles, social media posts, and more:
       - title: brief engaging title
-      - platform: "tiktok", "youtube", "instagram", "facebook", or "vimeo"
+      - platform: Choose from "tiktok", "youtube", "instagram", "facebook", "vimeo", "twitter", "linkedin", "reddit", "medium", "substack", "github", "article", "document", or "webpage"
       - category: main category
       - reason: why it's recommended (brief)
     `;
@@ -165,7 +215,10 @@ export async function generateRecommendations(
     const response = await openai.chat.completions.create({
       model: MODEL,
       messages: [
-        { role: "system", content: "You provide concise video recommendations for both short-form and regular videos from platforms including YouTube, TikTok, Instagram, Facebook, and Vimeo." },
+        { 
+          role: "system", 
+          content: "You provide concise content recommendations based on user interests. Include a variety of content types such as videos (both short-form and regular), articles, social media posts, documents, and other web content."
+        },
         { role: "user", content: prompt }
       ],
       response_format: { type: "json_object" },
