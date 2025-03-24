@@ -14,6 +14,19 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUserProfile(userId: number, profileData: { 
+    username?: string; 
+    email?: string; 
+    bio?: string; 
+    displayName?: string; 
+  }): Promise<User>;
+  updateUserPassword(userId: number, newPassword: string): Promise<void>;
+  updateUserNotificationPreferences(userId: number, preferences: {
+    emailNotifications?: boolean;
+    newContentAlerts?: boolean;
+    weeklyDigest?: boolean;
+    platformUpdates?: boolean;
+  }): Promise<void>;
   
   // Link operations
   createLink(link: InsertLink): Promise<Link>;
@@ -76,6 +89,70 @@ export class MemStorage implements IStorage {
     const user: User = { ...insertUser, id, created_at, is_premium };
     this.users.set(id, user);
     return user;
+  }
+  
+  async updateUserProfile(userId: number, profileData: {
+    username?: string;
+    email?: string;
+    bio?: string;
+    displayName?: string;
+  }): Promise<User> {
+    const user = this.users.get(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    
+    // Update user properties that are provided
+    if (profileData.username) user.username = profileData.username;
+    if (profileData.email) user.email = profileData.email;
+    if (profileData.bio) user.bio = profileData.bio;
+    if (profileData.displayName) user.display_name = profileData.displayName;
+    
+    this.users.set(userId, user);
+    return user;
+  }
+  
+  async updateUserPassword(userId: number, newPassword: string): Promise<void> {
+    const user = this.users.get(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    
+    user.password = newPassword;
+    this.users.set(userId, user);
+  }
+  
+  async updateUserNotificationPreferences(userId: number, preferences: {
+    emailNotifications?: boolean;
+    newContentAlerts?: boolean;
+    weeklyDigest?: boolean;
+    platformUpdates?: boolean;
+  }): Promise<void> {
+    const user = this.users.get(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    
+    // Initialize notification preferences object if it doesn't exist
+    if (!user.notification_preferences) {
+      user.notification_preferences = {};
+    }
+    
+    // Update preferences that are provided
+    if (preferences.emailNotifications !== undefined) {
+      user.notification_preferences.email_notifications = preferences.emailNotifications;
+    }
+    if (preferences.newContentAlerts !== undefined) {
+      user.notification_preferences.new_content_alerts = preferences.newContentAlerts;
+    }
+    if (preferences.weeklyDigest !== undefined) {
+      user.notification_preferences.weekly_digest = preferences.weeklyDigest;
+    }
+    if (preferences.platformUpdates !== undefined) {
+      user.notification_preferences.platform_updates = preferences.platformUpdates;
+    }
+    
+    this.users.set(userId, user);
   }
 
   async createLink(insertLink: InsertLink): Promise<Link> {
@@ -221,6 +298,73 @@ export class DatabaseStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const [user] = await db.insert(users).values(insertUser).returning();
     return user;
+  }
+  
+  async updateUserProfile(userId: number, profileData: {
+    username?: string;
+    email?: string;
+    bio?: string;
+    displayName?: string;
+  }): Promise<User> {
+    const updateData: any = {};
+    
+    // Only add fields that are provided to the update object
+    if (profileData.username) updateData.username = profileData.username;
+    if (profileData.email) updateData.email = profileData.email;
+    if (profileData.bio) updateData.bio = profileData.bio;
+    if (profileData.displayName) updateData.display_name = profileData.displayName;
+    
+    // Update user in database
+    const [updatedUser] = await db.update(users)
+      .set(updateData)
+      .where(eq(users.id, userId))
+      .returning();
+      
+    if (!updatedUser) {
+      throw new Error("User not found");
+    }
+    
+    return updatedUser;
+  }
+  
+  async updateUserPassword(userId: number, newPassword: string): Promise<void> {
+    await db.update(users)
+      .set({ password: newPassword })
+      .where(eq(users.id, userId));
+  }
+  
+  async updateUserNotificationPreferences(userId: number, preferences: {
+    emailNotifications?: boolean;
+    newContentAlerts?: boolean;
+    weeklyDigest?: boolean;
+    platformUpdates?: boolean;
+  }): Promise<void> {
+    const user = await this.getUser(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    
+    // Create notification preferences object to update
+    const notificationPreferences: any = user.notification_preferences || {};
+    
+    // Update only the provided preferences
+    if (preferences.emailNotifications !== undefined) {
+      notificationPreferences.email_notifications = preferences.emailNotifications;
+    }
+    if (preferences.newContentAlerts !== undefined) {
+      notificationPreferences.new_content_alerts = preferences.newContentAlerts;
+    }
+    if (preferences.weeklyDigest !== undefined) {
+      notificationPreferences.weekly_digest = preferences.weeklyDigest;
+    }
+    if (preferences.platformUpdates !== undefined) {
+      notificationPreferences.platform_updates = preferences.platformUpdates;
+    }
+    
+    // Update user notification preferences in database
+    await db.update(users)
+      .set({ notification_preferences: notificationPreferences })
+      .where(eq(users.id, userId));
   }
 
   async createLink(insertLink: InsertLink): Promise<Link> {

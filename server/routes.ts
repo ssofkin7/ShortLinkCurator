@@ -137,6 +137,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Profile routes
+  app.patch("/api/profile", authenticate, async (req: Request, res: Response) => {
+    try {
+      const userId = req.session.userId as number;
+      const { username, email, bio, displayName } = req.body;
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Update profile
+      const updatedUser = await storage.updateUserProfile(userId, {
+        username,
+        email,
+        bio,
+        displayName
+      });
+      
+      // Return updated user without password
+      const { password: _, ...userWithoutPassword } = updatedUser;
+      res.status(200).json(userWithoutPassword);
+    } catch (error) {
+      console.error("Update profile error:", error);
+      res.status(500).json({ message: "Error updating profile" });
+    }
+  });
+
+  // Password update route
+  app.patch("/api/profile/password", authenticate, async (req: Request, res: Response) => {
+    try {
+      const userId = req.session.userId as number;
+      const { currentPassword, newPassword } = req.body;
+      
+      // Get user
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Verify current password
+      const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ message: "Current password is incorrect" });
+      }
+      
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      
+      // Update password
+      await storage.updateUserPassword(userId, hashedPassword);
+      
+      res.status(200).json({ message: "Password updated successfully" });
+    } catch (error) {
+      console.error("Update password error:", error);
+      res.status(500).json({ message: "Error updating password" });
+    }
+  });
+
+  // Notification preferences route
+  app.patch("/api/profile/notifications", authenticate, async (req: Request, res: Response) => {
+    try {
+      const userId = req.session.userId as number;
+      const preferences = req.body; // notification preferences object
+      
+      // Get user
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Update notification preferences
+      await storage.updateUserNotificationPreferences(userId, preferences);
+      
+      res.status(200).json({ message: "Notification preferences updated successfully" });
+    } catch (error) {
+      console.error("Update notification preferences error:", error);
+      res.status(500).json({ message: "Error updating notification preferences" });
+    }
+  });
+
   // Link routes
   app.post("/api/links", authenticate, async (req: Request, res: Response) => {
     try {
