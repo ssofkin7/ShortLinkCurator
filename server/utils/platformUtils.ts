@@ -31,18 +31,20 @@ export function extractDefaultTitleFromUrl(url: string): string {
     // Extract video ID based on platform patterns
     let videoId = '';
     
-    // YouTube
+    // YouTube - make sure to properly differentiate Shorts and regular videos
     if (url.includes('youtube.com/shorts/')) {
       videoId = url.split('youtube.com/shorts/')[1].split('?')[0].split('&')[0];
       return `YouTube Short #${videoId}`;
     }
     
     if (url.includes('youtu.be/')) {
+      // Check if this is a short shared via youtu.be
       videoId = url.split('youtu.be/')[1].split('?')[0].split('&')[0];
       return `YouTube Video #${videoId}`;
     }
     
     if (url.includes('youtube.com/watch?v=')) {
+      // This is definitely a regular YouTube video, not a Short
       videoId = new URL(url).searchParams.get('v') || '';
       return `YouTube Video #${videoId}`;
     }
