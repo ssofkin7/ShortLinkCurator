@@ -76,7 +76,16 @@ export class MemStorage implements IStorage {
   async createLink(insertLink: InsertLink): Promise<Link> {
     const id = this.currentLinkId++;
     const created_at = new Date();
-    const link: Link = { ...insertLink, id, created_at };
+    
+    // Ensure null values for optional fields
+    const sanitizedLink = {
+      ...insertLink,
+      thumbnail_url: insertLink.thumbnail_url ?? null,
+      duration: insertLink.duration ?? null,
+      metadata: insertLink.metadata ?? null
+    };
+    
+    const link: Link = { ...sanitizedLink, id, created_at };
     this.links.set(id, link);
     return link;
   }
@@ -179,7 +188,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createLink(insertLink: InsertLink): Promise<Link> {
-    const [link] = await db.insert(links).values(insertLink).returning();
+    // Ensure null values for optional fields
+    const sanitizedLink = {
+      ...insertLink,
+      thumbnail_url: insertLink.thumbnail_url ?? null,
+      duration: insertLink.duration ?? null,
+      metadata: insertLink.metadata ?? null
+    };
+    
+    const [link] = await db.insert(links).values(sanitizedLink).returning();
     return link;
   }
 
