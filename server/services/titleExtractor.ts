@@ -1,16 +1,16 @@
 import axios from 'axios';
 import { detectPlatform, extractDefaultTitleFromUrl } from '../utils/platformUtils';
 
-interface VideoMetadata {
+interface ContentMetadata {
   title: string;
   thumbnail_url?: string;
 }
 
 /**
- * Extracts video metadata (title and thumbnail) from a URL using oEmbed when available,
- * with fallbacks for platforms that don't support it.
+ * Extracts content metadata (title and thumbnail when available) from a URL
+ * using various platform-specific methods
  */
-export async function extractVideoMetadata(url: string): Promise<VideoMetadata> {
+export async function extractVideoMetadata(url: string): Promise<ContentMetadata> {
   try {
     const platform = detectPlatform(url);
     
@@ -20,6 +20,7 @@ export async function extractVideoMetadata(url: string): Promise<VideoMetadata> 
     
     // Different extraction method based on the platform
     switch (platform) {
+      // Video platforms
       case 'youtube':
         return await extractYouTubeMetadata(url);
       case 'tiktok':
@@ -30,6 +31,24 @@ export async function extractVideoMetadata(url: string): Promise<VideoMetadata> 
         return await extractFacebookMetadata(url);
       case 'vimeo':
         return await extractVimeoMetadata(url);
+        
+      // Social media platforms
+      case 'twitter':
+        return await extractTwitterMetadata(url);
+      case 'linkedin':
+        return await extractLinkedInMetadata(url);
+      case 'reddit':
+        return await extractRedditMetadata(url);
+        
+      // Content platforms
+      case 'medium':
+        return await extractMediumMetadata(url);
+      case 'substack':
+        return await extractSubstackMetadata(url);
+      case 'github':
+        return await extractGitHubMetadata(url);
+        
+      // Generic types - use default extraction
       default:
         return { title: extractDefaultTitleFromUrl(url) };
     }
@@ -50,7 +69,7 @@ export async function extractVideoTitle(url: string): Promise<string> {
 /**
  * Extracts metadata from a YouTube video using the oEmbed API.
  */
-async function extractYouTubeMetadata(url: string): Promise<VideoMetadata> {
+async function extractYouTubeMetadata(url: string): Promise<ContentMetadata> {
   try {
     // For YouTube Shorts, the URL format is different
     let videoId: string | null = null;
