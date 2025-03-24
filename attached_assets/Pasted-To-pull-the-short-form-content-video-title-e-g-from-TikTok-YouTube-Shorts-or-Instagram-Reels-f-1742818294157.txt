@@ -1,0 +1,231 @@
+To pull the short-form content video title (e.g., from TikTok, YouTube Shorts, or Instagram Reels) for your Link Orbit app, you’ll need to fetch metadata from the video’s URL after the user submits it. Since users are manually sharing links, you can use the URL to scrape or query the title using platform-specific methods. Here’s how you can approach this, integrating with Supabase for storage and processing, while keeping your app’s structure in mind.
+
+---
+
+### Overview of the Process
+1. **User Submits Link**: The user pastes a TikTok, YouTube Shorts, or Instagram Reels URL via the Link Submission Interface.
+2. **Extract the Title**: Use the URL to fetch the video’s metadata (including the title) via scraping, APIs, or oEmbed endpoints.
+3. **Store the Title**: Save the title alongside the link in Supabase’s Postgres database.
+4. **Display in Content Library**: Show the title in the grid/list view of the Content Library.
+
+---
+
+### Step-by-Step Implementation
+
+#### 1. Link Submission and URL Handling
+- **Frontend**: In your Link Submission Interface, the user pastes a URL (e.g., `https://www.youtube.com/shorts/abc123` or `https://www.tiktok.com/@user/video/123456`).
+- **Validation**: Check the URL to identify the platform (YouTube, TikTok, Instagram) by matching the domain (e.g., `youtube.com`, `tiktok.com`, `instagram.com`).
+  - Example (JavaScript):
+    ```javascript
+    function identifyPlatform(url) {
+      if (url.includes('youtube.com') || url.includes('youtu.be')) return 'YouTube';
+      if (url.includes('tiktok.com')) return 'TikTok';
+      if (url.includes('instagram.com')) return 'Instagram';
+      return null;
+    }
+    ```
+
+#### 2. Fetch the Video Title
+Each platform has a different method to retrieve the title. Since you’re using Supabase, you can offload this logic to a Supabase Edge Function to keep the frontend lightweight.
+
+##### Option 1: Use oEmbed Endpoints (Preferred for YouTube and Instagram)
+Many platforms provide oEmbed endpoints, which return structured metadata (including the title) in JSON format.
+
+- **YouTube**:
+  - Endpoint: `https://www.youtube.com/oembed?url=<VIDEO_URL>&format=json`
+  - Example: For `https://www.youtube.com/shorts/abc123`, query:
+    ```
+    https://www.youtube.com/oembed?url=https://www.youtube.com/shorts/abc123&format=json
+    ```
+  - Response:
+    ```json
+    {
+      "title": "My Awesome Short Video",
+      "author_name": "CreatorName",
+      "thumbnail_url": "https://i.ytimg.com/vi/abc123/hqdefault.jpg",
+      ...
+    }
+    ```
+
+- **Instagram**:
+  - Endpoint: `https://api.instagram.com/oembed/?url=<VIDEO_URL>`
+  - Note: Requires an Instagram app access token for some requests, but public Reels often work without one.
+  - Example: For `https://www.instagram.com/reel/xyz789/`, query:
+    ```
+    https://api.instagram.com/oembed/?url=https://www.instagram.com/reel/xyz789/
+    ```
+  - Response:
+    ```json
+    {
+      "title": "Cool Reel Title",
+      "author_name": "insta_user",
+      "thumbnail_url": "...",
+      ...
+    }
+    ```
+
+- **TikTok**:
+  - TikTok’s oEmbed endpoint is less reliable (`https://www.tiktok.com/oembed?url=<VIDEO_URL>`), and the title isn’t always included. You may need to scrape the page (see Option 2).
+
+##### Option 2: Scrape the Page (Fallback for TikTok or If oEmbed Fails)
+If oEmbed isn’t available or doesn’t return the title, you can scrape the video page’s HTML to extract the title from the `<title>` tag or Open Graph meta tags (`<meta property="og:title">`).
+
+- **Supabase Edge Function**: Use a Node.js function to fetch the page and parse the HTML.
+  - Example (Node.js with `axios` and `cheerio`):
+    ```javascript
+    const axios = require('axios');
+    const cheerio = require('cheerio');
+
+    async function fetchVideoTitle(url) {
+      try {
+        const response = await axios.get(url);
+        const $ = cheerio.load(response.data);
+        // Try Open Graph title first
+        let title = $('meta[property="og:title"]').attr('content');
+        if (!title) {
+          // Fallback to <title> tag
+          title = $('title').text();
+        }
+        return title || 'Untitled Video';
+      } catch (error) {
+        console.error('Error fetching title:', error);
+        return 'Untitled Video';
+      }
+    }
+    ```
+
+- **TikTok Example**: For `https://www.tiktok.com/@user/video/123456`, the `<meta property="og:title">` might contain the title, like "Funny Dance Video by @user."
+
+##### Option 3: Use Platform APIs (More Complex)
+If oEmbed and scraping aren’t enough, you can use official APIs, but they require authentication and are more complex:  
+- **YouTube Data API**: Requires an API key. Use the `videos.list` endpoint with the video ID (`abc123`) to get the title.  
+- **TikTok API**: Requires a developer account and access token. The `video.query` endpoint can return metadata.  
+- **Instagram Graph API**: Requires a business account and access token. The `media` endpoint can fetch Reel metadata.
+
+For simplicity, stick with oEmbed or scraping unless you need deeper data.
+
+#### 3. Supabase Edge Function to Process the Title
+Create a Supabase Edge Function to handle title extraction and storage.
+
+- **Edge Function Example** (Node.js):
+  ```javascript
+  import { serve } from 'https://deno.land/std@0.131.0/http/server.ts';
+  import axios from 'https://deno.land/x/axios@0.21.1/mod.ts';
+
+  serve(async (req) => {
+    const { url, userId } = await req.json();
+
+    // Identify platform
+    let platform = 'Unknown';
+    if (url.includes('youtube.com') || url.includes('youtu.be')) platform = 'YouTube';
+    if (url.includes('tiktok.com')) platform = 'TikTok';
+    if (url.includes('instagram.com')) platform = 'Instagram';
+
+    // Fetch title via oEmbed (example for YouTube)
+    let title = 'Untitled Video';
+    if (platform === 'YouTube') {
+      const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
+      try {
+        const response = await axios.get(oembedUrl);
+        title = response.data.title || 'Untitled Video';
+      } catch (error) {
+        console.error('YouTube oEmbed error:', error);
+      }
+    }
+    // Add similar logic for TikTok (scrape) and Instagram (oEmbed)
+
+    // Save to Supabase
+    const { data, error } = await supabase
+      .from('links')
+      .insert({
+        user_id: userId,
+        url,
+        title,
+        platform,
+        created_at: new Date().toISOString(),
+      });
+
+    if (error) {
+      return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    }
+
+    return new Response(JSON.stringify({ title, platform }), { status: 200 });
+  });
+  ```
+
+- **Supabase Schema** (Postgres table `links`):
+  ```sql
+  CREATE TABLE links (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id),
+    url TEXT NOT NULL,
+    title TEXT NOT NULL,
+    platform TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+  );
+
+  -- Enable Row Level Security
+  ALTER TABLE links ENABLE ROW LEVEL SECURITY;
+  CREATE POLICY user_links ON links FOR ALL USING (auth.uid() = user_id);
+  ```
+
+#### 4. AI Categorization (Post-Title Extraction)
+After fetching the title, use the title and URL metadata for AI categorization:  
+- **Edge Function Addition**: Pass the title to an AI model (e.g., OpenAI API or a lightweight NLP model) to generate tags.  
+  - Example: Title "Quick Pasta Recipe" → Tags: "recipe," "cooking," "pasta."  
+- Store tags in a separate `tags` table or as a JSON column in the `links` table.
+
+#### 5. Display in Content Library
+- **Frontend**: Fetch the links from Supabase and display the title in the Content Library.
+  - Example (React):
+    ```javascript
+    const { data: links, error } = useSupabase()
+      .from('links')
+      .select('*')
+      .eq('user_id', userId);
+
+    return (
+      <div className="content-library">
+        {links.map((link) => (
+          <div key={link.id} className="link-card">
+            <h3>{link.title}</h3>
+            <p>{link.platform}</p>
+            <a href={link.url} target="_blank">Watch</a>
+          </div>
+        ))}
+      </div>
+    );
+    ```
+
+#### 6. Handle Thumbnails (Bonus)
+While fetching the title, oEmbed responses often include a `thumbnail_url`. Store this in Supabase Storage or the `links` table to display alongside the title in the Content Library.
+
+---
+
+### Challenges and Solutions
+- **Rate Limits**: oEmbed endpoints or scraping might hit rate limits. Use Supabase Edge Functions to cache titles in the database after the first fetch.  
+- **Private Videos**: If a video is private, oEmbed/scraping will fail. Fallback to a default title like "Untitled Video."  
+- **TikTok Scraping**: TikTok may block scrapers. Use a headless browser (e.g., Puppeteer) in an Edge Function as a last resort, or prompt users to paste the title manually if needed.  
+- **Performance**: Fetching titles for many links could be slow. Batch process in the background and show a "Processing" state in the UI.
+
+---
+
+### Fit with Your App
+- **Link Submission Interface**: Users paste the URL, and the title is fetched automatically.  
+- **AI Processing Dashboard**: Show a loading state while fetching the title and generating tags (e.g., “Fetching title… Tagging: recipe”).  
+- **Content Library**: Display the title alongside the thumbnail and platform.  
+- **Supabase Integration**: Titles are stored in the `links` table, fetched via Edge Functions.  
+- **Polar.sh Subscription**: Free tier can fetch titles for 50 links; pro tier unlocks unlimited.
+
+---
+
+### Is "Link Orbit" Still a Good Name?
+Yes, the name "Link Orbit" still fits. The process of pulling titles and organizing them into a library reinforces the idea of links "orbiting" around the user in a structured way. The AI categorization (using the title) adds to the app’s smart, futuristic vibe, which "Link Orbit" captures better than "LinkSnap."
+
+---
+
+### Next Steps
+1. **Set Up the Edge Function**: Start with YouTube oEmbed to fetch titles, then add TikTok scraping and Instagram oEmbed.  
+2. **Update the Schema**: Add a `title` column to your `links` table in Supabase.  
+3. **UI Feedback**: Show a loading state while fetching the title, then display it in the Content Library.  
+What do you want to tackle first—writing the Edge Function or designing the loading state in the UI?

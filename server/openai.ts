@@ -1,4 +1,6 @@
 import OpenAI from "openai";
+// Import the title extractor that we'll use later
+import { extractVideoTitle } from './services/titleExtractor';
 
 const openai = new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY || 'your-api-key' 
@@ -67,23 +69,42 @@ function extractDefaultTitleFromUrl(url: string): string {
 }
 
 // Extract metadata from video title and description
+
+// Extract metadata from video title and description
 export async function analyzeVideoContent(
   url: string, 
-  title: string = '', 
+  providedTitle: string = '', 
   description: string = ''
 ): Promise<LinkMetadata> {
   const platform = detectPlatform(url) || 'unknown';
-  const defaultTitle = extractDefaultTitleFromUrl(url);
+  let defaultTitle = extractDefaultTitleFromUrl(url);
   
   try {
+    // First try to get a real title from oEmbed or similar
+    let title = providedTitle;
+    
+    if (!title) {
+      try {
+        title = await extractVideoTitle(url);
+        console.log(`Title extracted from ${platform}: "${title}"`);
+        
+        // If title extraction returned a real title, use it as the default
+        if (title && title !== 'Untitled Content') {
+          defaultTitle = title;
+        }
+      } catch (titleError) {
+        console.error('Error extracting video title:', titleError);
+      }
+    }
+    
     const prompt = `
       Analyze this ${platform} short-form video content based on the URL, title, and description.
       URL: ${url}
-      Title: ${title}
+      Title: ${title || defaultTitle}
       Description: ${description}
       
       Return a JSON object with the following fields:
-      - title: The most likely title for this content. Be descriptive and concise (15-50 characters).
+      - title: ${title ? "Use this exact title: " + title : "The most likely title for this content. Be descriptive and concise (15-50 characters)."} 
       - category: A single category that best describes this content (e.g., "Fitness", "Cooking", "Technology", "Fashion", etc.)
       - tags: An array of 3-5 relevant tags for this content
       - duration: If you can detect it, the duration of the video (otherwise null)
