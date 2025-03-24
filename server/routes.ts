@@ -141,7 +141,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/profile", authenticate, async (req: Request, res: Response) => {
     try {
       const userId = req.session.userId as number;
-      const { username, email, bio, displayName } = req.body;
+      const { username, email, bio, displayName, avatar_url } = req.body;
       
       const user = await storage.getUser(userId);
       if (!user) {
@@ -175,7 +175,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         username,
         email,
         bio,
-        displayName
+        displayName,
+        avatar_url
       });
       
       // Return updated user without password

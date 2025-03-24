@@ -18,7 +18,8 @@ export interface IStorage {
     username?: string; 
     email?: string; 
     bio?: string; 
-    displayName?: string; 
+    displayName?: string;
+    avatar_url?: string;
   }): Promise<User>;
   updateUserPassword(userId: number, newPassword: string): Promise<void>;
   updateUserNotificationPreferences(userId: number, preferences: {
@@ -93,6 +94,7 @@ export class MemStorage implements IStorage {
       is_premium,
       bio: null,
       display_name: null,
+      avatar_url: null,
       notification_preferences: null
     };
     this.users.set(id, user);
@@ -104,6 +106,7 @@ export class MemStorage implements IStorage {
     email?: string;
     bio?: string;
     displayName?: string;
+    avatar_url?: string;
   }): Promise<User> {
     const user = this.users.get(userId);
     if (!user) {
@@ -115,6 +118,7 @@ export class MemStorage implements IStorage {
     if (profileData.email) user.email = profileData.email;
     if (profileData.bio) user.bio = profileData.bio;
     if (profileData.displayName) user.display_name = profileData.displayName;
+    if (profileData.avatar_url) user.avatar_url = profileData.avatar_url;
     
     this.users.set(userId, user);
     return user;
@@ -313,6 +317,7 @@ export class DatabaseStorage implements IStorage {
     email?: string;
     bio?: string;
     displayName?: string;
+    avatar_url?: string;
   }): Promise<User> {
     const updateData: any = {};
     
@@ -321,6 +326,7 @@ export class DatabaseStorage implements IStorage {
     if (profileData.email) updateData.email = profileData.email;
     if (profileData.bio) updateData.bio = profileData.bio;
     if (profileData.displayName) updateData.display_name = profileData.displayName;
+    if (profileData.avatar_url) updateData.avatar_url = profileData.avatar_url;
     
     // Update user in database
     const [updatedUser] = await db.update(users)
