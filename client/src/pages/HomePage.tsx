@@ -24,7 +24,7 @@ const HomePage = () => {
   
   // Fetch recent links (limited to latest 5)
   const { data: recentLinks = [], isLoading: linksLoading } = useQuery<LinkWithTags[]>({
-    queryKey: ["/api/links", "recent"],
+    queryKey: ["/api/links", { type: "recent" }],
   });
 
   // Handle link submission

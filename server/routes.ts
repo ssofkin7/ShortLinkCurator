@@ -323,9 +323,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.session.userId as number;
       const platform = req.query.platform as string;
+      const type = req.query.type as string;
       
       let links;
-      if (platform && ['tiktok', 'youtube', 'instagram'].includes(platform)) {
+      if (type === 'recent') {
+        // For recent links, get all links but limit to most recent 5
+        links = await storage.getLinksByUserId(userId);
+        links = links.slice(0, 5); // Already sorted by created_at desc in storage
+      } else if (platform && ['tiktok', 'youtube', 'instagram', 'facebook', 'vimeo', 'twitter', 'linkedin', 'reddit', 'medium', 'substack', 'github', 'article', 'document', 'webpage'].includes(platform)) {
         links = await storage.getLinksByPlatform(userId, platform);
       } else {
         links = await storage.getLinksByUserId(userId);
