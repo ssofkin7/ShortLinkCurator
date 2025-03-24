@@ -40,18 +40,18 @@ const LinkSubmitter = ({ onSubmit }: LinkSubmitterProps) => {
     if (!url.trim()) {
       toast({
         title: "Empty link",
-        description: "Please enter a valid TikTok, YouTube Shorts, or Instagram Reels link",
+        description: "Please enter a valid video link from a supported platform",
         variant: "destructive",
       });
       return;
     }
 
     // Check if URL is from a supported platform
-    const isValidUrl = /tiktok\.com|youtube\.com\/shorts|youtu\.be|instagram\.com\/reel/i.test(url);
+    const isValidUrl = /tiktok\.com|youtube\.com|youtu\.be|instagram\.com|facebook\.com|fb\.watch|vimeo\.com/i.test(url);
     if (!isValidUrl) {
       toast({
         title: "Unsupported link",
-        description: "Only TikTok, YouTube Shorts, and Instagram Reels links are supported",
+        description: "Only TikTok, YouTube, Instagram, Facebook, and Vimeo links are supported",
         variant: "destructive",
       });
       return;
@@ -76,7 +76,7 @@ const LinkSubmitter = ({ onSubmit }: LinkSubmitterProps) => {
             <Input
               type="text"
               id="linkInput"
-              placeholder="Paste TikTok, YouTube Shorts or Instagram Reels link"
+              placeholder="Paste video link from YouTube, TikTok, Instagram, Facebook, etc."
               className="w-full pl-10 pr-4 py-3"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
@@ -97,7 +97,7 @@ const LinkSubmitter = ({ onSubmit }: LinkSubmitterProps) => {
             <line x1="12" y1="16" x2="12" y2="12"></line>
             <line x1="12" y1="8" x2="12.01" y2="8"></line>
           </svg>
-          <span>Supports TikTok, YouTube Shorts, and Instagram Reels links</span>
+          <span>Supports TikTok, YouTube, Instagram, Facebook, and Vimeo links</span>
         </div>
       </CardContent>
     </Card>
