@@ -67,7 +67,10 @@ const HomePage = () => {
             onViewModeChange={setViewMode}
           />
           
-          {/* Recommendations Section */}
+          {/* "Revisit These Links" Section */}
+          <NotViewedRecommendations />
+          
+          {/* "Recommended for You" Section */}
           <Recommendations />
         </div>
       </main>

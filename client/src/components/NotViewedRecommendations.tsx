@@ -18,9 +18,7 @@ const NotViewedRecommendations = () => {
   // Mutation to update the last_viewed timestamp when a link is clicked
   const updateLastViewed = useMutation({
     mutationFn: (linkId: number) => {
-      return apiRequest(`/api/links/${linkId}/view`, {
-        method: "POST",
-      });
+      return apiRequest("POST", `/api/links/${linkId}/view`);
     },
     onSuccess: () => {
       // Invalidate the not viewed links query to refresh the list
