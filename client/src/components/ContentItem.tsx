@@ -274,15 +274,15 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
 
   if (viewMode === "list") {
     return (
-      <Card className="flex items-center p-4 hover:shadow-md transition-shadow">
+      <Card className="flex items-center p-3 hover:shadow-md transition-shadow duration-300">
         <div 
-          className="w-24 h-16 rounded overflow-hidden flex-shrink-0 mr-4 cursor-pointer relative group"
+          className="w-24 h-16 sm:w-32 sm:h-20 rounded overflow-hidden flex-shrink-0 mr-4 cursor-pointer relative group"
           onClick={(e) => {
             e.stopPropagation();
             window.open(link.url, "_blank");
           }}
         >
-          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center z-10">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
               <polyline points="15 3 21 3 21 9"></polyline>
@@ -291,82 +291,96 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
           </div>
           <img 
             src={getThumbnailImage()} 
-            className="w-full h-full object-cover" 
+            className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300" 
             alt={link.title} 
           />
+          <div className={`absolute top-1 left-1 ${platformBadge.bgColor} text-white rounded-md p-1 text-xs font-medium flex items-center z-20`}>
+            {platformBadge.icon}
+          </div>
         </div>
         
         <div className="flex-1 min-w-0">
-          <div className="flex items-center mb-1">
-            <Badge variant="secondary" className={`${platformBadge.bgColor} text-white text-xs p-1 rounded-md flex items-center mr-2`}>
-              {platformBadge.icon}
-            </Badge>
-            <span className="text-xs text-gray-500">{formatDate(link.created_at)}</span>
+          <h3 className="font-medium text-gray-900 text-sm md:text-base line-clamp-1 mb-1.5" title={link.title}>
+            {link.title}
+          </h3>
+          
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            {link.tags.slice(0, 3).map((tag) => (
+              <Badge 
+                key={tag.id} 
+                variant="outline" 
+                className="bg-blue-50 text-blue-800 text-xs border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors group relative"
+                title="Click to filter by this tag"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onTagClick && onTagClick(tag.name, e);
+                }}
+              >
+                {tag.name}
+                <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                  Filter by tag
+                </span>
+              </Badge>
+            ))}
+            {link.tags.length > 3 && (
+              <Badge variant="outline" className="bg-gray-100 text-gray-700 text-xs border-gray-200">
+                +{link.tags.length - 3}
+              </Badge>
+            )}
           </div>
           
-          <h3 className="font-medium text-sm line-clamp-1 mb-1">{link.title}</h3>
-          
-          <div className="flex items-center gap-2">
-            <div className="flex flex-wrap gap-1 mr-1">
-              {link.tags.slice(0, 3).map((tag) => (
-                <Badge 
-                  key={tag.id} 
-                  variant="outline" 
-                  className="bg-blue-100 text-blue-800 text-xs border-blue-200 cursor-pointer hover:bg-blue-200 transition-colors group relative"
-                  title="Click to filter by this tag"
-                  onClick={() => onTagClick && onTagClick(tag.name)}
-                >
-                  {tag.name}
-                  <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-                    Filter by tag
-                  </span>
-                </Badge>
-              ))}
-              {link.tags.length > 3 && (
-                <Badge variant="outline" className="bg-gray-100 text-gray-800 text-xs border-gray-200">
-                  +{link.tags.length - 3}
-                </Badge>
-              )}
-            </div>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-6 px-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 flex items-center"
-              onClick={onEditTags}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
-                <path d="M12 20h9"></path>
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-              </svg>
-              <span className="text-xs">Edit</span>
-            </Button>
-          </div>
-        </div>
-        
-        <div className="ml-2">
-          <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
-                  <circle cx="12" cy="12" r="1" />
-                  <circle cx="12" cy="5" r="1" />
-                  <circle cx="12" cy="19" r="1" />
+          <div className="flex items-center justify-between text-xs text-gray-500">
+            <span>{formatDate(link.created_at)}</span>
+            
+            <div className="flex items-center gap-1">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 px-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 flex items-center"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEditTags(e);
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
+                  <path d="M12 20h9"></path>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
                 </svg>
+                <span className="text-xs">Edit</span>
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => window.open(link.url, "_blank")}>
-                Open Link
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onEditTags}>
-                Edit Tags
-              </DropdownMenuItem>
-              <DropdownMenuItem className="text-red-600" onClick={() => deleteLink()}>
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              
+              <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-7 w-7 p-0 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="1" />
+                      <circle cx="12" cy="5" r="1" />
+                      <circle cx="12" cy="19" r="1" />
+                    </svg>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => window.open(link.url, "_blank")}>
+                    Open Link
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={(e) => {
+                    e.stopPropagation();
+                    onEditTags(e);
+                  }}>
+                    Edit Tags
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="text-red-600" onClick={() => deleteLink()}>
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
         </div>
       </Card>
     );
