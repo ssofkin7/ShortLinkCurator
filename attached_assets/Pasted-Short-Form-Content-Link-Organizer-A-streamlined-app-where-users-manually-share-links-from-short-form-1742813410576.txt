@@ -1,0 +1,32 @@
+Short-Form Content Link Organizer
+A streamlined app where users manually share links from short-form content platforms (TikTok, YouTube Shorts, Instagram Reels), AI intelligently organizes and categorizes them, with Supabase integration for data management and Polar.sh handling monthly subscriptions.
+
+Link Submission Interface:
+
+Clean, minimal input field with paste functionality and share-sheet integration for quick link submission.
+Users share a link from TikTok, Shorts, or Reels via the app’s share-sheet option or paste it manually. One-tap “Save” button sends it to the system.
+AI Processing Dashboard:
+
+Shows real-time analysis with auto-generated tags and categories.
+After submission, AI (e.g., powered by an LLM via Supabase Edge Functions) scans the link’s metadata (title, description, hashtags) and suggests tags like “fitness,” “recipe,” or “tech” and a category like “Workouts” or “Cooking.” Users see this live as it processes.
+Content Library:
+
+Grid/list view of saved links with thumbnails, organized by AI-generated categories with search and filter options.
+Stored in Supabase’s Postgres database, links display with video thumbnails (pulled via Supabase Storage if available) or platform icons. Search by tag or filter by date/platform.
+Tag Correction:
+
+Simple one-tap interface to correct AI miscategorizations to improve future accuracy.
+If AI tags a DIY video as “Cooking,” users tap to tweak it to “DIY.” Corrections feed back to refine the AI model, hosted via Supabase Functions.
+Personalized Recommendations:
+
+Section highlighting trending or related content based on user’s saving patterns.
+AI analyzes saved links (stored in Supabase) and suggests trending Shorts or Reels in similar categories, pulled from public web/X data or Supabase-curated feeds.
+Supabase Integration:
+
+Database: Postgres tables store links, user-defined folders, and AI-generated tags/categories. Row Level Security (RLS) ensures users only see their own data.
+Storage: Optional thumbnail caching for faster load times, tied to each link.
+Edge Functions: Host the AI logic for categorization and recommendations, triggered on link save.
+Polar.sh Subscription:
+
+Monthly subscription managed via Polar.sh for premium features.
+Free tier: 50 links, basic AI categorization. Paid tier ($5/month via Polar.sh): unlimited links, advanced recommendations, and priority support. Polar.sh handles billing and syncs subscription status to Supabase via webhooks.
