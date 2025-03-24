@@ -48,27 +48,52 @@ export async function extractVideoTitle(url: string): Promise<string> {
  */
 async function extractYouTubeMetadata(url: string): Promise<VideoMetadata> {
   try {
-    const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
-    const response = await axios.get(oembedUrl);
+    // For YouTube Shorts, the URL format is different
+    let videoId: string | null = null;
     
-    if (response.data) {
-      let metadata: VideoMetadata = { title: extractDefaultTitleFromUrl(url) };
-      
-      if (response.data.title) {
-        metadata.title = response.data.title;
+    // Check if it's a YouTube Shorts URL (contains /shorts/)
+    if (url.includes('/shorts/')) {
+      // Extract the video ID from shorts URL
+      const shortsMatch = url.match(/\/shorts\/([a-zA-Z0-9_-]+)/);
+      if (shortsMatch && shortsMatch[1]) {
+        videoId = shortsMatch[1];
       }
+    } else {
+      // Regular YouTube URL, try to get the 'v' parameter
+      videoId = new URL(url).searchParams.get('v');
+    }
+    
+    // Try oEmbed API first
+    try {
+      const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
+      const response = await axios.get(oembedUrl);
       
-      if (response.data.thumbnail_url) {
-        metadata.thumbnail_url = response.data.thumbnail_url;
-      } else {
-        // Try to extract video ID for thumbnail fallback
-        const videoId = new URL(url).searchParams.get('v');
-        if (videoId) {
-          metadata.thumbnail_url = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+      if (response.data) {
+        let metadata: VideoMetadata = { title: extractDefaultTitleFromUrl(url) };
+        
+        if (response.data.title) {
+          metadata.title = response.data.title;
         }
+        
+        if (response.data.thumbnail_url) {
+          metadata.thumbnail_url = response.data.thumbnail_url;
+        } else if (videoId) {
+          // Use the high quality thumbnail if oEmbed doesn't provide one
+          metadata.thumbnail_url = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+        }
+        
+        return metadata;
       }
-      
-      return metadata;
+    } catch (oembedError) {
+      console.log('YouTube oEmbed failed, falling back to direct thumbnail URL');
+    }
+    
+    // If oEmbed failed but we have a videoId, construct a metadata response
+    if (videoId) {
+      return {
+        title: extractDefaultTitleFromUrl(url),
+        thumbnail_url: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+      };
     }
     
     return { title: extractDefaultTitleFromUrl(url) };

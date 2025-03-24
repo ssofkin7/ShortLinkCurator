@@ -1,7 +1,7 @@
 import express, { type Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { analyzeVideoContent, generateRecommendations } from "./openai";
+import { analyzeVideoContent, generateRecommendations, type LinkMetadata } from "./openai";
 import { detectPlatform } from "./utils/platformUtils";
 import { insertUserSchema, insertLinkSchema, insertTagSchema } from "../shared/schema";
 import { z } from "zod";
@@ -200,7 +200,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create tags
       const tags = await Promise.all(
-        metadata.tags.map(tagName => 
+        metadata.tags.map((tagName: string) => 
           storage.createTag({
             name: tagName,
             link_id: link.id
