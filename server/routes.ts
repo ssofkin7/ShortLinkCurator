@@ -140,7 +140,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Link routes
   app.post("/api/links", authenticate, async (req: Request, res: Response) => {
     try {
-      const { url, force = false } = req.body;
+      const { url } = req.body;
       const userId = req.session.userId as number;
       
       // Check if user is on free tier and has reached the limit
@@ -164,20 +164,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ 
           message: "Unsupported link. Only TikTok, YouTube Shorts, and Instagram Reels are supported."
         });
-      }
-      
-      // Only check for duplicates if force flag is not set
-      if (!force) {
-        // Check if user already has this link in their library
-        const userLinks = await storage.getLinksByUserId(userId);
-        const duplicateLink = userLinks.find(link => link.url === url);
-        
-        if (duplicateLink) {
-          return res.status(409).json({
-            message: "This link already exists in your library",
-            existingLink: duplicateLink
-          });
-        }
       }
       
       // AI Caching: Check if this URL has been processed before by any user
