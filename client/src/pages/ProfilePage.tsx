@@ -121,10 +121,11 @@ export default function ProfilePage() {
   // Profile update mutation
   const profileMutation = useMutation({
     mutationFn: async (data: ProfileFormValues) => {
-      return apiRequest('/api/profile', {
-        method: 'PATCH',
-        body: JSON.stringify(data),
-      });
+      return apiRequest(
+        "PATCH",
+        '/api/profile',
+        data
+      );
     },
     onSuccess: () => {
       toast({
@@ -146,10 +147,11 @@ export default function ProfilePage() {
   // Password update mutation
   const passwordMutation = useMutation({
     mutationFn: async (data: { currentPassword: string, newPassword: string }) => {
-      return apiRequest('/api/profile/password', {
-        method: 'PATCH',
-        body: JSON.stringify(data),
-      });
+      return apiRequest(
+        "PATCH",
+        '/api/profile/password',
+        data
+      );
     },
     onSuccess: () => {
       toast({
@@ -179,10 +181,11 @@ export default function ProfilePage() {
   // Notification preferences mutation
   const notificationMutation = useMutation({
     mutationFn: async (data: NotificationFormValues) => {
-      return apiRequest('/api/profile/notifications', {
-        method: 'PATCH',
-        body: JSON.stringify(data),
-      });
+      return apiRequest(
+        "PATCH",
+        '/api/profile/notifications',
+        data
+      );
     },
     onSuccess: () => {
       toast({
