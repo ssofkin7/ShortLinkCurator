@@ -31,6 +31,7 @@ const ContentLibrary = ({
   const [activeTagFilter, setActiveTagFilter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [filteredLinks, setFilteredLinks] = useState<LinkWithTags[]>([]);
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
   // Fetch links only if they're not provided as props
   const { data: fetchedLinks = [], isLoading: isFetchLoading } = useQuery<LinkWithTags[]>({
@@ -42,12 +43,18 @@ const ContentLibrary = ({
   const links = externalLinks || fetchedLinks;
   const isLoading = externalLoading !== undefined ? externalLoading : isFetchLoading;
 
-  // Filter links when active tag, platform, or search query changes
+  // Filter and sort links when changes occur
   useEffect(() => {
     // Skip if links aren't loaded yet
     if (!links || links.length === 0) return;
     
+    // Make a copy of links to work with
     let result = [...links];
+    
+    // Filter by platform tab if it's not "all"
+    if (activeTab !== "all") {
+      result = result.filter(link => link.platform.toLowerCase() === activeTab.toLowerCase());
+    }
     
     // Apply tag filter if active
     if (activeTagFilter) {
@@ -61,27 +68,26 @@ const ContentLibrary = ({
       const query = searchQuery.toLowerCase().trim();
       
       result = result.filter(link => {
-        // For debugging
         const matchesTitle = link.title && link.title.toLowerCase().includes(query);
         const matchesUrl = link.url && link.url.toLowerCase().includes(query);
         const matchesTags = link.tags.some(tag => tag.name.toLowerCase().includes(query));
         const matchesCategory = link.category && link.category.toLowerCase().includes(query);
         
         return (
-          // Search in title
-          matchesTitle ||
-          // Search in URL
-          matchesUrl ||
-          // Search in tags
-          matchesTags ||
-          // Search in category
-          matchesCategory
+          matchesTitle || matchesUrl || matchesTags || matchesCategory
         );
       });
     }
     
+    // Apply sorting
+    result.sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
+    });
+    
     setFilteredLinks(result);
-  }, [links, activeTagFilter, searchQuery]);
+  }, [links, activeTab, activeTagFilter, searchQuery, sortOrder]);
 
   // Calculate all unique platforms and their counts
   const calculatePlatformCounts = () => {
@@ -121,10 +127,13 @@ const ContentLibrary = ({
   };
 
   // Handle sort change
-  const handleSortChange = (sort: string) => {
+  const handleSortChange = () => {
+    // Toggle between newest and oldest
+    const newSortOrder = sortOrder === "newest" ? "oldest" : "newest";
+    setSortOrder(newSortOrder);
     toast({
       title: "Sorting applied",
-      description: `Sorted by ${sort}`,
+      description: `Sorted by ${newSortOrder === "newest" ? "newest" : "oldest"}`,
     });
   };
 
@@ -175,26 +184,44 @@ const ContentLibrary = ({
           {/* Filter and Sort Controls - Made more prominent */}
           <div className="flex flex-wrap gap-2 ml-auto">
             <Button
-              variant="secondary"
+              variant={activeTagFilter ? "primary" : "secondary"}
               size="sm"
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium shadow-sm"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium shadow-sm relative"
+              onClick={() => activeTagFilter && clearTagFilter()}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
                 <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
               </svg>
-              <span>Filter</span>
+              <span>{activeTagFilter ? `Filtered: ${activeTagFilter}` : "Filter"}</span>
+              {activeTagFilter && (
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="14" 
+                  height="14" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  className="ml-1"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              )}
             </Button>
             
             <Button
               variant="secondary"
               size="sm"
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium shadow-sm"
-              onClick={() => handleSortChange("Newest")}
+              onClick={() => handleSortChange()}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
                 <path d="M3 9l4-4 4 4M7 5v14M21 15l-4 4-4-4M17 19V5"/>
               </svg>
-              <span>Sort: Newest</span>
+              <span>Sort: {sortOrder === "newest" ? "Newest" : "Oldest"}</span>
             </Button>
           </div>
         </div>
