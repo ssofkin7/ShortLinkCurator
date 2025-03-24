@@ -30,6 +30,9 @@ export interface IStorage {
   getTagsByLinkId(linkId: number): Promise<Tag[]>;
   deleteTag(id: number): Promise<void>;
   updateLinkCategory(linkId: number, category: string): Promise<void>;
+  
+  // AI Cache operations
+  getLinkByUrl(url: string): Promise<Link | undefined>;
 }
 
 // In-memory implementation for development/testing
@@ -192,6 +195,10 @@ export class MemStorage implements IStorage {
       return { ...link, tags: linkTags };
     }));
   }
+  
+  async getLinkByUrl(url: string): Promise<Link | undefined> {
+    return Array.from(this.links.values()).find(link => link.url === url);
+  }
 }
 
 // Database implementation using Supabase
@@ -319,6 +326,12 @@ export class DatabaseStorage implements IStorage {
       const linkTags = await this.getTagsByLinkId(link.id);
       return { ...link, tags: linkTags };
     }));
+  }
+  
+  async getLinkByUrl(url: string): Promise<Link | undefined> {
+    // This method is used for AI caching to check if we've already processed this URL
+    const [link] = await db.select().from(links).where(eq(links.url, url));
+    return link;
   }
 }
 

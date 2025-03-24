@@ -166,8 +166,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Analyze link using OpenAI
-      const metadata = await analyzeVideoContent(url);
+      // AI Caching: Check if this URL has been processed before by any user
+      // We can reuse the metadata to avoid redundant AI API calls
+      const existingLink = await storage.getLinkByUrl(url);
+      let metadata;
+      
+      if (existingLink && existingLink.metadata) {
+        // Use the cached metadata - this saves an OpenAI API call
+        console.log("Using cached metadata for URL:", url);
+        metadata = existingLink.metadata as unknown as LinkMetadata;
+        
+        // Add the thumbnail from the existing link if available
+        if (existingLink.thumbnail_url) {
+          metadata.thumbnail_url = existingLink.thumbnail_url;
+        }
+      } else {
+        // No cache hit, analyze link using OpenAI
+        console.log("No cache found, analyzing content for URL:", url);
+        metadata = await analyzeVideoContent(url);
+      }
       
       // Create the link
       const link = await storage.createLink({

@@ -1,0 +1,133 @@
+2. Optimize AI API Usage (If Using a Third-Party AI Service)
+If you’re using a third-party AI service (e.g., OpenAI) for tagging and recommendations, these APIs often charge based on token usage (words/characters processed). Here’s how to reduce those costs:
+
+Minimize Input Tokens
+AI APIs like OpenAI charge based on the number of tokens in the input and output. Since you’re passing video titles (and possibly author names) to the AI for tagging, optimize the input to use fewer tokens.
+Example: Instead of sending the full title "How Sabrina Carpenter OPENS her Concert 🎤🔥" (10 tokens), trim unnecessary words or emojis: "Sabrina Carpenter Concert" (4 tokens).
+Implementation: Preprocess the title in your Edge Function before sending it to the AI:
+javascript
+
+Collapse
+
+Wrap
+
+Copy
+function optimizeTitleForAI(title) {
+  return title
+    .replace(/🎤|🔥/g, '') // Remove emojis
+    .replace(/\b(how|her|opens)\b/gi, '') // Remove filler words
+    .trim();
+}
+
+const optimizedTitle = optimizeTitleForAI("How Sabrina Carpenter OPENS her Concert 🎤🔥");
+// Result: "Sabrina Carpenter Concert"
+Impact: Can reduce input tokens by 20-40%, lowering AI API costs proportionally.
+Limit Output Tokens
+Set a max_tokens parameter to limit the AI’s response length. For tagging, you don’t need a verbose response—just a list of tags.
+Example: Set max_tokens to 50 to ensure the AI returns a concise list of tags (e.g., "music, concert, sabrina carpenter").
+Implementation (Using OpenAI API as an example):
+javascript
+
+Collapse
+
+Wrap
+
+Copy
+const response = await openai.createCompletion({
+  model: 'text-davinci-003',
+  prompt: `Generate tags for this video title: "${optimizedTitle}"`,
+  max_tokens: 50,
+});
+const tags = response.data.choices[0].text.split(',').map(tag => tag.trim());
+Impact: Reduces output tokens by 30-50%, directly lowering costs.
+Cache AI Results
+Cache AI-generated tags in Supabase to avoid reprocessing the same title multiple times. This is especially useful for popular videos that multiple users might save.
+Implementation: Add a tags column to the links table and check for existing tags before calling the AI:
+javascript
+
+Collapse
+
+Wrap
+
+Copy
+const { data: existingLink } = await supabase
+  .from('links')
+  .select('tags')
+  .eq('title', title)
+  .single();
+
+let tags = existingLink?.tags;
+if (!tags) {
+  tags = await generateTagsWithAI(title); // Call AI
+  await supabase
+    .from('links')
+    .update({ tags })
+    .eq('url', url);
+}
+Impact: Can reduce AI API calls by 40-60%, depending on how often users save the same videos.
+Use a Cheaper AI Model
+If you’re using a premium AI model (e.g., OpenAI’s GPT-4), switch to a cheaper one (e.g., GPT-3.5  for simple tasks like tagging.
+Example: GPT-4 might cost $30 per million tokens, while GPT-3.5 costs $2 per million tokens—a 15x cost difference.
+Impact: Switching models can reduce AI costs by 50-90%, depending on the model.
+3. Leverage neon to Reduce API Calls
+Supabase can help offload some of the work from external APIs, reducing charges further:
+
+Store Thumbnails in neon Storage
+Instead of relying on oEmbed’s thumbnail URLs (which might expire or require repeated fetches), download the thumbnail once and store it in neon Storage. This ensures you only fetch the thumbnail once per link.
+Implementation: In your Edge Function, after fetching the thumbnail URL, download and store it:
+javascript
+
+Collapse
+
+Wrap
+
+Copy
+let thumbnail = 'https://yourapp.com/default-thumbnail.jpg';
+if (oembedResponse.thumbnail_url) {
+  const imageResponse = await axios.get(oembedResponse.thumbnail_url, { responseType: 'arraybuffer' });
+  const imageBuffer = Buffer.from(imageResponse.data, 'binary');
+  const { data: storageData } = await supabase.storage
+    .from('thumbnails')
+    .upload(`${userId}/${Date.now()}.jpg`, imageBuffer, { contentType: 'image/jpeg' });
+  thumbnail = supabase.storage.from('thumbnails').getPublicUrl(storageData.path).data.publicUrl;
+}
+Impact: Eliminates repeated oEmbed calls for thumbnails, potentially saving 10-20% on API charges.
+Precompute Recommendations
+Instead of calling the AI API every time a user loads the "Recommended for You" section, precompute recommendations periodically (e.g., once a day) and store them in neon.
+Implementation: Create a recommendations table and run a cron job to generate recommendations:
+sql
+
+Collapse
+
+Wrap
+
+Copy
+CREATE TABLE recommendations (
+  user_id UUID REFERENCES auth.users(id),
+  link_id UUID REFERENCES links(id),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+In a Supabase Edge Function or cron job:
+javascript
+
+Collapse
+
+Wrap
+
+Copy
+const { data: userLinks } = await supabase
+  .from('links')
+  .select('tags')
+  .eq('user_id', userId);
+
+const commonTags = userLinks.flatMap(link => link.tags).filter(tag => tag);
+const recommendedLinks = await supabase
+  .from('links')
+  .select('id')
+  .in('tags', commonTags)
+  .neq('user_id', userId); // Exclude user’s own links
+
+await supabase
+  .from('recommendations')
+  .insert(recommendedLinks.map(link => ({ user_id: userId, link_id: link.id })));
+Impact: Reduces AI API calls for recommendations by 80-90%, as they’re only generated periodically.

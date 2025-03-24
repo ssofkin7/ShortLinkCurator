@@ -23,6 +23,17 @@ interface LinkMetadata {
   thumbnail_url?: string;
 }
 
+/**
+ * Optimize title for AI processing to reduce token usage
+ */
+function optimizeTitleForAI(title: string): string {
+  return title
+    .replace(/[😍🔥🎤👀💯]/g, '') // Remove common emojis
+    .replace(/\b(how|her|opens|this|that|with|the|and|or|for|is|are|was|were|have|has|had|a|an|of|in|on|at|to|by|it|its)\b/gi, '') // Remove filler words
+    .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+    .trim();
+}
+
 // Extract metadata from video title and description
 export async function analyzeVideoContent(
   url: string, 
@@ -58,28 +69,30 @@ export async function analyzeVideoContent(
       }
     }
     
+    // Use the original title for display, but optimize it for the AI to reduce tokens
+    const optimizedTitle = optimizeTitleForAI(title || defaultTitle);
+    
+    // Shorten the prompt to reduce input tokens
     const prompt = `
-      Analyze this ${platform} short-form video content based on the URL, title, and description.
+      Analyze: ${platform} video
+      Title: ${optimizedTitle}
       URL: ${url}
-      Title: ${title || defaultTitle}
-      Description: ${description}
       
-      Return a JSON object with the following fields:
-      - title: ${title ? "Use this exact title: " + title : "The most likely title for this content. Be descriptive and concise (15-50 characters)."} 
-      - category: A single category that best describes this content (e.g., "Fitness", "Cooking", "Technology", "Fashion", etc.)
-      - tags: An array of 3-5 relevant tags for this content
-      - duration: If you can detect it, the duration of the video (otherwise null)
-      
-      Return ONLY the JSON object, no additional text.
+      Return JSON with:
+      - title: ${title ? "Use exactly: " + title : "Brief descriptive title"} 
+      - category: Single best category
+      - tags: 3-5 relevant tags
+      - duration: If detectable (null if not)
     `;
 
     const response = await openai.chat.completions.create({
       model: MODEL,
       messages: [
-        { role: "system", content: "You are a content analysis assistant that categorizes short-form video content." },
+        { role: "system", content: "You categorize short-form videos concisely." },
         { role: "user", content: prompt }
       ],
-      response_format: { type: "json_object" }
+      response_format: { type: "json_object" },
+      max_tokens: 150 // Limit output tokens
     });
 
     try {
@@ -127,28 +140,31 @@ export async function generateRecommendations(
   savedTags: string[]
 ): Promise<{ title: string; platform: PlatformType; category: string; reason: string }[]> {
   try {
+    // Limit input tokens by taking only the most used categories and tags
+    const topCategories = savedCategories.slice(0, 3);
+    const topTags = savedTags.slice(0, 5);
+    
+    // Create a shorter, more concise prompt
     const prompt = `
-      Based on a user's saved video preferences, suggest 3 short-form videos they might enjoy.
+      Suggest 3 short videos based on:
+      Categories: ${topCategories.join(', ')}
+      Tags: ${topTags.join(', ')}
       
-      User's preferred categories: ${savedCategories.join(', ')}
-      User's preferred tags: ${savedTags.join(', ')}
-      
-      Return a JSON array with 3 video suggestions, each with:
-      - title: An engaging, realistic title
-      - platform: Either "tiktok", "youtube", or "instagram"
-      - category: The main category
-      - reason: Why this is recommended based on their preferences
-      
-      Make the suggestions varied but relevant. Return ONLY the JSON array, no additional text.
+      Return only JSON array with 3 suggestions:
+      - title: brief engaging title
+      - platform: "tiktok", "youtube", or "instagram"
+      - category: main category
+      - reason: why it's recommended (brief)
     `;
 
     const response = await openai.chat.completions.create({
       model: MODEL,
       messages: [
-        { role: "system", content: "You are a content recommendation system that provides personalized video suggestions." },
+        { role: "system", content: "You provide concise video recommendations." },
         { role: "user", content: prompt }
       ],
-      response_format: { type: "json_object" }
+      response_format: { type: "json_object" },
+      max_tokens: 200 // Limit output tokens
     });
 
     try {
