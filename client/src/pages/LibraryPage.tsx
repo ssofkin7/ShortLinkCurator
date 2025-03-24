@@ -23,10 +23,6 @@ export default function LibraryPage() {
     queryKey: ["/api/links"],
   });
 
-  const filteredLinks = activeTab === "all" 
-    ? links
-    : links.filter(link => link.platform.toLowerCase() === activeTab);
-
   const handleTabChange = (value: string) => {
     setActiveTab(value);
   };
