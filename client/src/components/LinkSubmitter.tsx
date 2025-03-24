@@ -46,12 +46,12 @@ const LinkSubmitter = ({ onSubmit }: LinkSubmitterProps) => {
       return;
     }
 
-    // Check if URL is from a supported platform
-    const isValidUrl = /tiktok\.com|youtube\.com|youtu\.be|instagram\.com|facebook\.com|fb\.watch|vimeo\.com/i.test(url);
+    // Check if URL is valid (all platforms are now supported)
+    const isValidUrl = /^https?:\/\//i.test(url);
     if (!isValidUrl) {
       toast({
-        title: "Unsupported link",
-        description: "Only TikTok, YouTube, Instagram, Facebook, and Vimeo links are supported",
+        title: "Invalid URL",
+        description: "Please enter a valid URL starting with http:// or https://",
         variant: "destructive",
       });
       return;
@@ -76,7 +76,7 @@ const LinkSubmitter = ({ onSubmit }: LinkSubmitterProps) => {
             <Input
               type="text"
               id="linkInput"
-              placeholder="Paste video link from YouTube, TikTok, Instagram, Facebook, etc."
+              placeholder="Paste any content link (videos, social media posts, articles, etc.)"
               className="w-full pl-10 pr-4 py-3"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
@@ -97,7 +97,7 @@ const LinkSubmitter = ({ onSubmit }: LinkSubmitterProps) => {
             <line x1="12" y1="16" x2="12" y2="12"></line>
             <line x1="12" y1="8" x2="12.01" y2="8"></line>
           </svg>
-          <span>Supports TikTok, YouTube, Instagram, Facebook, and Vimeo links</span>
+          <span>Supports all content links including social media, videos, articles, and more</span>
         </div>
       </CardContent>
     </Card>
