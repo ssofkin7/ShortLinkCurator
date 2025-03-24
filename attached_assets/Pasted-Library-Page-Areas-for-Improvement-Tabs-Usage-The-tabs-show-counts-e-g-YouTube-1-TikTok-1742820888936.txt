@@ -1,0 +1,39 @@
+Library Page
+
+Areas for Improvement:
+
+Tabs Usage: The tabs show counts (e.g., YouTube: 1, TikTok: 0), but the empty tabs (TikTok, Instagram) feel redundant with only one link. Consider hiding empty tabs or adding placeholder text like "Save a TikTok link to see it here!"
+Filter/Sort Placement: The "Filter" and "Sort: Newest" dropdowns are on the far right, which might be missed. Move them closer to the tabs or make them more visually distinct (e.g., button styles instead of dropdowns).
+Empty State: If the library is empty, there should be a friendly empty state message (e.g., "No links yet—paste one above to get started!").
+Tag Interaction: The tags on the link card are clickable (e.g., "music"), but it’s not clear they filter the library. Add a tooltip or label like "Click to filter by tag."
+3. Tags Page
+Layout Overview:
+
+Top: Search bar for tags and a "Create Tag" button.
+Middle: List of tags ("Sabrina Carpenter," "concert," etc.) with usage bars, "View Content," and "Delete" buttons.
+Sidebar: Same as Home.
+What Works Well:
+
+The tag list is clean and functional, with usage bars providing a quick visual of tag frequency.
+The "Create Tag" button is prominent, encouraging manual tag creation alongside AI tags.
+The "View Content" and "Delete" buttons are intuitive for managing tags.
+Areas for Improvement:
+
+Tag Correction: There’s no "Edit" button to rename tags (e.g., change "pop" to "pop music"). Add an "Edit" button next to "View Content" and "Delete" to fully support your tag correction feature.
+Tag Previews: The page would be more engaging if each tag showed a preview of associated content (e.g., thumbnails of links tagged "music").
+Search Bar Usage: The "Search tags…" bar is fine, but it could be more useful if it also suggested tags as the user types (e.g., autocomplete "mu" to "music").
+Visual Appeal: The usage bars are a bit plain. Add color (e.g., blue for the bar, gray for the background) to make them pop.
+4. Analytics Page
+Layout Overview:
+
+Top: Search bar (same as others).
+
+Middle: "Analytics Dashboard" with:
+
+Areas for Improvement:
+
+Charts: The placeholders ("Charts feature coming soon") make the page feel unfinished. Prioritize adding these charts (e.g., a line graph for content activity, a pie chart for platform distribution) using a library like Chart.js. 
+Top Categories: The "Top Categories" section is empty. Populate it with the tags already in use (e.g., "music," "pop") to show value immediately.
+Usage Statistics: This section is also empty. Add basic stats like "Most Active Day" or "Average Links Saved per Week" to make it more engaging.
+Visual Appeal: The analytics page is very text-heavy. Add icons or colors to differentiate sections (e.g., a YouTube icon next to "YouTube: 1").
+Pro Feature Tease: Since analytics could be a premium feature, add a subtle "Upgrade to Pro for More Insights" prompt in the empty sections.

@@ -18,9 +18,10 @@ interface ContentItemProps {
   link: LinkWithTags;
   viewMode: "grid" | "list";
   onEditTags: () => void;
+  onTagClick?: (tagName: string) => void;
 }
 
-const ContentItem = ({ link, viewMode, onEditTags }: ContentItemProps) => {
+const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProps) => {
   const { toast } = useToast();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -130,8 +131,17 @@ const ContentItem = ({ link, viewMode, onEditTags }: ContentItemProps) => {
           <div className="flex items-center gap-2">
             <div className="flex flex-wrap gap-1 mr-1">
               {link.tags.slice(0, 3).map((tag) => (
-                <Badge key={tag.id} variant="outline" className="bg-blue-100 text-blue-800 text-xs border-blue-200">
+                <Badge 
+                  key={tag.id} 
+                  variant="outline" 
+                  className="bg-blue-100 text-blue-800 text-xs border-blue-200 cursor-pointer hover:bg-blue-200 transition-colors group relative"
+                  title="Click to filter by this tag"
+                  onClick={() => onTagClick && onTagClick(tag.name)}
+                >
                   {tag.name}
+                  <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                    Filter by tag
+                  </span>
                 </Badge>
               ))}
               {link.tags.length > 3 && (
@@ -214,9 +224,14 @@ const ContentItem = ({ link, viewMode, onEditTags }: ContentItemProps) => {
               <Badge 
                 key={tag.id} 
                 variant="outline" 
-                className="bg-blue-100 text-blue-800 text-xs border-blue-200"
+                className="bg-blue-100 text-blue-800 text-xs border-blue-200 cursor-pointer hover:bg-blue-200 transition-colors group relative"
+                title="Click to filter by this tag"
+                onClick={() => onTagClick && onTagClick(tag.name)}
               >
                 {tag.name}
+                <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                  Filter by tag
+                </span>
               </Badge>
             ))}
           </div>
