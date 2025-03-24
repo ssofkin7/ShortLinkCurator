@@ -11,3 +11,24 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
 }
+
+@layer components {
+  /* Custom scrollbar for tabs */
+  .tabs-scrollbar {
+    @apply pb-1 overflow-x-auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(203, 213, 225, 0.8) transparent;
+  }
+
+  .tabs-scrollbar::-webkit-scrollbar {
+    @apply h-1.5;
+  }
+
+  .tabs-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  .tabs-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 rounded-full hover:bg-slate-400 transition-colors;
+  }
+}

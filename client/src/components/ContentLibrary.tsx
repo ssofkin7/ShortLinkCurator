@@ -259,7 +259,7 @@ const ContentLibrary = ({
 
       {/* Content Tabs */}
       <div className="mb-6 border-b border-gray-200">
-        <div className="flex -mb-px overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent pb-1">
+        <div className="flex -mb-px tabs-scrollbar">
           <Button 
             variant="link" 
             className={`px-4 py-2.5 text-sm whitespace-nowrap ${activeTab === 'all' ? 'border-b-2 border-blue-500 text-blue-600 font-medium' : 'border-b-2 border-transparent text-gray-500 hover:text-gray-700'}`}
@@ -386,7 +386,7 @@ const ContentLibrary = ({
               <Button 
                 key={platform}
                 variant="link" 
-                className={`px-4 py-3 text-sm ${activeTab === platform ? 'border-b-2 border-blue-500 text-blue-600 font-medium' : 'border-b-2 border-transparent text-gray-500 hover:text-gray-700'}`}
+                className={`px-4 py-2.5 text-sm whitespace-nowrap ${activeTab === platform ? 'border-b-2 border-blue-500 text-blue-600 font-medium' : 'border-b-2 border-transparent text-gray-500 hover:text-gray-700'}`}
                 onClick={() => onTabChange(platform)}
               >
                 {getTabIcon()}
