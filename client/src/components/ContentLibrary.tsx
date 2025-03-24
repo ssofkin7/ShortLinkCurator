@@ -184,7 +184,7 @@ const ContentLibrary = ({
           {/* Filter and Sort Controls - Made more prominent */}
           <div className="flex flex-wrap gap-2 ml-auto">
             <Button
-              variant={activeTagFilter ? "primary" : "secondary"}
+              variant={activeTagFilter ? "default" : "secondary"}
               size="sm"
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium shadow-sm relative"
               onClick={() => activeTagFilter && clearTagFilter()}
@@ -524,7 +524,10 @@ const ContentLibrary = ({
               </div>
             )}
 
-            <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'} gap-5`}>
+            <div className={`grid ${viewMode === 'grid' 
+              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6' 
+              : 'grid-cols-1 gap-4'}`}
+            >
               {(searchQuery.trim() || activeTagFilter ? filteredLinks : links).map((link) => (
                 <ContentItem 
                   key={link.id} 
@@ -540,6 +543,33 @@ const ContentLibrary = ({
                   }}
                 />
               ))}
+              
+              {/* Display "No results" for filtered content when no matches found */}
+              {(searchQuery.trim() || activeTagFilter) && filteredLinks.length === 0 && (
+                <div className="col-span-full text-center py-16 bg-gray-50 rounded-lg border border-gray-200">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto text-gray-400 mb-3">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.3-4.3"></path>
+                  </svg>
+                  <h3 className="text-lg font-medium text-gray-900 mb-1">No results found</h3>
+                  <p className="text-gray-500 mb-4">
+                    {searchQuery && activeTagFilter
+                      ? `No content matching "${searchQuery}" with tag "${activeTagFilter}"`
+                      : searchQuery
+                      ? `No content matching "${searchQuery}"`
+                      : `No content with tag "${activeTagFilter}"`}
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setSearchQuery('');
+                      setActiveTagFilter(null);
+                    }}
+                  >
+                    Clear filters
+                  </Button>
+                </div>
+              )}
             </div>
           </>
         )}
