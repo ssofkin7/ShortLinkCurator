@@ -2,7 +2,7 @@
  * Shared utilities for platform detection and URL operations
  */
 
-export type PlatformType = 'tiktok' | 'youtube' | 'instagram';
+export type PlatformType = 'tiktok' | 'youtube' | 'instagram' | 'facebook' | 'vimeo';
 
 /**
  * Detects the platform from a given URL
@@ -10,10 +10,14 @@ export type PlatformType = 'tiktok' | 'youtube' | 'instagram';
 export function detectPlatform(url: string): PlatformType | null {
   if (url.includes('tiktok.com')) {
     return 'tiktok';
-  } else if (url.includes('youtube.com/shorts') || url.includes('youtu.be')) {
+  } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
     return 'youtube';
-  } else if (url.includes('instagram.com/reel')) {
+  } else if (url.includes('instagram.com')) {
     return 'instagram';
+  } else if (url.includes('facebook.com') || url.includes('fb.watch')) {
+    return 'facebook';
+  } else if (url.includes('vimeo.com')) {
+    return 'vimeo';
   }
   return null;
 }
@@ -63,6 +67,45 @@ export function extractDefaultTitleFromUrl(url: string): string {
       
       if (reelMatch && reelMatch[1]) {
         return `Instagram Reel #${reelMatch[1]}`;
+      }
+      
+      // Regular Instagram post
+      const postMatch = url.match(/p\/([^\/]+)/);
+      if (postMatch && postMatch[1]) {
+        return `Instagram Post #${postMatch[1]}`;
+      }
+    }
+    
+    // Facebook
+    if (url.includes('facebook.com') || url.includes('fb.watch')) {
+      // fb.watch links
+      if (url.includes('fb.watch/')) {
+        const watchMatch = url.match(/fb\.watch\/([^\/]+)/);
+        if (watchMatch && watchMatch[1]) {
+          return `Facebook Video #${watchMatch[1]}`;
+        }
+      }
+      
+      // facebook.com/watch links
+      if (url.includes('facebook.com/watch')) {
+        const videoParam = new URL(url).searchParams.get('v');
+        if (videoParam) {
+          return `Facebook Video #${videoParam}`;
+        }
+      }
+      
+      // Regular facebook links with video ID
+      const videoMatch = url.match(/videos\/(\d+)/);
+      if (videoMatch && videoMatch[1]) {
+        return `Facebook Video #${videoMatch[1]}`;
+      }
+    }
+    
+    // Vimeo
+    if (url.includes('vimeo.com')) {
+      const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+      if (vimeoMatch && vimeoMatch[1]) {
+        return `Vimeo Video #${vimeoMatch[1]}`;
       }
     }
     

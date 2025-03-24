@@ -26,6 +26,10 @@ export async function extractVideoMetadata(url: string): Promise<VideoMetadata> 
         return await extractTikTokMetadata(url);
       case 'instagram':
         return await extractInstagramMetadata(url);
+      case 'facebook':
+        return await extractFacebookMetadata(url);
+      case 'vimeo':
+        return await extractVimeoMetadata(url);
       default:
         return { title: extractDefaultTitleFromUrl(url) };
     }
@@ -187,6 +191,115 @@ async function extractInstagramMetadata(url: string): Promise<VideoMetadata> {
     return { title: extractDefaultTitleFromUrl(url) };
   } catch (error) {
     console.error('Instagram metadata extraction error:', error);
+    return { title: extractDefaultTitleFromUrl(url) };
+  }
+}
+
+/**
+ * Attempts to extract metadata from a Facebook video.
+ */
+async function extractFacebookMetadata(url: string): Promise<VideoMetadata> {
+  try {
+    // Try Facebook oEmbed (requires access token for production use)
+    const oembedUrl = `https://graph.facebook.com/v18.0/oembed_video?url=${encodeURIComponent(url)}&format=json`;
+    
+    try {
+      const response = await axios.get(oembedUrl);
+      if (response.data) {
+        let metadata: VideoMetadata = { title: extractDefaultTitleFromUrl(url) };
+        
+        if (response.data.title) {
+          metadata.title = response.data.title;
+        }
+        
+        if (response.data.thumbnail_url) {
+          metadata.thumbnail_url = response.data.thumbnail_url;
+        }
+        
+        return metadata;
+      }
+    } catch (oembedError) {
+      console.log('Facebook oEmbed failed, using default metadata extraction');
+    }
+    
+    // Extract video ID for thumbnail if possible
+    let videoId = null;
+    
+    // Handle fb.watch URLs
+    if (url.includes('fb.watch')) {
+      // Not much we can do without API to resolve the short URL
+      return { title: extractDefaultTitleFromUrl(url) };
+    }
+    
+    // Handle regular facebook.com URLs with video ID
+    const videoMatch = url.match(/videos\/(\d+)/);
+    if (videoMatch && videoMatch[1]) {
+      videoId = videoMatch[1];
+      
+      // Note: Facebook doesn't allow thumbnail access without an access token
+      // So we can only return the title
+      return { 
+        title: `Facebook Video #${videoId}`,
+      };
+    }
+    
+    return { title: extractDefaultTitleFromUrl(url) };
+  } catch (error) {
+    console.error('Facebook metadata extraction error:', error);
+    return { title: extractDefaultTitleFromUrl(url) };
+  }
+}
+
+/**
+ * Attempts to extract metadata from a Vimeo video.
+ */
+async function extractVimeoMetadata(url: string): Promise<VideoMetadata> {
+  try {
+    // Vimeo has a reliable oEmbed endpoint
+    const oembedUrl = `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(url)}`;
+    
+    try {
+      const response = await axios.get(oembedUrl);
+      if (response.data) {
+        let metadata: VideoMetadata = { title: extractDefaultTitleFromUrl(url) };
+        
+        if (response.data.title) {
+          metadata.title = response.data.title;
+        }
+        
+        if (response.data.thumbnail_url) {
+          metadata.thumbnail_url = response.data.thumbnail_url;
+        }
+        
+        return metadata;
+      }
+    } catch (oembedError) {
+      console.log('Vimeo oEmbed failed, falling back to direct API');
+      
+      // Try Vimeo's direct API if oEmbed fails
+      const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+      if (vimeoMatch && vimeoMatch[1]) {
+        const videoId = vimeoMatch[1];
+        
+        try {
+          const apiUrl = `https://api.vimeo.com/videos/${videoId}`;
+          const response = await axios.get(apiUrl);
+          
+          if (response.data) {
+            return {
+              title: response.data.name || extractDefaultTitleFromUrl(url),
+              thumbnail_url: response.data.pictures?.sizes?.[0]?.link
+            };
+          }
+        } catch (apiError) {
+          console.log('Vimeo API failed, using default title');
+        }
+      }
+    }
+    
+    return { title: extractDefaultTitleFromUrl(url) };
+  } catch (error) {
+    console.error('Vimeo metadata extraction error:', error);
     return { title: extractDefaultTitleFromUrl(url) };
   }
 }
