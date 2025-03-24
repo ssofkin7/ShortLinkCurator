@@ -33,6 +33,8 @@ import TopBar from "@/components/TopBar";
 import MobileNavigation from "@/components/MobileNavigation";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Camera } from "lucide-react";
 
 const profileSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
@@ -255,15 +257,51 @@ export default function ProfilePage() {
                           className="space-y-4"
                         >
                           <div className="flex items-center space-x-4 mb-6">
-                            <div className="h-20 w-20 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xl font-semibold">
-                              {user?.username?.charAt(0).toUpperCase() || "U"}
+                            <div className="relative">
+                              <div className="h-20 w-20 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xl font-semibold overflow-hidden">
+                                {user?.avatar_url ? (
+                                  <img 
+                                    src={user.avatar_url} 
+                                    alt={`${user.username}'s avatar`}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <span>{user?.username?.charAt(0).toUpperCase() || "U"}</span>
+                                )}
+                              </div>
+                              <div className="absolute -bottom-1 -right-1">
+                                <div className="p-1 bg-white rounded-full shadow-md">
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button 
+                                          variant="ghost" 
+                                          size="icon" 
+                                          className="h-8 w-8 rounded-full bg-primary hover:bg-primary/90 text-white"
+                                          onClick={() => {
+                                            // Show toast about avatar feature
+                                            toast({
+                                              title: "Feature coming soon",
+                                              description: "Avatar upload will be available in the next update.",
+                                              variant: "default"
+                                            });
+                                          }}
+                                        >
+                                          <Camera className="h-4 w-4" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent side="right">
+                                        Change avatar
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                </div>
+                              </div>
                             </div>
                             <div>
-                              <Button variant="outline" size="sm">
-                                Change Avatar
-                              </Button>
+                              <h3 className="font-medium">{user?.display_name || user?.username}</h3>
                               <p className="text-xs text-gray-500 mt-1">
-                                JPG, GIF or PNG. 1MB max.
+                                Personalize your profile with a custom avatar
                               </p>
                             </div>
                           </div>

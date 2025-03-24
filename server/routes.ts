@@ -148,6 +148,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
       
+      // Check if username is changed and already exists
+      if (username && username !== user.username) {
+        const existingUser = await storage.getUserByUsername(username);
+        if (existingUser) {
+          return res.status(400).json({ 
+            message: "Username already taken. Please choose another username.",
+            field: "username"
+          });
+        }
+      }
+      
+      // Check if email is changed and already exists
+      if (email && email !== user.email) {
+        const existingUser = await storage.getUserByEmail(email);
+        if (existingUser) {
+          return res.status(400).json({ 
+            message: "Email already in use. Please use another email address.",
+            field: "email"
+          });
+        }
+      }
+      
       // Update profile
       const updatedUser = await storage.updateUserProfile(userId, {
         username,

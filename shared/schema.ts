@@ -9,6 +9,7 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   bio: text("bio"),
   display_name: text("display_name"),
+  avatar_url: text("avatar_url"),
   notification_preferences: json("notification_preferences").$type<Record<string, boolean>>(),
   created_at: timestamp("created_at").defaultNow().notNull(),
   is_premium: boolean("is_premium").default(false).notNull(),
