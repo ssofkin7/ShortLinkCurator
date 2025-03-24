@@ -192,7 +192,7 @@ export default function AnalyticsPage() {
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart
                         data={activityData}
-                        margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                        margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                         <XAxis 
@@ -256,7 +256,7 @@ export default function AnalyticsPage() {
                 ) : (
                   <div className="h-[250px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
+                      <PieChart margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                         <Pie
                           data={platformData}
                           cx="50%"
@@ -324,7 +324,7 @@ export default function AnalyticsPage() {
                       <BarChart
                         data={categoryData}
                         layout="vertical"
-                        margin={{ top: 5, right: 5, left: 35, bottom: 5 }}
+                        margin={{ top: 5, right: 10, left: 80, bottom: 5 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} opacity={0.3} />
                         <XAxis type="number" tick={{ fontSize: 12 }} />
@@ -332,7 +332,7 @@ export default function AnalyticsPage() {
                           dataKey="name" 
                           type="category" 
                           tick={{ fontSize: 12 }}
-                          width={100}
+                          width={70}
                         />
                         <Tooltip
                           formatter={(value: number) => [`${value} items`, "Content Count"]}
