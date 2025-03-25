@@ -56,9 +56,13 @@ const ContentLibrary = ({
     
     // Apply tag filter if active
     if (activeTagFilter) {
-      result = result.filter(link => 
-        link.tags.some(tag => tag.name.toLowerCase() === activeTagFilter.toLowerCase())
-      );
+      result = result.filter(link => {
+        // Check if link.tags is an array before using some()
+        if (link.tags && Array.isArray(link.tags)) {
+          return link.tags.some(tag => tag.name.toLowerCase() === activeTagFilter.toLowerCase());
+        }
+        return false;
+      });
     }
     
     // Apply search filter if there's a search query
@@ -68,7 +72,8 @@ const ContentLibrary = ({
       result = result.filter(link => {
         const matchesTitle = link.title && link.title.toLowerCase().includes(query);
         const matchesUrl = link.url && link.url.toLowerCase().includes(query);
-        const matchesTags = link.tags.some(tag => tag.name.toLowerCase().includes(query));
+        const matchesTags = link.tags && Array.isArray(link.tags) && 
+          link.tags.some(tag => tag.name.toLowerCase().includes(query));
         const matchesCategory = link.category && link.category.toLowerCase().includes(query);
         
         return (
