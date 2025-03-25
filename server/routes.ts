@@ -691,31 +691,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/custom-tabs/:tabId/links/:linkId", authenticate, async (req: Request, res: Response) => {
     try {
+      console.log(`Received request to add link to tab. Params:`, req.params);
+      
       const tabId = parseInt(req.params.tabId);
       const linkId = parseInt(req.params.linkId);
       const userId = req.session.userId as number;
       
+      console.log(`Parsed IDs: tabId=${tabId}, linkId=${linkId}, userId=${userId}`);
+      
       if (isNaN(tabId) || isNaN(linkId)) {
+        console.error(`Invalid IDs: tabId=${tabId}, linkId=${linkId}`);
         return res.status(400).json({ message: "Invalid tab or link ID" });
       }
       
       // Verify tab belongs to user
+      console.log(`Fetching custom tab with ID ${tabId}`);
       const customTab = await storage.getCustomTabById(tabId);
-      if (!customTab || customTab.user_id !== userId) {
+      console.log(`Custom tab lookup result:`, customTab);
+      
+      if (!customTab) {
+        console.error(`Tab with ID ${tabId} not found`);
+        return res.status(404).json({ message: "Tab not found" });
+      }
+      
+      if (customTab.user_id !== userId) {
+        console.error(`Tab belongs to user ${customTab.user_id}, not requester ${userId}`);
         return res.status(403).json({ message: "Unauthorized access to this tab" });
       }
       
       // Verify link belongs to user
+      console.log(`Fetching link with ID ${linkId}`);
       const link = await storage.getLinkById(linkId);
-      if (!link || link.user_id !== userId) {
+      console.log(`Link lookup result:`, link ? { ...link, tags: link.tags?.length || 0 } : null);
+      
+      if (!link) {
+        console.error(`Link with ID ${linkId} not found`);
+        return res.status(404).json({ message: "Link not found" });
+      }
+      
+      if (link.user_id !== userId) {
+        console.error(`Link belongs to user ${link.user_id}, not requester ${userId}`);
         return res.status(403).json({ message: "Unauthorized access to this link" });
       }
       
+      // All validations passed, add link to tab
+      console.log(`Adding link ${linkId} to tab ${tabId}`);
       await storage.addLinkToTab(linkId, tabId);
+      console.log(`Successfully added link ${linkId} to tab ${tabId}`);
+      
       res.status(200).json({ message: "Link added to tab successfully" });
     } catch (error) {
       console.error("Add link to tab error:", error);
-      res.status(500).json({ message: "Error adding link to tab" });
+      let errorMessage = "Error adding link to tab";
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      res.status(500).json({ message: errorMessage });
     }
   });
 

@@ -618,7 +618,20 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
                           onClick={(e) => {
                             e.stopPropagation();
                             // Check if link is already in this tab
-                            const isInTab = tab.links && tab.links.some(l => l.id === link.id);
+                            // Ensure tab.links exists and is an array
+                            if (!tab || !tab.id) {
+                              console.error("Tab is undefined or missing ID");
+                              toast({
+                                title: "Error",
+                                description: "Could not add to tab - invalid tab data",
+                                variant: "destructive"
+                              });
+                              return;
+                            }
+                            
+                            const isInTab = tab.links && Array.isArray(tab.links) && tab.links.some(l => l && l.id === link.id);
+                            console.log(`Checking if link ${link.id} is in tab ${tab.id} (${tab.name}): ${isInTab}`);
+                            
                             if (isInTab) {
                               toast({
                                 title: "Already in tab",
@@ -628,6 +641,7 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
                             }
                             
                             // Add link to tab
+                            console.log(`Adding link ${link.id} to tab ${tab.id} (${tab.name})`);
                             addLinkToTab(tab.id);
                           }}
                         >
