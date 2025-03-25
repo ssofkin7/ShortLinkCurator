@@ -2,7 +2,10 @@ import {
   users, type User, type InsertUser,
   links, type Link, type InsertLink,
   tags, type Tag, type InsertTag,
-  type LinkWithTags
+  customTabs, type CustomTab, type InsertCustomTab,
+  linkTabs, type LinkTab, type InsertLinkTab,
+  type LinkWithTags,
+  type CustomTabWithLinks
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -37,6 +40,7 @@ export interface IStorage {
   getLinkCount(userId: number): Promise<number>;
   deleteLink(id: number, userId: number): Promise<void>;
   updateLastViewed(linkId: number): Promise<void>;
+  updateLinkTitle(linkId: number, userId: number, title: string): Promise<void>;
   getRecommendedLinks(userId: number, limit?: number): Promise<LinkWithTags[]>;
   
   // Tag operations
@@ -44,6 +48,15 @@ export interface IStorage {
   getTagsByLinkId(linkId: number): Promise<Tag[]>;
   deleteTag(id: number): Promise<void>;
   updateLinkCategory(linkId: number, category: string): Promise<void>;
+  
+  // Custom Tab operations
+  createCustomTab(tab: InsertCustomTab): Promise<CustomTab>;
+  getCustomTabsByUserId(userId: number): Promise<CustomTabWithLinks[]>;
+  getCustomTabById(id: number): Promise<CustomTabWithLinks | undefined>;
+  deleteCustomTab(id: number, userId: number): Promise<void>;
+  addLinkToTab(linkId: number, tabId: number): Promise<void>;
+  removeLinkFromTab(linkId: number, tabId: number): Promise<void>;
+  getLinksByTabId(tabId: number): Promise<LinkWithTags[]>;
   
   // AI Cache operations
   getLinkByUrl(url: string): Promise<Link | undefined>;
@@ -54,17 +67,25 @@ export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private links: Map<number, Link>;
   private tags: Map<number, Tag>;
+  private customTabs: Map<number, CustomTab>;
+  private linkTabs: Map<number, LinkTab>;
   currentUserId: number;
   currentLinkId: number;
   currentTagId: number;
+  currentTabId: number;
+  currentLinkTabId: number;
 
   constructor() {
     this.users = new Map();
     this.links = new Map();
     this.tags = new Map();
+    this.customTabs = new Map();
+    this.linkTabs = new Map();
     this.currentUserId = 1;
     this.currentLinkId = 1;
     this.currentTagId = 1;
+    this.currentTabId = 1;
+    this.currentLinkTabId = 1;
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -265,6 +286,16 @@ export class MemStorage implements IStorage {
     if (link) {
       link.last_viewed = new Date();
       this.links.set(linkId, link);
+    }
+  }
+  
+  async updateLinkTitle(linkId: number, userId: number, title: string): Promise<void> {
+    const link = this.links.get(linkId);
+    if (link && link.user_id === userId) {
+      link.title = title;
+      this.links.set(linkId, link);
+    } else {
+      throw new Error("Link not found or not owned by user");
     }
   }
 

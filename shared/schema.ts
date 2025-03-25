@@ -19,7 +19,7 @@ export const links = pgTable("links", {
   id: serial("id").primaryKey(),
   url: text("url").notNull(),
   title: text("title").notNull(),
-  platform: text("platform").notNull(), // "tiktok", "youtube", "instagram"
+  platform: text("platform").notNull(), // "tiktok", "youtube", "instagram", etc.
   thumbnail_url: text("thumbnail_url"),
   category: text("category").notNull(),
   duration: text("duration"),
@@ -33,6 +33,22 @@ export const tags = pgTable("tags", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   link_id: integer("link_id").notNull().references(() => links.id),
+  created_at: timestamp("created_at").defaultNow().notNull(),
+});
+
+// New table for custom tabs
+export const customTabs = pgTable("custom_tabs", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  user_id: integer("user_id").notNull().references(() => users.id),
+  created_at: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Junction table for links and custom tabs (many-to-many)
+export const linkTabs = pgTable("link_tabs", {
+  id: serial("id").primaryKey(),
+  link_id: integer("link_id").notNull().references(() => links.id),
+  tab_id: integer("tab_id").notNull().references(() => customTabs.id),
   created_at: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -59,6 +75,16 @@ export const insertTagSchema = createInsertSchema(tags).pick({
   link_id: true,
 });
 
+export const insertCustomTabSchema = createInsertSchema(customTabs).pick({
+  name: true,
+  user_id: true,
+});
+
+export const insertLinkTabSchema = createInsertSchema(linkTabs).pick({
+  link_id: true,
+  tab_id: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
@@ -68,4 +94,11 @@ export type Link = typeof links.$inferSelect;
 export type InsertTag = z.infer<typeof insertTagSchema>;
 export type Tag = typeof tags.$inferSelect;
 
+export type InsertCustomTab = z.infer<typeof insertCustomTabSchema>;
+export type CustomTab = typeof customTabs.$inferSelect;
+
+export type InsertLinkTab = z.infer<typeof insertLinkTabSchema>;
+export type LinkTab = typeof linkTabs.$inferSelect;
+
 export type LinkWithTags = Link & { tags: Tag[] };
+export type CustomTabWithLinks = CustomTab & { links: Link[] };
