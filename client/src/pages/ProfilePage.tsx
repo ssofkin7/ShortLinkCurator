@@ -235,7 +235,7 @@ export default function ProfilePage() {
                 onValueChange={setActiveTab}
                 className="w-full"
               >
-                <TabsList className="bg-white border border-gray-200 w-full justify-center">
+                <TabsList className="w-full flex justify-center gap-4">
                   <TabsTrigger value="profile">Profile Information</TabsTrigger>
                   <TabsTrigger value="notifications">Notifications</TabsTrigger>
                   <TabsTrigger value="security">Security</TabsTrigger>
