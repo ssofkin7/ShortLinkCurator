@@ -277,7 +277,7 @@ export default function ProfileModal({ trigger }: ProfileModalProps) {
                     name="username"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Username</FormLabel>
+                        <FormLabel className="text-sm">Username</FormLabel>
                         <FormControl>
                           <Input {...field} disabled={isLoading} />
                         </FormControl>
@@ -294,7 +294,7 @@ export default function ProfileModal({ trigger }: ProfileModalProps) {
                     name="displayName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Display Name</FormLabel>
+                        <FormLabel className="text-sm">Display Name</FormLabel>
                         <FormControl>
                           <Input {...field} placeholder="Your display name" />
                         </FormControl>
@@ -311,7 +311,7 @@ export default function ProfileModal({ trigger }: ProfileModalProps) {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email</FormLabel>
+                        <FormLabel className="text-sm">Email</FormLabel>
                         <FormControl>
                           <Input {...field} type="email" disabled={isLoading} />
                         </FormControl>
@@ -328,7 +328,7 @@ export default function ProfileModal({ trigger }: ProfileModalProps) {
                     name="bio"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Bio</FormLabel>
+                        <FormLabel className="text-sm">Bio</FormLabel>
                         <FormControl>
                           <Textarea
                             {...field}
@@ -344,7 +344,7 @@ export default function ProfileModal({ trigger }: ProfileModalProps) {
                     )}
                   />
 
-                  <Button type="submit">Update Profile</Button>
+                  <Button type="submit" size="sm">Update Profile</Button>
                 </form>
               </Form>
             </TabsContent>
@@ -463,7 +463,7 @@ export default function ProfileModal({ trigger }: ProfileModalProps) {
                     name="currentPassword"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Current Password</FormLabel>
+                        <FormLabel className="text-sm">Current Password</FormLabel>
                         <FormControl>
                           <Input
                             {...field}
@@ -481,7 +481,7 @@ export default function ProfileModal({ trigger }: ProfileModalProps) {
                     name="newPassword"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>New Password</FormLabel>
+                        <FormLabel className="text-sm">New Password</FormLabel>
                         <FormControl>
                           <Input
                             {...field}
@@ -489,7 +489,7 @@ export default function ProfileModal({ trigger }: ProfileModalProps) {
                             placeholder="••••••••"
                           />
                         </FormControl>
-                        <FormDescription>
+                        <FormDescription className="text-xs">
                           Must be at least 8 characters with a number.
                         </FormDescription>
                         <FormMessage />
@@ -502,7 +502,7 @@ export default function ProfileModal({ trigger }: ProfileModalProps) {
                     name="confirmPassword"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Confirm New Password</FormLabel>
+                        <FormLabel className="text-sm">Confirm New Password</FormLabel>
                         <FormControl>
                           <Input
                             {...field}
@@ -517,6 +517,7 @@ export default function ProfileModal({ trigger }: ProfileModalProps) {
 
                   <Button 
                     type="submit"
+                    size="sm"
                     disabled={passwordMutation.isPending}
                   >
                     {passwordMutation.isPending ? "Updating..." : "Change Password"}
