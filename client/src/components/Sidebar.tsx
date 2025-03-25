@@ -78,8 +78,8 @@ const CustomSidebar = ({ user, isLoading }: SidebarProps) => {
             </div>
           </Link>
           
-          {/* Custom Tabs Section */}
-          {location === '/library' && (
+          {/* Custom Tabs Section - Always show for authenticated users */}
+          {user && (
             <div className="mt-4">
               <CustomTabsList
                 activeTab={activeCustomTab || 'all'} 
@@ -91,6 +91,11 @@ const CustomSidebar = ({ user, isLoading }: SidebarProps) => {
                     detail: { tabId }
                   });
                   window.dispatchEvent(tabChangeEvent);
+                  
+                  // If we're not already on the library page, navigate there
+                  if (location !== '/library') {
+                    setLocation('/library');
+                  }
                 }}
               />
             </div>

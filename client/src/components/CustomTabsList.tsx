@@ -44,10 +44,14 @@ const CustomTabsList: React.FC<CustomTabsListProps> = ({ activeTab, onTabChange 
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Query custom tabs
-  const { data: customTabs = [], isLoading } = useQuery<CustomTabWithLinks[]>({
+  // Query custom tabs - only fetch when we have a valid user session
+  const { data: customTabs = [], isLoading, isError } = useQuery<CustomTabWithLinks[]>({
     queryKey: ['/api/custom-tabs'],
-    enabled: true
+    retry: 1,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    onError: (error) => {
+      console.error("Error fetching custom tabs:", error);
+    }
   });
 
   // Delete custom tab mutation
@@ -145,6 +149,12 @@ const CustomTabsList: React.FC<CustomTabsListProps> = ({ activeTab, onTabChange 
         {isLoading ? (
           <div className="flex justify-center py-4">
             <Loader2Icon className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : isError ? (
+          <div className="py-2 px-2">
+            <p className="text-xs text-amber-600 text-center">
+              Unable to load custom tabs. Please sign in to view your tabs.
+            </p>
           </div>
         ) : customTabs.length > 0 ? (
           <div className="space-y-1">
