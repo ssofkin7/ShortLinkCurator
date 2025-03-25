@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import SubscriptionModal from "./SubscriptionModal";
+import CustomTabsList from "./CustomTabsList";
 
 interface SidebarProps {
   user: User | undefined;
@@ -75,6 +76,18 @@ const CustomSidebar = ({ user, isLoading }: SidebarProps) => {
               <span>Analytics</span>
             </div>
           </Link>
+          
+          {/* Custom Tabs Section */}
+          {location === '/library' && (
+            <div className="mt-4">
+              <CustomTabsList
+                activeTab={location === '/library' ? 'all' : ''} 
+                onTabChange={(tabId) => {
+                  // This will be handled in LibraryPage
+                }}
+              />
+            </div>
+          )}
         </nav>
         
         <div className="mt-auto">
