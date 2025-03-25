@@ -25,6 +25,7 @@ interface Notification {
   read: boolean;
   iconBgColor: string;
   iconTextColor: string;
+  action?: () => void;
 }
 
 const TopBar = ({ user }: TopBarProps) => {
@@ -45,7 +46,8 @@ const TopBar = ({ user }: TopBarProps) => {
         </svg>
       ),
       iconBgColor: "bg-indigo-100",
-      iconTextColor: "text-indigo-600"
+      iconTextColor: "text-indigo-600",
+      action: () => setLocation("/")
     },
     {
       id: 2,
@@ -59,7 +61,8 @@ const TopBar = ({ user }: TopBarProps) => {
         </svg>
       ),
       iconBgColor: "bg-indigo-100", 
-      iconTextColor: "text-indigo-600"
+      iconTextColor: "text-indigo-600",
+      action: () => setLocation("/library")
     },
     {
       id: 3,
@@ -74,7 +77,8 @@ const TopBar = ({ user }: TopBarProps) => {
         </svg>
       ),
       iconBgColor: "bg-purple-100",
-      iconTextColor: "text-purple-600"
+      iconTextColor: "text-purple-600",
+      action: () => setLocation("/tags")
     },
     {
       id: 4,
@@ -91,7 +95,11 @@ const TopBar = ({ user }: TopBarProps) => {
         </svg>
       ),
       iconBgColor: "bg-green-100",
-      iconTextColor: "text-green-600"
+      iconTextColor: "text-green-600",
+      action: () => {
+        const profileButton = document.querySelector('[data-component="profileModal"]') as HTMLElement;
+        if (profileButton) profileButton.click();
+      }
     }
   ]);
   
@@ -170,7 +178,10 @@ const TopBar = ({ user }: TopBarProps) => {
                     <div 
                       key={notification.id}
                       className={`flex items-start gap-4 p-2 rounded-lg hover:bg-gray-50 cursor-pointer ${notification.read ? 'opacity-70' : ''}`}
-                      onClick={() => markAsRead(notification.id)}
+                      onClick={() => {
+                        markAsRead(notification.id);
+                        notification.action && notification.action();
+                      }}
                     >
                       <div className={`h-9 w-9 rounded-full ${notification.iconBgColor} flex items-center justify-center shrink-0`}>
                         <div className={notification.iconTextColor}>
@@ -210,6 +221,7 @@ const TopBar = ({ user }: TopBarProps) => {
                     variant="outline" 
                     size="icon" 
                     className="h-9 w-9 rounded-lg bg-gray-100 text-gray-600"
+                    data-component="profileModal"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
