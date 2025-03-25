@@ -144,7 +144,7 @@ const CustomTabsList: React.FC<CustomTabsListProps> = ({ activeTab, onTabChange 
         </Button>
       </div>
       
-      <ScrollArea className="h-auto max-h-40">
+      <ScrollArea className="h-auto max-h-72">
         {isLoading ? (
           <div className="flex justify-center py-4">
             <Loader2Icon className="h-5 w-5 animate-spin text-muted-foreground" />
