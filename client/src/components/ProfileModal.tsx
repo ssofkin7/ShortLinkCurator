@@ -229,7 +229,7 @@ export default function ProfileModal({ trigger }: ProfileModalProps) {
       <DialogTrigger asChild>
         {trigger}
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Your Profile</DialogTitle>
           <DialogDescription>
@@ -237,11 +237,11 @@ export default function ProfileModal({ trigger }: ProfileModalProps) {
           </DialogDescription>
         </DialogHeader>
         
-        <div className="py-4">
+        <div className="py-2">
           <Tabs
             value={activeTab}
             onValueChange={setActiveTab}
-            className="space-y-4 w-full"
+            className="space-y-3 w-full"
           >
             <TabsList className="bg-white border border-gray-200 w-full">
               <TabsTrigger value="profile">Profile Information</TabsTrigger>
@@ -250,17 +250,19 @@ export default function ProfileModal({ trigger }: ProfileModalProps) {
             </TabsList>
             
             <TabsContent value="profile" className="space-y-4 w-full">
-              <div className="flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-6 mb-6">
-                <div className="h-20 w-20 rounded-full bg-blue-500 flex items-center justify-center text-white text-xl font-bold mb-3">
+              <div className="flex items-center gap-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 mb-4">
+                <div className="h-14 w-14 rounded-full bg-blue-500 flex items-center justify-center text-white text-lg font-bold">
                   <span>{user?.username?.charAt(0).toUpperCase() || "U"}</span>
                 </div>
-                <h3 className="font-medium text-lg">{user?.display_name || user?.username}</h3>
-                <p className="text-sm text-gray-500 mt-1 text-center max-w-xs">
-                  {user?.email}
-                </p>
-                <div className="flex items-center space-x-2 mt-3">
-                  <div className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs">
-                    Active User
+                <div>
+                  <h3 className="font-medium">{user?.display_name || user?.username}</h3>
+                  <p className="text-xs text-gray-500">
+                    {user?.email}
+                  </p>
+                  <div className="flex items-center mt-1">
+                    <div className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs">
+                      Active User
+                    </div>
                   </div>
                 </div>
               </div>
@@ -331,7 +333,7 @@ export default function ProfileModal({ trigger }: ProfileModalProps) {
                           <Textarea
                             {...field}
                             placeholder="A short bio about yourself"
-                            className="min-h-[120px]"
+                            className="min-h-[80px]"
                           />
                         </FormControl>
                         <FormDescription>
@@ -357,13 +359,13 @@ export default function ProfileModal({ trigger }: ProfileModalProps) {
                     control={notificationForm.control}
                     name="emailNotifications"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-base">
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                        <div>
+                          <FormLabel className="text-sm font-medium">
                             Email Notifications
                           </FormLabel>
-                          <FormDescription>
-                            Receive email notifications about your account and content.
+                          <FormDescription className="text-xs">
+                            Receive email notifications about your account.
                           </FormDescription>
                         </div>
                         <FormControl>
@@ -380,12 +382,12 @@ export default function ProfileModal({ trigger }: ProfileModalProps) {
                     control={notificationForm.control}
                     name="newContentAlerts"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-base">
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                        <div>
+                          <FormLabel className="text-sm font-medium">
                             New Content Alerts
                           </FormLabel>
-                          <FormDescription>
+                          <FormDescription className="text-xs">
                             Get notified when new similar content is available.
                           </FormDescription>
                         </div>
@@ -403,12 +405,12 @@ export default function ProfileModal({ trigger }: ProfileModalProps) {
                     control={notificationForm.control}
                     name="weeklyDigest"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-base">
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                        <div>
+                          <FormLabel className="text-sm font-medium">
                             Weekly Digest
                           </FormLabel>
-                          <FormDescription>
+                          <FormDescription className="text-xs">
                             Receive a weekly summary of your content activity.
                           </FormDescription>
                         </div>
@@ -426,12 +428,12 @@ export default function ProfileModal({ trigger }: ProfileModalProps) {
                     control={notificationForm.control}
                     name="platformUpdates"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-base">
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                        <div>
+                          <FormLabel className="text-sm font-medium">
                             Platform Updates
                           </FormLabel>
-                          <FormDescription>
+                          <FormDescription className="text-xs">
                             Get notified about new features and improvements.
                           </FormDescription>
                         </div>
@@ -445,7 +447,7 @@ export default function ProfileModal({ trigger }: ProfileModalProps) {
                     )}
                   />
 
-                  <Button type="submit">Save Preferences</Button>
+                  <Button type="submit" size="sm">Save Preferences</Button>
                 </form>
               </Form>
             </TabsContent>
@@ -522,36 +524,31 @@ export default function ProfileModal({ trigger }: ProfileModalProps) {
                 </form>
               </Form>
               
-              <div className="pt-6 mt-6 border-t border-gray-200">
-                <h3 className="font-medium text-base mb-4">Account Management</h3>
+              <div className="pt-4 mt-4 border-t border-gray-200">
+                <h3 className="font-medium text-sm mb-3">Account Management</h3>
                 
-                <div className="mb-6">
-                  <h4 className="text-sm font-medium mb-3">Subscription</h4>
-                  {user?.is_premium ? (
-                    <>
-                      <Button 
-                        variant="outline" 
-                        className="mb-2 text-sm w-full justify-start"
-                      >
+                <div className="mb-4">
+                  <Button 
+                    className="text-xs w-full justify-start"
+                    variant="default"
+                    size="sm"
+                  >
+                    {user?.is_premium ? (
+                      <>
                         <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs mr-2">Premium</span>
                         Manage Subscription
-                      </Button>
-                    </>
-                  ) : (
-                    <Button 
-                      className="mb-2 text-sm w-full justify-start"
-                      variant="default"
-                    >
-                      Upgrade to Premium
-                    </Button>
-                  )}
+                      </>
+                    ) : (
+                      'Upgrade to Premium'
+                    )}
+                  </Button>
                 </div>
                 
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-red-600 mb-3">Danger Zone</h4>
+                <div>
                   <Button 
                     variant="destructive" 
-                    className="w-full"
+                    className="w-full text-xs"
+                    size="sm"
                   >
                     Delete Account
                   </Button>
