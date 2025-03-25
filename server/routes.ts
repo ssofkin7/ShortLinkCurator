@@ -33,6 +33,16 @@ const validate = (schema: z.ZodType<any, any>) => (req: Request, res: Response, 
     schema.parse(req.body);
     next();
   } catch (error) {
+    console.error("Validation error:", error);
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ 
+        message: "Invalid request data", 
+        errors: error.errors.map(e => ({ 
+          path: e.path.join('.'), 
+          message: e.message 
+        }))
+      });
+    }
     return res.status(400).json({ message: "Invalid request data", error });
   }
 };
