@@ -35,24 +35,20 @@ export default function LoginPage() {
       setIsLoading(true);
       await apiRequest("POST", "/api/login", data);
       
-      // Display success toast and redirect to home page
       toast({
         title: "Login successful",
         description: "Welcome back to LinkSnap!",
       });
       
-      // Use wouter navigation instead of full page reload
-      // This will trigger a re-render and re-fetch auth state
-      setTimeout(() => {
-        setLocation("/");
-      }, 500);
+      // For now, let's go back to using window.location.href to ensure a full reload
+      // which will properly refresh the auth state
+      window.location.href = "/";
     } catch (error) {
       toast({
         title: "Login failed",
         description: error instanceof Error ? error.message : "Invalid credentials",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   }
