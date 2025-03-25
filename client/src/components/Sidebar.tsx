@@ -145,10 +145,12 @@ const CustomSidebar = ({ user, isLoading }: SidebarProps) => {
                     <span>{user.username.charAt(0).toUpperCase()}</span>
                   )}
                 </div>
-                <div>
-                  <p className="text-sm font-medium">{user.username}</p>
-                  <p className="text-xs text-gray-500">{user.email}</p>
-                </div>
+                <Link href="/profile" className="flex-1 hover:underline">
+                  <div>
+                    <p className="text-sm font-medium">{user.username}</p>
+                    <p className="text-xs text-gray-500">{user.email}</p>
+                  </div>
+                </Link>
               </>
             ) : (
               <Link href="/">
