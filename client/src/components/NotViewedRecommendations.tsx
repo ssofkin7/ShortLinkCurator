@@ -13,7 +13,11 @@ const isVideoContent = (platform: string): boolean => {
 };
 
 const isTextContent = (platform: string): boolean => {
-  return ['medium', 'substack', 'article', 'document', 'webpage', 'github', 'reddit', 'twitter', 'linkedin'].includes(platform);
+  return ['medium', 'substack', 'article', 'document', 'webpage', 'github', 'reddit', 'linkedin'].includes(platform);
+};
+
+const isTwitterContent = (platform: string): boolean => {
+  return platform === 'twitter';
 };
 
 const NotViewedRecommendations = () => {
@@ -216,6 +220,11 @@ const NotViewedRecommendations = () => {
                           className="w-full h-full object-cover" 
                           alt={link.title} 
                         />
+                      ) : isTwitterContent(link.platform) ? (
+                        /* Display for Twitter/X content - only show icon */
+                        <div className="w-full h-full flex items-center justify-center bg-[#f7f9f9]">
+                          <div className="text-3xl text-[#1DA1F2]">{platform.icon}</div>
+                        </div>
                       ) : isTextContent(link.platform) ? (
                         /* Display for text/article content */
                         <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 p-1 text-center">
