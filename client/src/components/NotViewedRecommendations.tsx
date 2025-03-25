@@ -149,9 +149,7 @@ const NotViewedRecommendations = () => {
                 <div key={i} className="flex gap-3 p-3 rounded-lg bg-gray-50">
                   <Skeleton className="w-16 h-16 rounded flex-shrink-0" />
                   <div className="flex-1 space-y-2">
-                    <Skeleton className="h-4 w-28" />
                     <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-3 w-3/4" />
                   </div>
                 </div>
               ))
@@ -179,24 +177,9 @@ const NotViewedRecommendations = () => {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-end mb-1">
-                        <span className="text-xs text-gray-400">
-                          {formatLastViewed(link.last_viewed)}
-                        </span>
-                      </div>
-                      <h3 className="text-sm font-medium line-clamp-2 mb-1">
+                      <h3 className="text-sm font-medium line-clamp-2">
                         {link.title}
                       </h3>
-                      <div className="flex flex-wrap gap-1">
-                        <Badge variant="outline" className="text-xs">
-                          {link.category}
-                        </Badge>
-                        {link.tags && link.tags.slice(0, 2).map((tag) => (
-                          <Badge key={tag.id} variant="outline" className="text-xs bg-gray-50">
-                            {tag.name}
-                          </Badge>
-                        ))}
-                      </div>
                     </div>
                   </div>
                 );
