@@ -40,8 +40,9 @@ const CustomTabPage = () => {
     refetch: refetchLinks,
     error: linksError
   } = useQuery<LinkWithTags[]>({
-    queryKey: ['/api/custom-tabs', tabId, 'links'],
-    enabled: !!tabId
+    queryKey: [`/api/custom-tabs/${tabId}/links`],
+    enabled: !!tabId,
+    retry: 3
   });
 
   // Create state for tab links to enable local filtering
@@ -82,14 +83,30 @@ const CustomTabPage = () => {
   // Handle link submission
   const handleSubmitLink = async (url: string) => {
     try {
-      // First create the link
-      const response = await apiRequest('POST', '/api/links', { url });
-      const newLink = await response.json();
+      // Check if the link already exists first
+      const checkResponse = await apiRequest('GET', '/api/links');
+      const existingLinks = await checkResponse.json();
+      const existingLink = existingLinks.find((link: LinkWithTags) => link.url === url);
       
-      // Then add it to the tab
-      await apiRequest('POST', `/api/custom-tabs/${tabId}/links/${newLink.id}`);
+      let linkId: number;
       
-      // Refetch the tab links
+      if (existingLink) {
+        console.log("Using existing link with ID:", existingLink.id);
+        linkId = existingLink.id;
+      } else {
+        // Create a new link if it doesn't exist
+        console.log("Creating new link for URL:", url);
+        const createResponse = await apiRequest('POST', '/api/links', { url });
+        const newLink = await createResponse.json();
+        linkId = newLink.id;
+      }
+      
+      console.log(`Adding link ID ${linkId} to tab ID ${tabId}`);
+      
+      // Add the link to the tab
+      await apiRequest('POST', `/api/custom-tabs/${tabId}/links/${linkId}`);
+      
+      // Refetch the tab and its links
       refetchLinks();
       
       // Close the submitter
