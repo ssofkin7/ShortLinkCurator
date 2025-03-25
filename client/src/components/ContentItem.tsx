@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { LinkWithTags } from "@shared/schema";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { LinkWithTags, CustomTabWithLinks } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -12,6 +12,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
   Dialog,
@@ -19,8 +23,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import EditTitleDialog from "./EditTitleDialog";
+import CreateCustomTabDialog from "./CreateCustomTabDialog";
 
 interface ContentItemProps {
   link: LinkWithTags;
@@ -34,6 +40,13 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [viewTagsModalOpen, setViewTagsModalOpen] = useState(false);
   const [editTitleDialogOpen, setEditTitleDialogOpen] = useState(false);
+  const [isCreateTabDialogOpen, setIsCreateTabDialogOpen] = useState(false);
+  
+  // Fetch custom tabs
+  const { data: customTabs = [], isLoading: isLoadingTabs } = useQuery<CustomTabWithLinks[]>({
+    queryKey: ['/api/custom-tabs'],
+    staleTime: 1000 * 60, // 1 minute
+  });
 
   // Function to format date
   const formatDate = (date: Date) => {
