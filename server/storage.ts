@@ -8,7 +8,7 @@ import {
   type CustomTabWithLinks
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, inArray } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -319,6 +319,100 @@ export class MemStorage implements IStorage {
   async getLinkByUrl(url: string): Promise<Link | undefined> {
     return Array.from(this.links.values()).find(link => link.url === url);
   }
+
+  // Custom Tab operations
+  async createCustomTab(tab: InsertCustomTab): Promise<CustomTab> {
+    const id = this.currentTabId++;
+    const created_at = new Date();
+    const customTab: CustomTab = { ...tab, id, created_at };
+    this.customTabs.set(id, customTab);
+    return customTab;
+  }
+
+  async getCustomTabsByUserId(userId: number): Promise<CustomTabWithLinks[]> {
+    const userTabs = Array.from(this.customTabs.values())
+      .filter(tab => tab.user_id === userId)
+      .sort((a, b) => b.created_at.getTime() - a.created_at.getTime());
+    
+    return Promise.all(userTabs.map(async tab => {
+      const tabLinks = await this.getLinksByTabId(tab.id);
+      return { ...tab, links: tabLinks };
+    }));
+  }
+
+  async getCustomTabById(id: number): Promise<CustomTabWithLinks | undefined> {
+    const tab = this.customTabs.get(id);
+    if (!tab) return undefined;
+    
+    const tabLinks = await this.getLinksByTabId(id);
+    return { ...tab, links: tabLinks };
+  }
+
+  async deleteCustomTab(id: number, userId: number): Promise<void> {
+    const tab = this.customTabs.get(id);
+    if (tab && tab.user_id === userId) {
+      this.customTabs.delete(id);
+      
+      // Delete all link-tab associations for this tab
+      const allLinkTabs = Array.from(this.linkTabs.values());
+      for (const linkTab of allLinkTabs) {
+        if (linkTab.tab_id === id) {
+          this.linkTabs.delete(linkTab.id);
+        }
+      }
+    }
+  }
+
+  async addLinkToTab(linkId: number, tabId: number): Promise<void> {
+    // Check if the link and tab exist
+    const link = this.links.get(linkId);
+    const tab = this.customTabs.get(tabId);
+    if (!link || !tab) {
+      throw new Error("Link or tab not found");
+    }
+    
+    // Check if association already exists
+    const existingAssociation = Array.from(this.linkTabs.values())
+      .find(lt => lt.link_id === linkId && lt.tab_id === tabId);
+    
+    if (!existingAssociation) {
+      const id = this.currentLinkTabId++;
+      const created_at = new Date();
+      const linkTab: LinkTab = {
+        id,
+        link_id: linkId,
+        tab_id: tabId,
+        created_at
+      };
+      this.linkTabs.set(id, linkTab);
+    }
+  }
+
+  async removeLinkFromTab(linkId: number, tabId: number): Promise<void> {
+    const association = Array.from(this.linkTabs.values())
+      .find(lt => lt.link_id === linkId && lt.tab_id === tabId);
+    
+    if (association) {
+      this.linkTabs.delete(association.id);
+    }
+  }
+
+  async getLinksByTabId(tabId: number): Promise<LinkWithTags[]> {
+    // Find all link-tab associations for this tab
+    const tabLinkIds = Array.from(this.linkTabs.values())
+      .filter(lt => lt.tab_id === tabId)
+      .map(lt => lt.link_id);
+    
+    // Get all links that are in this tab
+    const tabLinks = Array.from(this.links.values())
+      .filter(link => tabLinkIds.includes(link.id))
+      .sort((a, b) => b.created_at.getTime() - a.created_at.getTime());
+    
+    return Promise.all(tabLinks.map(async link => {
+      const linkTags = await this.getTagsByLinkId(link.id);
+      return { ...link, tags: linkTags };
+    }));
+  }
 }
 
 // Database implementation using Supabase
@@ -504,6 +598,17 @@ export class DatabaseStorage implements IStorage {
       .where(eq(links.id, linkId));
   }
   
+  async updateLinkTitle(linkId: number, userId: number, title: string): Promise<void> {
+    await db.update(links)
+      .set({ title })
+      .where(
+        and(
+          eq(links.id, linkId),
+          eq(links.user_id, userId)
+        )
+      );
+  }
+  
   async getRecommendedLinks(userId: number, limit: number = 5): Promise<LinkWithTags[]> {
     // Get links sorted by last_viewed (oldest first)
     const recommendedLinks = await db.select().from(links)
@@ -521,6 +626,114 @@ export class DatabaseStorage implements IStorage {
     // This method is used for AI caching to check if we've already processed this URL
     const [link] = await db.select().from(links).where(eq(links.url, url));
     return link;
+  }
+  
+  // Custom Tab operations
+  async createCustomTab(tab: InsertCustomTab): Promise<CustomTab> {
+    const [customTab] = await db.insert(customTabs).values(tab).returning();
+    return customTab;
+  }
+
+  async getCustomTabsByUserId(userId: number): Promise<CustomTabWithLinks[]> {
+    const userTabs = await db.select().from(customTabs)
+      .where(eq(customTabs.user_id, userId))
+      .orderBy(desc(customTabs.created_at));
+    
+    return Promise.all(userTabs.map(async (tab) => {
+      const tabLinks = await this.getLinksByTabId(tab.id);
+      return { ...tab, links: tabLinks };
+    }));
+  }
+
+  async getCustomTabById(id: number): Promise<CustomTabWithLinks | undefined> {
+    const [tab] = await db.select().from(customTabs).where(eq(customTabs.id, id));
+    if (!tab) return undefined;
+    
+    const tabLinks = await this.getLinksByTabId(id);
+    return { ...tab, links: tabLinks };
+  }
+
+  async deleteCustomTab(id: number, userId: number): Promise<void> {
+    // First delete all link-tab associations for this tab
+    await db.delete(linkTabs).where(eq(linkTabs.tab_id, id));
+    
+    // Then delete the tab
+    await db.delete(customTabs).where(
+      and(
+        eq(customTabs.id, id),
+        eq(customTabs.user_id, userId)
+      )
+    );
+  }
+
+  async addLinkToTab(linkId: number, tabId: number): Promise<void> {
+    // Check if link and tab exist first
+    const [link] = await db.select().from(links).where(eq(links.id, linkId));
+    const [tab] = await db.select().from(customTabs).where(eq(customTabs.id, tabId));
+    
+    if (!link || !tab) {
+      throw new Error("Link or tab not found");
+    }
+    
+    // Check if association already exists
+    const [existingAssociation] = await db.select()
+      .from(linkTabs)
+      .where(
+        and(
+          eq(linkTabs.link_id, linkId),
+          eq(linkTabs.tab_id, tabId)
+        )
+      );
+    
+    if (!existingAssociation) {
+      await db.insert(linkTabs).values({
+        link_id: linkId,
+        tab_id: tabId
+      });
+    }
+  }
+
+  async removeLinkFromTab(linkId: number, tabId: number): Promise<void> {
+    await db.delete(linkTabs).where(
+      and(
+        eq(linkTabs.link_id, linkId),
+        eq(linkTabs.tab_id, tabId)
+      )
+    );
+  }
+
+  async getLinksByTabId(tabId: number): Promise<LinkWithTags[]> {
+    // First, get all link IDs from the tab
+    const linkTabAssociations = await db
+      .select()
+      .from(linkTabs)
+      .where(eq(linkTabs.tab_id, tabId));
+    
+    if (linkTabAssociations.length === 0) {
+      return [];
+    }
+    
+    // Get the links one by one - not the most efficient but simplest to implement
+    const tabLinks: Link[] = [];
+    for (const assoc of linkTabAssociations) {
+      const [link] = await db
+        .select()
+        .from(links)
+        .where(eq(links.id, assoc.link_id));
+      
+      if (link) {
+        tabLinks.push(link);
+      }
+    }
+    
+    // Sort by creation date, newest first
+    tabLinks.sort((a, b) => b.created_at.getTime() - a.created_at.getTime());
+    
+    // Add tags to each link
+    return Promise.all(tabLinks.map(async (link) => {
+      const linkTags = await this.getTagsByLinkId(link.id);
+      return { ...link, tags: linkTags };
+    }));
   }
 }
 
