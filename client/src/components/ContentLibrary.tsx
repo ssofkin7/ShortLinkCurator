@@ -15,6 +15,9 @@ interface ContentLibraryProps {
   onViewModeChange: (mode: "grid" | "list") => void;
   links?: LinkWithTags[]; // Make links optional so we can still fetch them if not provided
   isLoading?: boolean;
+  initialTagFilter?: string | null; // Optional initial tag filter from URL parameters
+  onTagClick?: (tagName: string) => void; // Handler for tag clicks
+  onClearTagFilter?: () => void; // Handler for clearing tag filter
 }
 
 const ContentLibrary = ({
@@ -24,12 +27,15 @@ const ContentLibrary = ({
   onViewModeChange,
   links = [],
   isLoading = false,
+  initialTagFilter = null,
+  onTagClick,
+  onClearTagFilter,
 }: ContentLibraryProps) => {
   const { toast } = useToast();
   const [filteredLinks, setFilteredLinks] = useState<LinkWithTags[]>([]);
   const [selectedLink, setSelectedLink] = useState<LinkWithTags | null>(null);
   const [showTagModal, setShowTagModal] = useState(false);
-  const [activeTagFilter, setActiveTagFilter] = useState<string | null>(null);
+  const [activeTagFilter, setActiveTagFilter] = useState<string | null>(initialTagFilter);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
@@ -107,15 +113,24 @@ const ContentLibrary = ({
   // Handle tag filter click
   const handleTagClick = (tagName: string) => {
     setActiveTagFilter(tagName);
-    toast({
-      title: "Tag filter applied",
-      description: `Filtering by tag: ${tagName}`,
-    });
+    // Use parent handler if provided, otherwise use local state
+    if (onTagClick) {
+      onTagClick(tagName);
+    } else {
+      toast({
+        title: "Tag filter applied",
+        description: `Filtering by tag: ${tagName}`,
+      });
+    }
   };
 
   // Remove active tag filter
   const clearTagFilter = () => {
     setActiveTagFilter(null);
+    // Use parent handler if provided, otherwise just clear local state
+    if (onClearTagFilter) {
+      onClearTagFilter();
+    }
   };
 
   // Handle sort change

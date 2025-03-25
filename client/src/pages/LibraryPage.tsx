@@ -169,6 +169,9 @@ export default function LibraryPage() {
               onViewModeChange={handleViewModeChange}
               links={displayLinks}
               isLoading={activeTab.startsWith('custom-') ? isLoadingCustomTabLinks : isLinksLoading}
+              initialTagFilter={activeTagFilter}
+              onTagClick={handleTagClick}
+              onClearTagFilter={clearTagFilter}
             />
           </div>
         </main>
