@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useRoute, Link, useLocation } from 'wouter';
-import { CustomTabWithLinks, LinkWithTags } from '@shared/schema';
+import { CustomTabWithLinks, LinkWithTags, Tag } from '@shared/schema';
 import { Sidebar } from "@/components/ui/sidebar";
 import CustomSidebar from "@/components/Sidebar";
 import TopBar from "@/components/TopBar";
@@ -41,10 +41,7 @@ const CustomTabPage = () => {
     error: linksError
   } = useQuery<LinkWithTags[]>({
     queryKey: ['/api/custom-tabs', tabId, 'links'],
-    enabled: !!tabId,
-    onError: (error) => {
-      console.error("Error fetching custom tab links:", error);
-    }
+    enabled: !!tabId
   });
 
   // Create state for tab links to enable local filtering
@@ -54,7 +51,7 @@ const CustomTabPage = () => {
 
   // Handle sorting and filtering
   useEffect(() => {
-    if (!tabLinks.length) {
+    if (!tabLinks || tabLinks.length === 0) {
       setFilteredLinks([]);
       return;
     }
@@ -68,7 +65,7 @@ const CustomTabPage = () => {
         link.title.toLowerCase().includes(query) || 
         link.url.toLowerCase().includes(query) || 
         link.category.toLowerCase().includes(query) ||
-        link.tags && link.tags.some(tag => tag.name.toLowerCase().includes(query))
+        (link.tags && Array.isArray(link.tags) && link.tags.some((tag: Tag) => tag.name.toLowerCase().includes(query)))
       );
     }
 

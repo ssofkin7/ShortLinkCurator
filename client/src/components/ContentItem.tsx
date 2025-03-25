@@ -79,8 +79,14 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
   const { mutate: addLinkToTab, isPending: isAddingToTab } = useMutation({
     mutationFn: async (tabId: number) => {
       console.log(`Adding link ID ${link.id} to tab ID ${tabId}`);
-      const response = await apiRequest("POST", `/api/custom-tabs/${tabId}/links/${link.id}`);
-      return response;
+      try {
+        const response = await apiRequest("POST", `/api/custom-tabs/${tabId}/links/${link.id}`);
+        console.log("Successfully added link to tab, response:", response);
+        return response;
+      } catch (error) {
+        console.error(`Failed to add link ID ${link.id} to tab ID ${tabId}:`, error);
+        throw error;
+      }
     },
     onSuccess: () => {
       toast({
