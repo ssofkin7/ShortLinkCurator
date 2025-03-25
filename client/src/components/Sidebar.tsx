@@ -148,14 +148,12 @@ const CustomSidebar = ({ user, isLoading }: SidebarProps) => {
                     <span>{user.username.charAt(0).toUpperCase()}</span>
                   )}
                 </div>
-                <ProfileModal 
-                  trigger={
-                    <div className="flex-1 cursor-pointer hover:underline">
-                      <p className="text-sm font-medium">{user.username}</p>
-                      <p className="text-xs text-gray-500">{user.email}</p>
-                    </div>
-                  }
-                />
+                <Link href="/profile">
+                  <div className="flex-1 cursor-pointer hover:underline">
+                    <p className="text-sm font-medium">{user.username}</p>
+                    <p className="text-xs text-gray-500">{user.email}</p>
+                  </div>
+                </Link>
               </>
             ) : (
               <Link href="/">

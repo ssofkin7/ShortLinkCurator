@@ -10,6 +10,7 @@ import LibraryPage from "@/pages/LibraryPage";
 import TagsPage from "@/pages/TagsPage";
 import AnalyticsPage from "@/pages/AnalyticsPage";
 import CustomTabPage from "@/pages/CustomTabPage";
+import ProfilePage from "@/pages/ProfilePage";
 import GetStartedWizard from "@/components/GetStartedWizard";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -25,6 +26,7 @@ function Router() {
           <Route path="/tabs/:id" component={CustomTabPage} />
           <Route path="/tags" component={TagsPage} />
           <Route path="/analytics" component={AnalyticsPage} />
+          <Route path="/profile" component={ProfilePage} />
         </>
       ) : (
         <>
