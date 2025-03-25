@@ -447,7 +447,7 @@ const ContentLibrary = ({
             <p className="text-gray-500">
               {activeTagFilter ? `No content with the tag "${activeTagFilter}"` : 
                searchQuery.trim() ? `No results found for "${searchQuery}"` :
-               activeTab.startsWith('custom-') ? "This collection is currently empty" :
+               activeTab.startsWith('custom-') ? "This collection is empty. Use 'Move to Tab' from any content item to add links here." :
                `No ${activeTab} content found in your library`}
             </p>
             {(activeTagFilter || searchQuery.trim()) && (
