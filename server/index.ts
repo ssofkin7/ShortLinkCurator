@@ -1,10 +1,40 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import rateLimit from "express-rate-limit";
+import helmet from "helmet";
+import csrf from "csurf";
+import xss from "xss-clean";
 
 const app = express();
-app.use(express.json());
+
+// Security Headers
+app.use(helmet());
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+});
+app.use('/api/', limiter);
+
+// Login rate limiting
+const loginLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour window
+  max: 5, // start blocking after 5 requests
+  message: { message: "Too many login attempts, please try again after an hour" }
+});
+app.use("/api/login", loginLimiter);
+
+// XSS Protection
+app.use(xss());
+
+app.use(express.json({ limit: '10kb' })); // Body limit
 app.use(express.urlencoded({ extended: false }));
+
+// CSRF Protection (after session middleware)
+const csrfProtection = csrf({ cookie: true });
+app.use('/api', csrfProtection);
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -40,11 +70,20 @@ app.use((req, res, next) => {
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    if (err.code === 'EBADCSRFTOKEN') {
+      return res.status(403).json({ message: 'Invalid CSRF token' });
+    }
+    
     const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+    const message = process.env.NODE_ENV === 'production' 
+      ? 'Internal Server Error' 
+      : (err.message || 'Internal Server Error');
 
     res.status(status).json({ message });
-    throw err;
+    
+    if (process.env.NODE_ENV !== 'production') {
+      throw err;
+    }
   });
 
   // importantly only setup vite in development and after

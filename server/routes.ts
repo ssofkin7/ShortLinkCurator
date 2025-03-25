@@ -56,6 +56,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     resave: false,
     saveUninitialized: false,
     secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
+    name: 'sessionId', // Change session cookie name from default 'connect.sid'
     cookie: { 
       maxAge: 86400000, // 1 day
       secure: process.env.NODE_ENV === 'production',
@@ -63,7 +64,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       sameSite: 'strict',
       path: '/',
       domain: process.env.NODE_ENV === 'production' ? process.env.DOMAIN : undefined
-    }
+    },
+    rolling: true // Extend session with every request
   }));
 
   // User routes
