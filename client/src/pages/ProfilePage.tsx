@@ -227,7 +227,7 @@ export default function ProfilePage() {
           <TopBar user={user} />
           
           <main className="flex-1 overflow-auto">
-            <div className="container mx-auto px-4 py-6">
+            <div className="w-full max-w-6xl mx-auto px-4 py-6">
               <h1 className="text-2xl font-bold mb-6">Your Profile</h1>
               
               <Tabs
