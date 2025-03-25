@@ -31,6 +31,19 @@ export default function LibraryPage() {
     queryKey: ['/api/custom-tabs'],
   });
 
+  // Listen for custom tab change events from Sidebar
+  useEffect(() => {
+    const handleCustomTabChange = (event: CustomEvent) => {
+      const { tabId } = event.detail;
+      setActiveTab(tabId);
+    };
+
+    window.addEventListener('customTabChange', handleCustomTabChange as EventListener);
+    return () => {
+      window.removeEventListener('customTabChange', handleCustomTabChange as EventListener);
+    };
+  }, []);
+
   // Handle fetching custom tab links when active tab changes
   useEffect(() => {
     if (activeTab.startsWith('custom-')) {

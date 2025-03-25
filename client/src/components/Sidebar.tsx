@@ -14,8 +14,9 @@ interface SidebarProps {
 }
 
 const CustomSidebar = ({ user, isLoading }: SidebarProps) => {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [activeCustomTab, setActiveCustomTab] = useState<string>("");
   
   // Get link count
   const { data: links = [] } = useQuery<any[]>({
@@ -81,9 +82,15 @@ const CustomSidebar = ({ user, isLoading }: SidebarProps) => {
           {location === '/library' && (
             <div className="mt-4">
               <CustomTabsList
-                activeTab={location === '/library' ? 'all' : ''} 
+                activeTab={activeCustomTab || 'all'} 
                 onTabChange={(tabId) => {
-                  // This will be handled in LibraryPage
+                  setActiveCustomTab(tabId);
+                  
+                  // Create a custom event to notify LibraryPage about tab change
+                  const tabChangeEvent = new CustomEvent('customTabChange', { 
+                    detail: { tabId }
+                  });
+                  window.dispatchEvent(tabChangeEvent);
                 }}
               />
             </div>
