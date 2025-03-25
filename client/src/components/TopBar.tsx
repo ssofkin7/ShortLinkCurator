@@ -33,16 +33,15 @@ const TopBar = ({ user }: TopBarProps) => {
   const [notifications, setNotifications] = useState<Notification[]>([
     {
       id: 1,
-      title: "Your profile is ready",
-      description: "Customize your profile now to improve your experience.",
-      time: "2 min ago",
+      title: "Welcome to LinkOrbit!",
+      description: "Start by adding your first link. Click the '+ Add Link' button to begin.",
+      time: "Just now",
       read: false,
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-          <circle cx="9" cy="7" r="4"></circle>
-          <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          <circle cx="12" cy="12" r="8" />
+          <path d="M8 12a4 4 0 0 1 8 0" />
+          <path d="M18 12a6 6 0 0 0-12 0" />
         </svg>
       ),
       iconBgColor: "bg-indigo-100",
@@ -50,17 +49,45 @@ const TopBar = ({ user }: TopBarProps) => {
     },
     {
       id: 2,
-      title: "Check out our recommendations",
-      description: "We've curated some content you might like based on your preferences.",
-      time: "1 hour ago",
+      title: "Create custom tabs",
+      description: "Organize your links into custom collections. Try creating your first tab!",
+      time: "Just now",
       read: false,
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-          <path d="M3 15h18" />
-          <path d="M3 9h18" />
-          <path d="M9 3v18" />
-          <path d="M15 3v18" />
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+        </svg>
+      ),
+      iconBgColor: "bg-indigo-100", 
+      iconTextColor: "text-indigo-600"
+    },
+    {
+      id: 3,
+      title: "AI-powered tagging",
+      description: "Our AI automatically generates tags for your content to make organization easier.",
+      time: "Just now",
+      read: false,
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+          <line x1="7" y1="7" x2="7.01" y2="7"></line>
+        </svg>
+      ),
+      iconBgColor: "bg-purple-100",
+      iconTextColor: "text-purple-600"
+    },
+    {
+      id: 4,
+      title: "Complete your profile",
+      description: "Add more information to your profile to personalize your experience.",
+      time: "Just now",
+      read: false,
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
         </svg>
       ),
       iconBgColor: "bg-green-100",

@@ -9,6 +9,7 @@ import RegisterPage from "@/pages/RegisterPage";
 import LibraryPage from "@/pages/LibraryPage";
 import TagsPage from "@/pages/TagsPage";
 import AnalyticsPage from "@/pages/AnalyticsPage";
+import GetStartedWizard from "@/components/GetStartedWizard";
 import { useAuth } from "@/hooks/useAuth";
 
 function Router() {
@@ -37,9 +38,20 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router />
+      <AppContent />
       <Toaster />
     </QueryClientProvider>
+  );
+}
+
+function AppContent() {
+  const { isAuthenticated } = useAuth();
+  
+  return (
+    <>
+      <Router />
+      {isAuthenticated && <GetStartedWizard />}
+    </>
   );
 }
 
