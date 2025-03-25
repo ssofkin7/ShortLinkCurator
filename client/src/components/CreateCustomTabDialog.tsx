@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -114,10 +115,10 @@ const CreateCustomTabDialog: React.FC<CreateCustomTabDialogProps> = ({ isOpen, o
 
   return (
     <Dialog open={isOpen} onOpenChange={handleDialogChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px]" aria-describedby="create-tab-description">
         <DialogHeader>
           <DialogTitle>Create Custom Tab</DialogTitle>
-          <DialogDescription>
+          <DialogDescription id="create-tab-description">
             Create a new tab to organize your content
           </DialogDescription>
         </DialogHeader>

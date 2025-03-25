@@ -593,10 +593,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Custom Tab routes
-  app.post("/api/custom-tabs", authenticate, validate(insertCustomTabSchema), async (req: Request, res: Response) => {
+  app.post("/api/custom-tabs", authenticate, async (req: Request, res: Response) => {
     try {
       const { name, icon, description } = req.body;
       const userId = req.session.userId as number;
+      
+      // Validate the complete object with user_id included
+      try {
+        insertCustomTabSchema.parse({
+          name,
+          icon: icon || "folder",
+          description: description || "",
+          user_id: userId
+        });
+      } catch (error) {
+        console.error("Custom tab validation error:", error);
+        if (error instanceof z.ZodError) {
+          return res.status(400).json({ 
+            message: "Invalid custom tab data", 
+            errors: error.errors.map(e => ({ 
+              path: e.path.join('.'), 
+              message: e.message 
+            }))
+          });
+        }
+        throw error;
+      }
       
       const customTab = await storage.createCustomTab({
         name,
