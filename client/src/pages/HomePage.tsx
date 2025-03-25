@@ -21,7 +21,7 @@ const HomePage = () => {
   const { data: user, isLoading: userLoading } = useQuery<User>({
     queryKey: ["/api/user"],
   });
-  
+
   // Fetch recent links (limited to latest 5)
   const { data: recentLinks = [], isLoading: linksLoading } = useQuery<LinkWithTags[]>({
     queryKey: ["/api/links", { type: "recent" }],
@@ -49,21 +49,18 @@ const HomePage = () => {
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Sidebar (Desktop) */}
       <Sidebar user={user} isLoading={userLoading} />
-      
+
       <main className="flex-1 min-h-screen">
         {/* Top Bar */}
         <TopBar user={user} />
-        
+
         <div className="container mx-auto px-4 py-6">
-          {/* Welcome and Link Submitter */}
+          {/* Link Submitter */}
           <div className="mb-8">
-            <h1 className="text-2xl font-bold mb-2">Welcome to LinkSnap</h1>
-            <p className="text-gray-600 mb-4">Save links from all your favorite platforms in one place</p>
-            
             {/* Link Submitter */}
             <LinkSubmitter onSubmit={handleSubmitLink} />
           </div>
-          
+
           {/* AI Processing Dashboard */}
           {processingLink && (
             <AIProcessingDashboard 
@@ -71,7 +68,7 @@ const HomePage = () => {
               onComplete={handleProcessingComplete} 
             />
           )}
-          
+
           {/* Recently Added Links */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-4">
@@ -82,7 +79,7 @@ const HomePage = () => {
                 </a>
               )}
             </div>
-            
+
             {linksLoading ? (
               <p>Loading recent links...</p>
             ) : recentLinks.length === 0 ? (
@@ -116,12 +113,12 @@ const HomePage = () => {
               </div>
             )}
           </div>
-          
+
           {/* "Revisit These Links" Section */}
           <NotViewedRecommendations />
         </div>
       </main>
-      
+
       {/* Tag Correction Modal */}
       {showTagModal && selectedLink && (
         <TagCorrectionModal
@@ -133,7 +130,7 @@ const HomePage = () => {
           }}
         />
       )}
-      
+
       {/* Mobile Navigation */}
       <MobileNavigation onAddLinkClick={() => setShowLinkSubmitter(true)} />
     </div>
