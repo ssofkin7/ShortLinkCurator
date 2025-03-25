@@ -135,7 +135,7 @@ const HomePage = () => {
       )}
       
       {/* Mobile Navigation */}
-      <MobileNavigation onAddLinkClick={() => window.scrollTo(0, 0)} />
+      <MobileNavigation onAddLinkClick={() => setShowLinkSubmitter(true)} />
     </div>
   );
 };

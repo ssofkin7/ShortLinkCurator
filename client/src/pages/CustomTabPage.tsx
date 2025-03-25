@@ -338,7 +338,7 @@ const CustomTabPage = () => {
       </div>
 
       {/* Mobile Navigation */}
-      {isMobile && <MobileNavigation onAddLinkClick={() => setShowLinkSubmitter(true)} />}
+      <MobileNavigation onAddLinkClick={() => setShowLinkSubmitter(true)} />
 
       {/* Link Submitter Dialog */}
       {showLinkSubmitter && (
