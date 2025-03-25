@@ -1,6 +1,4 @@
-import { useState } from "react";
 import { User } from "@shared/schema";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -17,7 +15,6 @@ interface TopBarProps {
 }
 
 const TopBar = ({ user }: TopBarProps) => {
-  const [searchVisible, setSearchVisible] = useState(false);
   const { toast } = useToast();
   const [_, setLocation] = useLocation();
 
@@ -47,32 +44,9 @@ const TopBar = ({ user }: TopBarProps) => {
           <h1 className="text-xl font-semibold">LinkOrbit</h1>
         </div>
         
-        <div className={`${searchVisible ? 'flex' : 'hidden'} md:block w-full max-w-md`}>
-          <div className="relative">
-            <Input
-              type="text"
-              placeholder="Search links, tags, or content..."
-              className="w-full pl-10 pr-4 py-2"
-            />
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
-              <circle cx="11" cy="11" r="8"></circle>
-              <path d="m21 21-4.3-4.3"></path>
-            </svg>
-          </div>
-        </div>
+        <div className="flex-1"></div>
         
         <div className="flex items-center gap-3">
-          <Button 
-            variant="outline" 
-            size="icon" 
-            className={`md:hidden h-9 w-9 rounded-lg bg-gray-100 ${searchVisible ? 'text-blue-600' : 'text-gray-600'}`}
-            onClick={() => setSearchVisible(!searchVisible)}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8"></circle>
-              <path d="m21 21-4.3-4.3"></path>
-            </svg>
-          </Button>
           
           <Popover>
             <PopoverTrigger asChild>
