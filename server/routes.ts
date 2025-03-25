@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { analyzeVideoContent, generateRecommendations, type LinkMetadata } from "./openai";
 import { detectPlatform } from "./utils/platformUtils";
-import { insertUserSchema, insertLinkSchema, insertTagSchema } from "../shared/schema";
+import { insertUserSchema, insertLinkSchema, insertTagSchema, insertCustomTabSchema } from "../shared/schema";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import session from "express-session";
@@ -549,6 +549,194 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Update last viewed error:", error);
       res.status(500).json({ message: "Error updating link view timestamp" });
+    }
+  });
+  
+  // Title editing route
+  app.patch("/api/links/:id/title", authenticate, async (req: Request, res: Response) => {
+    try {
+      const linkId = parseInt(req.params.id);
+      const { title } = req.body;
+      const userId = req.session.userId as number;
+      
+      if (isNaN(linkId)) {
+        return res.status(400).json({ message: "Invalid link ID" });
+      }
+      
+      // Validate that we have a title
+      if (!title || title.trim() === '') {
+        return res.status(400).json({ message: "Title cannot be empty" });
+      }
+      
+      // Verify link belongs to user
+      const link = await storage.getLinkById(linkId);
+      if (!link || link.user_id !== userId) {
+        return res.status(403).json({ message: "Unauthorized access to this link" });
+      }
+      
+      await storage.updateLinkTitle(linkId, userId, title);
+      res.status(200).json({ message: "Title updated successfully" });
+    } catch (error) {
+      console.error("Update title error:", error);
+      res.status(500).json({ message: "Error updating title" });
+    }
+  });
+
+  // Custom Tab routes
+  app.post("/api/custom-tabs", authenticate, validate(insertCustomTabSchema), async (req: Request, res: Response) => {
+    try {
+      const { name, icon, description } = req.body;
+      const userId = req.session.userId as number;
+      
+      const customTab = await storage.createCustomTab({
+        name,
+        icon: icon || "folder",
+        description: description || "",
+        user_id: userId
+      });
+      
+      res.status(201).json(customTab);
+    } catch (error) {
+      console.error("Create custom tab error:", error);
+      res.status(500).json({ message: "Error creating custom tab" });
+    }
+  });
+
+  app.get("/api/custom-tabs", authenticate, async (req: Request, res: Response) => {
+    try {
+      const userId = req.session.userId as number;
+      const customTabs = await storage.getCustomTabsByUserId(userId);
+      res.status(200).json(customTabs);
+    } catch (error) {
+      console.error("Get custom tabs error:", error);
+      res.status(500).json({ message: "Error fetching custom tabs" });
+    }
+  });
+
+  app.get("/api/custom-tabs/:id", authenticate, async (req: Request, res: Response) => {
+    try {
+      const tabId = parseInt(req.params.id);
+      const userId = req.session.userId as number;
+      
+      if (isNaN(tabId)) {
+        return res.status(400).json({ message: "Invalid tab ID" });
+      }
+      
+      const customTab = await storage.getCustomTabById(tabId);
+      
+      if (!customTab) {
+        return res.status(404).json({ message: "Custom tab not found" });
+      }
+      
+      // Verify tab belongs to user
+      if (customTab.user_id !== userId) {
+        return res.status(403).json({ message: "Unauthorized access to this tab" });
+      }
+      
+      res.status(200).json(customTab);
+    } catch (error) {
+      console.error("Get custom tab error:", error);
+      res.status(500).json({ message: "Error fetching custom tab" });
+    }
+  });
+
+  app.delete("/api/custom-tabs/:id", authenticate, async (req: Request, res: Response) => {
+    try {
+      const tabId = parseInt(req.params.id);
+      const userId = req.session.userId as number;
+      
+      if (isNaN(tabId)) {
+        return res.status(400).json({ message: "Invalid tab ID" });
+      }
+      
+      await storage.deleteCustomTab(tabId, userId);
+      res.status(200).json({ message: "Custom tab deleted successfully" });
+    } catch (error) {
+      console.error("Delete custom tab error:", error);
+      res.status(500).json({ message: "Error deleting custom tab" });
+    }
+  });
+
+  app.post("/api/custom-tabs/:tabId/links/:linkId", authenticate, async (req: Request, res: Response) => {
+    try {
+      const tabId = parseInt(req.params.tabId);
+      const linkId = parseInt(req.params.linkId);
+      const userId = req.session.userId as number;
+      
+      if (isNaN(tabId) || isNaN(linkId)) {
+        return res.status(400).json({ message: "Invalid tab or link ID" });
+      }
+      
+      // Verify tab belongs to user
+      const customTab = await storage.getCustomTabById(tabId);
+      if (!customTab || customTab.user_id !== userId) {
+        return res.status(403).json({ message: "Unauthorized access to this tab" });
+      }
+      
+      // Verify link belongs to user
+      const link = await storage.getLinkById(linkId);
+      if (!link || link.user_id !== userId) {
+        return res.status(403).json({ message: "Unauthorized access to this link" });
+      }
+      
+      await storage.addLinkToTab(linkId, tabId);
+      res.status(200).json({ message: "Link added to tab successfully" });
+    } catch (error) {
+      console.error("Add link to tab error:", error);
+      res.status(500).json({ message: "Error adding link to tab" });
+    }
+  });
+
+  app.delete("/api/custom-tabs/:tabId/links/:linkId", authenticate, async (req: Request, res: Response) => {
+    try {
+      const tabId = parseInt(req.params.tabId);
+      const linkId = parseInt(req.params.linkId);
+      const userId = req.session.userId as number;
+      
+      if (isNaN(tabId) || isNaN(linkId)) {
+        return res.status(400).json({ message: "Invalid tab or link ID" });
+      }
+      
+      // Verify tab belongs to user
+      const customTab = await storage.getCustomTabById(tabId);
+      if (!customTab || customTab.user_id !== userId) {
+        return res.status(403).json({ message: "Unauthorized access to this tab" });
+      }
+      
+      // Verify link belongs to user
+      const link = await storage.getLinkById(linkId);
+      if (!link || link.user_id !== userId) {
+        return res.status(403).json({ message: "Unauthorized access to this link" });
+      }
+      
+      await storage.removeLinkFromTab(linkId, tabId);
+      res.status(200).json({ message: "Link removed from tab successfully" });
+    } catch (error) {
+      console.error("Remove link from tab error:", error);
+      res.status(500).json({ message: "Error removing link from tab" });
+    }
+  });
+
+  app.get("/api/custom-tabs/:id/links", authenticate, async (req: Request, res: Response) => {
+    try {
+      const tabId = parseInt(req.params.id);
+      const userId = req.session.userId as number;
+      
+      if (isNaN(tabId)) {
+        return res.status(400).json({ message: "Invalid tab ID" });
+      }
+      
+      // Verify tab belongs to user
+      const customTab = await storage.getCustomTabById(tabId);
+      if (!customTab || customTab.user_id !== userId) {
+        return res.status(403).json({ message: "Unauthorized access to this tab" });
+      }
+      
+      const links = await storage.getLinksByTabId(tabId);
+      res.status(200).json(links);
+    } catch (error) {
+      console.error("Get links by tab error:", error);
+      res.status(500).json({ message: "Error fetching links for tab" });
     }
   });
 
