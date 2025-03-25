@@ -241,7 +241,7 @@ const ContentLibrary = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search links by title, URL, tags or category..."
-            className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           />
           {searchQuery && (
             <button 
@@ -263,7 +263,7 @@ const ContentLibrary = ({
           <div className="flex -mb-px tabs-scrollbar">
             <Button 
               variant="link" 
-              className={`px-4 py-2.5 text-sm whitespace-nowrap ${activeTab === 'all' ? 'border-b-2 border-blue-500 text-blue-600 font-medium' : 'border-b-2 border-transparent text-gray-500 hover:text-gray-700'}`}
+              className={`px-4 py-2.5 text-sm whitespace-nowrap ${activeTab === 'all' ? 'border-b-2 border-indigo-500 text-indigo-600 font-medium' : 'border-b-2 border-transparent text-gray-500 hover:text-gray-700'}`}
               onClick={() => onTabChange('all')}
             >
               All ({counts.all})
@@ -387,7 +387,7 @@ const ContentLibrary = ({
                 <Button 
                   key={platform}
                   variant="link" 
-                  className={`px-4 py-2.5 text-sm whitespace-nowrap ${activeTab === platform ? 'border-b-2 border-blue-500 text-blue-600 font-medium' : 'border-b-2 border-transparent text-gray-500 hover:text-gray-700'}`}
+                  className={`px-4 py-2.5 text-sm whitespace-nowrap ${activeTab === platform ? 'border-b-2 border-indigo-500 text-indigo-600 font-medium' : 'border-b-2 border-transparent text-gray-500 hover:text-gray-700'}`}
                   onClick={() => onTabChange(platform)}
                 >
                   {getTabIcon()}
@@ -408,7 +408,7 @@ const ContentLibrary = ({
           {filteredLinks.length > 0 && (
             <button 
               onClick={() => setSearchQuery('')}
-              className="ml-2 text-blue-500 text-sm hover:underline"
+              className="ml-2 text-indigo-500 text-sm hover:underline"
             >
               Clear search
             </button>
@@ -420,7 +420,7 @@ const ContentLibrary = ({
       <section className="mb-10">
         {isLoading ? (
           <div className="flex justify-center items-center py-10">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin text-blue-500">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin text-indigo-500">
               <path d="M21 12a9 9 0 1 1-6.219-8.56" />
             </svg>
             <span className="ml-2">Loading your content...</span>

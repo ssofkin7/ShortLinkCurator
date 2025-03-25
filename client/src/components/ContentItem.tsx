@@ -332,7 +332,7 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
       <div className="flex-grow min-w-0">
         <div className="flex items-center justify-between">
           <h3 
-            className="font-medium text-gray-900 truncate cursor-pointer hover:text-blue-600"
+            className="font-medium text-gray-900 truncate cursor-pointer hover:text-indigo-600"
             onClick={() => window.open(link.url, "_blank")}
           >
             {link.title}
@@ -539,7 +539,7 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
       <div className="p-3">
         <div className="flex items-center justify-between">
           <h3 
-            className="font-medium text-gray-900 truncate cursor-pointer hover:text-blue-600 text-sm"
+            className="font-medium text-gray-900 truncate cursor-pointer hover:text-indigo-600 text-sm"
             onClick={() => window.open(link.url, "_blank")}
           >
             {link.title}
