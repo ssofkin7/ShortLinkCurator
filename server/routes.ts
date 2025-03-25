@@ -56,7 +56,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }),
     resave: false,
     saveUninitialized: false,
-    secret: process.env.SESSION_SECRET || 'linkOrbitSecretKey'
+    secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
+  cookie: { 
+    maxAge: 86400000,
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    sameSite: 'strict'
+  }
   }));
 
   // User routes
@@ -116,7 +122,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(200).json(userWithoutPassword);
     } catch (error) {
       console.error("Login error:", error);
-      res.status(500).json({ message: "Error logging in" });
+      res.status(500).json({ 
+        message: "Authentication failed",
+        code: "AUTH_ERROR"
+      });
     }
   });
 

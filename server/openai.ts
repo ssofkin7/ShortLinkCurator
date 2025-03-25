@@ -8,8 +8,12 @@ import {
 } from './utils/platformUtils';
 
 const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY || 'your-api-key' 
+  apiKey: process.env.OPENAI_API_KEY
 });
+
+if (!process.env.OPENAI_API_KEY) {
+  console.error('OpenAI API key not configured');
+}
 
 // Switched to GPT-3.5-turbo for cost optimization as requested by the user
 const MODEL = "gpt-3.5-turbo";
