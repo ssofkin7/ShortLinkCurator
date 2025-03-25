@@ -547,7 +547,37 @@ export default function ProfilePage() {
                       <div className="pt-6 mt-6 border-t border-gray-200">
                         <h3 className="font-medium text-base mb-4">Account Management</h3>
                         
-                        <div className="mb-8">
+                        <div className="mb-6">
+                          <h4 className="text-sm font-medium mb-3">Subscription</h4>
+                          {user?.is_premium ? (
+                            <>
+                              <Button 
+                                variant="outline" 
+                                className="mb-3 border-amber-300 text-amber-700 hover:bg-amber-50"
+                              >
+                                Cancel Subscription Plan
+                              </Button>
+                              <p className="text-xs text-gray-500">
+                                Your premium subscription will remain active until the end of your current billing period.
+                              </p>
+                            </>
+                          ) : (
+                            <>
+                              <Button 
+                                variant="outline" 
+                                className="mb-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-0 hover:from-blue-600 hover:to-indigo-600"
+                              >
+                                Upgrade to Premium
+                              </Button>
+                              <p className="text-xs text-gray-500">
+                                Upgrade to premium for advanced features and unlimited content organization.
+                              </p>
+                            </>
+                          )}
+                        </div>
+                        
+                        <div className="mb-8 pt-6 border-t border-gray-100">
+                          <h4 className="text-sm font-medium mb-3 text-red-600">Danger Zone</h4>
                           <Button variant="destructive" className="mb-3">
                             Delete Account
                           </Button>
