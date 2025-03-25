@@ -64,7 +64,6 @@ function AppContent() {
             <Route path="/" component={LandingPage} />
             <Route path="/login" component={LoginPage} />
             <Route path="/register" component={RegisterPage} />
-            <Route component={NotFound} />
           </>
         ) : (
           <Router />
