@@ -47,7 +47,26 @@ export default function LibraryPage() {
   // Handle fetching custom tab links when active tab changes
   useEffect(() => {
     if (activeTab.startsWith('custom-')) {
-      const tabId = parseInt(activeTab.replace('custom-', ''), 10);
+      const tabIdStr = activeTab.replace('custom-', '');
+      
+      // Ensure tabId is a valid number before proceeding
+      if (!tabIdStr || isNaN(parseInt(tabIdStr, 10))) {
+        console.error('Invalid tab ID');
+        setCustomTabLinks([]);
+        setIsLoadingCustomTabLinks(false);
+        return;
+      }
+      
+      const tabId = parseInt(tabIdStr, 10);
+      
+      // Check if tabId exists in customTabs
+      const tabExists = customTabs.some(tab => tab.id === tabId);
+      if (!tabExists) {
+        console.error('Tab ID not found in available tabs');
+        setCustomTabLinks([]);
+        setIsLoadingCustomTabLinks(false);
+        return;
+      }
       
       // Fetch links for the selected custom tab
       const fetchCustomTabLinks = async () => {
@@ -74,7 +93,7 @@ export default function LibraryPage() {
       // Reset custom tab links when viewing regular tabs
       setCustomTabLinks([]);
     }
-  }, [activeTab]);
+  }, [activeTab, customTabs]);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
