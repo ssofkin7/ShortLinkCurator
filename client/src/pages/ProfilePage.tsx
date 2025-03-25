@@ -351,53 +351,53 @@ export default function ProfilePage() {
                   </Card>
                 </TabsContent>
 
-                <TabsContent value="notifications" className="space-y-4 w-full bg-white rounded-lg p-6 shadow-sm mt-4">
-                  <Card className="w-full">
-                    <CardHeader>
-                      <CardTitle>Notification Preferences</CardTitle>
-                      <CardDescription>
-                        Configure how you want to receive notifications.
+                <TabsContent value="notifications" className="space-y-6 w-full bg-white rounded-xl p-10 shadow-md mt-8">
+                  <Card className="w-full border-0 shadow-none">
+                    <CardHeader className="px-0 pt-0">
+                      <CardTitle className="text-2xl font-bold text-gray-900">Notification Settings</CardTitle>
+                      <CardDescription className="text-base text-gray-600 mt-3 leading-relaxed">
+                        Control how and when you receive notifications about your account activity.
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-6">
+                    <CardContent className="space-y-8 px-0 mt-4">
                       <Form {...notificationForm}>
                         <form
                           onSubmit={notificationForm.handleSubmit(onNotificationSubmit)}
-                          className="space-y-4"
+                          className="space-y-6"
                         >
                           <FormField
                             control={notificationForm.control}
                             name="emailNotifications"
                             render={({ field }) => (
-                              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                <div className="space-y-0.5">
-                                  <FormLabel className="text-base">
+                              <FormItem className="flex flex-row items-center justify-between rounded-lg border border-gray-200 p-6 bg-white hover:bg-gray-50 transition-colors">
+                                <div className="space-y-2">
+                                  <FormLabel className="text-lg font-medium text-gray-900">
                                     Email Notifications
                                   </FormLabel>
-                                  <FormDescription>
-                                    Receive email notifications about your account and content.
+                                  <FormDescription className="text-sm text-gray-600">
+                                    Receive email notifications about your account activity and content updates.
                                   </FormDescription>
                                 </div>
                                 <FormControl>
                                   <Switch
                                     checked={field.value}
                                     onCheckedChange={field.onChange}
+                                    className="data-[state=checked]:bg-primary"
                                   />
                                 </FormControl>
                               </FormItem>
                             )}
                           />
-
                           <FormField
                             control={notificationForm.control}
                             name="newContentAlerts"
                             render={({ field }) => (
-                              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                <div className="space-y-0.5">
-                                  <FormLabel className="text-base">
+                              <FormItem className="flex flex-row items-center justify-between rounded-lg border border-gray-200 p-6 bg-white hover:bg-gray-50 transition-colors">
+                                <div className="space-y-2">
+                                  <FormLabel className="text-lg font-medium text-gray-900">
                                     New Content Alerts
                                   </FormLabel>
-                                  <FormDescription>
+                                  <FormDescription className="text-sm text-gray-600">
                                     Get notified when new similar content is available.
                                   </FormDescription>
                                 </div>
@@ -405,22 +405,22 @@ export default function ProfilePage() {
                                   <Switch
                                     checked={field.value}
                                     onCheckedChange={field.onChange}
+                                    className="data-[state=checked]:bg-primary"
                                   />
                                 </FormControl>
                               </FormItem>
                             )}
                           />
-
                           <FormField
                             control={notificationForm.control}
                             name="weeklyDigest"
                             render={({ field }) => (
-                              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                <div className="space-y-0.5">
-                                  <FormLabel className="text-base">
+                              <FormItem className="flex flex-row items-center justify-between rounded-lg border border-gray-200 p-6 bg-white hover:bg-gray-50 transition-colors">
+                                <div className="space-y-2">
+                                  <FormLabel className="text-lg font-medium text-gray-900">
                                     Weekly Digest
                                   </FormLabel>
-                                  <FormDescription>
+                                  <FormDescription className="text-sm text-gray-600">
                                     Receive a weekly summary of your content activity.
                                   </FormDescription>
                                 </div>
@@ -428,22 +428,22 @@ export default function ProfilePage() {
                                   <Switch
                                     checked={field.value}
                                     onCheckedChange={field.onChange}
+                                    className="data-[state=checked]:bg-primary"
                                   />
                                 </FormControl>
                               </FormItem>
                             )}
                           />
-
                           <FormField
                             control={notificationForm.control}
                             name="platformUpdates"
                             render={({ field }) => (
-                              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                <div className="space-y-0.5">
-                                  <FormLabel className="text-base">
+                              <FormItem className="flex flex-row items-center justify-between rounded-lg border border-gray-200 p-6 bg-white hover:bg-gray-50 transition-colors">
+                                <div className="space-y-2">
+                                  <FormLabel className="text-lg font-medium text-gray-900">
                                     Platform Updates
                                   </FormLabel>
-                                  <FormDescription>
+                                  <FormDescription className="text-sm text-gray-600">
                                     Get notified about new features and improvements.
                                   </FormDescription>
                                 </div>
@@ -451,6 +451,7 @@ export default function ProfilePage() {
                                   <Switch
                                     checked={field.value}
                                     onCheckedChange={field.onChange}
+                                    className="data-[state=checked]:bg-primary"
                                   />
                                 </FormControl>
                               </FormItem>
@@ -464,34 +465,35 @@ export default function ProfilePage() {
                   </Card>
                 </TabsContent>
 
-                <TabsContent value="security" className="space-y-4 w-full bg-white rounded-lg p-6 shadow-sm mt-4">
-                  <Card className="w-full">
-                    <CardHeader>
-                      <CardTitle>Security Settings</CardTitle>
-                      <CardDescription>
-                        Manage your account security and password.
+                <TabsContent value="security" className="space-y-6 w-full bg-white rounded-xl p-10 shadow-md mt-8">
+                  <Card className="w-full border-0 shadow-none">
+                    <CardHeader className="px-0 pt-0">
+                      <CardTitle className="text-2xl font-bold text-gray-900">Security Settings</CardTitle>
+                      <CardDescription className="text-base text-gray-600 mt-3 leading-relaxed">
+                        Manage your account security and update your password.
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-6">
+                    <CardContent className="space-y-8 px-0 mt-4">
                       <Form {...passwordForm}>
                         <form
                           onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
-                          className="space-y-4"
+                          className="space-y-6 max-w-md"
                         >
                           <FormField
                             control={passwordForm.control}
                             name="currentPassword"
                             render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Current Password</FormLabel>
+                              <FormItem className="space-y-2">
+                                <FormLabel className="text-sm font-medium text-gray-700">Current Password</FormLabel>
                                 <FormControl>
                                   <Input
                                     {...field}
                                     type="password"
                                     placeholder="••••••••"
+                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20"
                                   />
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage className="text-sm text-red-500" />
                               </FormItem>
                             )}
                           />
@@ -500,19 +502,20 @@ export default function ProfilePage() {
                             control={passwordForm.control}
                             name="newPassword"
                             render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>New Password</FormLabel>
+                              <FormItem className="space-y-2">
+                                <FormLabel className="text-sm font-medium text-gray-700">New Password</FormLabel>
                                 <FormControl>
                                   <Input
                                     {...field}
                                     type="password"
                                     placeholder="••••••••"
+                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20"
                                   />
                                 </FormControl>
-                                <FormDescription>
+                                <FormDescription className="text-xs text-gray-500">
                                   Must be at least 8 characters with a number.
                                 </FormDescription>
-                                <FormMessage />
+                                <FormMessage className="text-sm text-red-500" />
                               </FormItem>
                             )}
                           />
@@ -521,16 +524,17 @@ export default function ProfilePage() {
                             control={passwordForm.control}
                             name="confirmPassword"
                             render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Confirm New Password</FormLabel>
+                              <FormItem className="space-y-2">
+                                <FormLabel className="text-sm font-medium text-gray-700">Confirm New Password</FormLabel>
                                 <FormControl>
                                   <Input
                                     {...field}
                                     type="password"
                                     placeholder="••••••••"
+                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20"
                                   />
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage className="text-sm text-red-500" />
                               </FormItem>
                             )}
                           />
@@ -538,6 +542,7 @@ export default function ProfilePage() {
                           <Button 
                             type="submit"
                             disabled={passwordMutation.isPending}
+                            className="w-full"
                           >
                             {passwordMutation.isPending ? "Updating..." : "Change Password"}
                           </Button>
@@ -553,7 +558,7 @@ export default function ProfilePage() {
                             <>
                               <Button 
                                 variant="outline" 
-                                className="mb-3 border-amber-300 text-amber-700 hover:bg-amber-50"
+                                className="mb-3 border-amber-300 text-amber-700 hover:bg-amber-50 w-full"
                               >
                                 Cancel Subscription Plan
                               </Button>
@@ -565,7 +570,7 @@ export default function ProfilePage() {
                             <>
                               <Button 
                                 variant="outline" 
-                                className="mb-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-0 hover:from-blue-600 hover:to-indigo-600"
+                                className="mb-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-0 hover:from-blue-600 hover:to-indigo-600 w-full"
                               >
                                 Upgrade to Premium
                               </Button>
@@ -578,7 +583,7 @@ export default function ProfilePage() {
 
                         <div className="mb-8 pt-6 border-t border-gray-100">
                           <h4 className="text-sm font-medium mb-3 text-red-600">Danger Zone</h4>
-                          <Button variant="destructive" className="mb-3">
+                          <Button variant="destructive" className="w-full">
                             Delete Account
                           </Button>
                           <p className="text-xs text-gray-500">
