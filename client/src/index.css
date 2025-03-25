@@ -43,28 +43,13 @@
   @apply text-gray-900 bg-white/80 shadow-sm;
 }
 
-/* Responsive utilities */
-@layer utilities {
-  .responsive-container {
-    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
-  }
-  
-  .responsive-grid {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
-  }
-  
-  .responsive-text {
-    @apply text-sm sm:text-base lg:text-lg;
-  }
-}
-
 /* Form styling */
 .form-item {
-  @apply space-y-2 w-full max-w-full sm:max-w-md mx-auto;
+  @apply space-y-2;
 }
 
 .form-label {
-  @apply text-sm font-medium text-gray-700 block;
+  @apply text-sm font-medium text-gray-700;
 }
 
 .form-input {

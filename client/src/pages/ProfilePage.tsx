@@ -235,21 +235,21 @@ export default function ProfilePage() {
                 onValueChange={setActiveTab}
                 className="w-full"
               >
-                <TabsList className="w-full flex flex-col sm:flex-row justify-center bg-gray-100 rounded-xl p-2 space-y-2 sm:space-y-0 sm:space-x-3 border border-gray-200/80 shadow-sm">
+                <TabsList className="w-full flex justify-center bg-gray-100 rounded-xl p-2 space-x-3 border border-gray-200/80 shadow-sm">
                   <TabsTrigger 
-                    className="flex-1 py-3 sm:py-3.5 px-4 sm:px-5 font-medium rounded-lg transition-all data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md hover:bg-white/80 text-gray-700 text-sm sm:text-base" 
+                    className="flex-1 py-3.5 px-5 font-medium rounded-lg transition-all data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md hover:bg-white/80 text-gray-700" 
                     value="profile"
                   >
                     Profile Information
                   </TabsTrigger>
                   <TabsTrigger 
-                    className="flex-1 py-3 sm:py-3.5 px-4 sm:px-5 font-medium rounded-lg transition-all data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md hover:bg-white/80 text-gray-700 text-sm sm:text-base" 
+                    className="flex-1 py-3.5 px-5 font-medium rounded-lg transition-all data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md hover:bg-white/80 text-gray-700" 
                     value="notifications"
                   >
                     Notifications
                   </TabsTrigger>
                   <TabsTrigger 
-                    className="flex-1 py-3 sm:py-3.5 px-4 sm:px-5 font-medium rounded-lg transition-all data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md hover:bg-white/80 text-gray-700 text-sm sm:text-base" 
+                    className="flex-1 py-3.5 px-5 font-medium rounded-lg transition-all data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md hover:bg-white/80 text-gray-700" 
                     value="security"
                   >
                     Security
