@@ -468,12 +468,10 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
             </DropdownMenu>
           </div>
           <div className="flex items-center text-xs text-gray-500 mt-1">
-            <span>{formatDate(new Date(link.created_at))}</span>
-            {link.last_viewed && (
-              <>
-                <span className="mx-1">•</span>
-                <span>Viewed {formatDate(new Date(link.last_viewed))}</span>
-              </>
+            {link.last_viewed ? (
+              <span>Viewed {formatDate(new Date(link.last_viewed))}</span>
+            ) : (
+              <span>Added {formatDate(new Date(link.created_at))}</span>
             )}
           </div>
           <div className="mt-2 flex flex-wrap gap-1">
@@ -671,12 +669,10 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
           </DropdownMenu>
         </div>
         <div className="flex items-center text-xs text-gray-500 mt-1">
-          <span>{formatDate(new Date(link.created_at))}</span>
-          {link.last_viewed && (
-            <>
-              <span className="mx-1">•</span>
-              <span>Viewed {formatDate(new Date(link.last_viewed))}</span>
-            </>
+          {link.last_viewed ? (
+            <span>Viewed {formatDate(new Date(link.last_viewed))}</span>
+          ) : (
+            <span>Added {formatDate(new Date(link.created_at))}</span>
           )}
         </div>
         <div className="mt-2 flex flex-wrap gap-1">
