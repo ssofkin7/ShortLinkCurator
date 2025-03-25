@@ -1,10 +1,17 @@
-import React from "react";
-import { createRoot } from "react-dom/client";
-import Test from "./test";
-import "./index.css";
+/* eslint-disable */
+// Importing with aliased syntax for better preamble detection
+import * as React from 'react';
+import * as ReactDOM from 'react-dom/client';
+import './index.css';
+import Minimal from './Minimal';
 
-createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <Test />
-  </React.StrictMode>
-);
+// Direct access to DOM element and simplified render
+const rootElement = document.getElementById('root');
+if (rootElement) {
+  const root = ReactDOM.createRoot(rootElement);
+  root.render(
+    <React.StrictMode>
+      <Minimal />
+    </React.StrictMode>
+  );
+}
