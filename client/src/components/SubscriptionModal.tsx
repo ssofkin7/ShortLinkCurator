@@ -1,5 +1,6 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogHeader } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 interface SubscriptionModalProps {
   onClose: () => void;
@@ -16,6 +17,9 @@ const SubscriptionModal = ({ onClose }: SubscriptionModalProps) => {
   return (
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="p-0 max-w-md">
+        <DialogHeader className="sr-only">
+          <DialogTitle>Upgrade to Pro</DialogTitle>
+        </DialogHeader>
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 text-white">
           <h3 className="text-xl font-semibold mb-2">Upgrade to Pro</h3>
           <p className="text-blue-100">Unlock unlimited links and premium features</p>
