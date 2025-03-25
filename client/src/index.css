@@ -30,6 +30,16 @@
     scrollbar-color: rgba(203, 213, 225, 0.8) transparent;
   }
 
+/* Custom tab styling */
+[data-state="active"][role="tab"] {
+  @apply bg-background text-foreground shadow-sm;
+}
+
+[role="tab"] {
+  @apply text-muted-foreground;
+}
+
+
   .tabs-scrollbar::-webkit-scrollbar {
     @apply h-1.5;
   }

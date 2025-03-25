@@ -235,10 +235,10 @@ export default function ProfilePage() {
                 onValueChange={setActiveTab}
                 className="w-full"
               >
-                <TabsList className="w-full flex justify-center gap-4">
-                  <TabsTrigger value="profile">Profile Information</TabsTrigger>
-                  <TabsTrigger value="notifications">Notifications</TabsTrigger>
-                  <TabsTrigger value="security">Security</TabsTrigger>
+                <TabsList className="w-full flex justify-center space-x-1 bg-muted/30 rounded-lg p-1">
+                  <TabsTrigger className="flex-1 py-3 font-medium transition-colors hover:bg-muted/50" value="profile">Profile Information</TabsTrigger>
+                  <TabsTrigger className="flex-1 py-3 font-medium transition-colors hover:bg-muted/50" value="notifications">Notifications</TabsTrigger>
+                  <TabsTrigger className="flex-1 py-3 font-medium transition-colors hover:bg-muted/50" value="security">Security</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="profile" className="space-y-4 w-full bg-white rounded-lg p-6 shadow-sm mt-4">
