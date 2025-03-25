@@ -16,6 +16,7 @@ const HomePage = () => {
   const [processingLink, setProcessingLink] = useState<string | null>(null);
   const [selectedLink, setSelectedLink] = useState<LinkWithTags | null>(null);
   const [showTagModal, setShowTagModal] = useState(false);
+  const [showLinkSubmitter, setShowLinkSubmitter] = useState(false);
 
   // Fetch current user
   const { data: user, isLoading: userLoading } = useQuery<User>({
@@ -57,8 +58,13 @@ const HomePage = () => {
         <div className="container mx-auto px-4 py-6">
           {/* Link Submitter */}
           <div className="mb-8">
-            {/* Link Submitter */}
-            <LinkSubmitter onSubmit={handleSubmitLink} />
+            {/* Always show on desktop, only show on mobile when showLinkSubmitter is true */}
+            <div className={`${!showLinkSubmitter ? 'hidden md:block' : 'block'}`}>
+              <LinkSubmitter onSubmit={(url) => {
+                handleSubmitLink(url);
+                setShowLinkSubmitter(false); // Hide after submission
+              }} />
+            </div>
           </div>
 
           {/* AI Processing Dashboard */}
