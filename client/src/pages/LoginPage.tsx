@@ -37,7 +37,7 @@ export default function LoginPage() {
       
       toast({
         title: "Login successful",
-        description: "Welcome back to LinkSnap!",
+        description: "Welcome back to LinkOrbit!",
       });
       
       // For now, let's go back to using window.location.href to ensure a full reload
@@ -58,13 +58,15 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <div className="flex items-center gap-2 mb-2">
-            <div className="h-8 w-8 bg-blue-500 rounded-lg flex items-center justify-center">
+            <div className="h-8 w-8 bg-indigo-600 rounded-lg flex items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                <circle cx="12" cy="12" r="8" />
+                <path d="M8 12a4 4 0 0 1 8 0" />
+                <path d="M18 12a6 6 0 0 0-12 0" />
+                <path d="M16 8l-4 4-4-4" />
               </svg>
             </div>
-            <h1 className="text-xl font-semibold">LinkSnap</h1>
+            <h1 className="text-xl font-semibold">LinkOrbit</h1>
           </div>
           <CardTitle className="text-2xl">Welcome back</CardTitle>
           <CardDescription>
@@ -110,7 +112,7 @@ export default function LoginPage() {
           <p className="text-sm text-gray-600">
             Don't have an account?{" "}
             <Link href="/register">
-              <span className="text-blue-600 hover:text-blue-800 font-medium cursor-pointer">Sign up</span>
+              <span className="text-indigo-600 hover:text-indigo-800 font-medium cursor-pointer">Sign up</span>
             </Link>
           </p>
         </CardFooter>
