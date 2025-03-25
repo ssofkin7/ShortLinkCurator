@@ -227,13 +227,13 @@ export default function ProfilePage() {
           <TopBar user={user} />
           
           <main className="flex-1 overflow-auto pb-20">
-            <div className="container mx-auto px-4 py-6">
+            <div className="container mx-auto px-4 py-6 max-w-full overflow-x-hidden">
               <h1 className="text-2xl font-bold mb-6">Your Profile</h1>
               
               <Tabs
                 value={activeTab}
                 onValueChange={setActiveTab}
-                className="space-y-6 mb-10"
+                className="space-y-6 mb-10 w-full"
               >
                 <TabsList className="bg-white border border-gray-200">
                   <TabsTrigger value="profile">Profile Information</TabsTrigger>
@@ -241,8 +241,8 @@ export default function ProfilePage() {
                   <TabsTrigger value="security">Security</TabsTrigger>
                 </TabsList>
                 
-                <TabsContent value="profile" className="space-y-6">
-                  <Card>
+                <TabsContent value="profile" className="space-y-6 w-full">
+                  <Card className="w-full">
                     <CardHeader>
                       <CardTitle>Profile Information</CardTitle>
                       <CardDescription>
@@ -351,8 +351,8 @@ export default function ProfilePage() {
                   </Card>
                 </TabsContent>
                 
-                <TabsContent value="notifications" className="space-y-6">
-                  <Card>
+                <TabsContent value="notifications" className="space-y-6 w-full">
+                  <Card className="w-full">
                     <CardHeader>
                       <CardTitle>Notification Preferences</CardTitle>
                       <CardDescription>
@@ -464,8 +464,8 @@ export default function ProfilePage() {
                   </Card>
                 </TabsContent>
                 
-                <TabsContent value="security" className="space-y-6">
-                  <Card>
+                <TabsContent value="security" className="space-y-6 w-full">
+                  <Card className="w-full">
                     <CardHeader>
                       <CardTitle>Security Settings</CardTitle>
                       <CardDescription>
