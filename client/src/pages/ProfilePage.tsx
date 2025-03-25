@@ -222,60 +222,51 @@ export default function ProfilePage() {
     <SidebarProvider>
       <div className="flex h-screen bg-gray-50">
         <CustomSidebar user={user} isLoading={isLoading} />
-
+        
         <div className="flex-1 flex flex-col h-screen overflow-hidden">
           <TopBar user={user} />
-
+          
           <main className="flex-1 overflow-auto w-full">
-            <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-              <h1 className="text-3xl font-bold tracking-tight text-center mb-8">Your Profile</h1>
-
+            <div style={{width: "calc(100% - 40px)", maxWidth: "1200px"}} className="mx-auto px-4 py-6">
+              <h1 className="text-2xl font-bold mb-6">Your Profile</h1>
+              
               <Tabs
                 value={activeTab}
                 onValueChange={setActiveTab}
-                className="w-full"
+                className="space-y-6 mb-10 w-full"
               >
-                <TabsList className="w-full flex justify-center bg-gray-100/80 rounded-xl p-2 space-x-2 border border-gray-200">
-                  <TabsTrigger 
-                    className="flex-1 py-3 px-4 font-medium rounded-lg transition-all data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm hover:bg-gray-50" 
-                    value="profile"
-                  >
-                    Profile Information
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    className="flex-1 py-3 px-4 font-medium rounded-lg transition-all data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm hover:bg-gray-50" 
-                    value="notifications"
-                  >
-                    Notifications
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    className="flex-1 py-3 px-4 font-medium rounded-lg transition-all data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm hover:bg-gray-50" 
-                    value="security"
-                  >
-                    Security
-                  </TabsTrigger>
+                <TabsList className="bg-white border border-gray-200">
+                  <TabsTrigger value="profile">Profile Information</TabsTrigger>
+                  <TabsTrigger value="notifications">Notifications</TabsTrigger>
+                  <TabsTrigger value="security">Security</TabsTrigger>
                 </TabsList>
-
-                <TabsContent value="profile" className="space-y-6 w-full bg-white rounded-xl p-8 shadow-sm mt-6">
-                  <Card className="w-full border-0 shadow-none">
-                    <CardHeader className="px-0 pt-0">
-                      <CardTitle className="text-2xl font-semibold">Profile Information</CardTitle>
-                      <CardDescription className="text-base text-gray-600 mt-2">
+                
+                <TabsContent value="profile" className="space-y-6 w-full">
+                  <Card className="w-full">
+                    <CardHeader>
+                      <CardTitle>Profile Information</CardTitle>
+                      <CardDescription>
                         Update your personal information and public profile.
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-8 px-0">
+                    <CardContent className="space-y-6">
                       <Form {...profileForm}>
                         <form
                           onSubmit={profileForm.handleSubmit(onProfileSubmit)}
-                          className="space-y-6 max-w-md mx-auto"
+                          className="space-y-4"
                         >
-                          <div className="text-center mb-6">
-                            <p className="text-sm font-medium text-gray-900 mb-2">
+                          <div className="flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-6 mb-6">
+                            <div className="h-20 w-20 rounded-full bg-blue-500 flex items-center justify-center text-white text-xl font-bold mb-3">
+                              <span>{user?.username?.charAt(0).toUpperCase() || "U"}</span>
+                            </div>
+                            <h3 className="font-medium text-lg">{user?.display_name || user?.username}</h3>
+                            <p className="text-sm text-gray-500 mt-1 text-center max-w-xs">
                               {user?.email}
                             </p>
-                            <div className="inline-flex px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs">
-                              Active User
+                            <div className="flex items-center space-x-2 mt-3">
+                              <div className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs">
+                                Active User
+                              </div>
                             </div>
                           </div>
 
@@ -288,6 +279,9 @@ export default function ProfilePage() {
                                 <FormControl>
                                   <Input {...field} disabled={isLoading} />
                                 </FormControl>
+                                <FormDescription>
+                                  This is your public username.
+                                </FormDescription>
                                 <FormMessage />
                               </FormItem>
                             )}
@@ -300,8 +294,11 @@ export default function ProfilePage() {
                               <FormItem>
                                 <FormLabel>Display Name</FormLabel>
                                 <FormControl>
-                                  <Input {...field} placeholder="How others will see you" />
+                                  <Input {...field} placeholder="Your display name" />
                                 </FormControl>
+                                <FormDescription>
+                                  This is the name displayed to other users.
+                                </FormDescription>
                                 <FormMessage />
                               </FormItem>
                             )}
@@ -333,10 +330,13 @@ export default function ProfilePage() {
                                 <FormControl>
                                   <Textarea
                                     {...field}
-                                    placeholder="Tell others about yourself"
+                                    placeholder="A short bio about yourself"
                                     className="min-h-[120px]"
                                   />
                                 </FormControl>
+                                <FormDescription>
+                                  Tell others a little about yourself.
+                                </FormDescription>
                                 <FormMessage />
                               </FormItem>
                             )}
@@ -350,8 +350,8 @@ export default function ProfilePage() {
                     </CardContent>
                   </Card>
                 </TabsContent>
-
-                <TabsContent value="notifications" className="space-y-4 w-full bg-white rounded-lg p-6 shadow-sm mt-4">
+                
+                <TabsContent value="notifications" className="space-y-6 w-full">
                   <Card className="w-full">
                     <CardHeader>
                       <CardTitle>Notification Preferences</CardTitle>
@@ -463,8 +463,8 @@ export default function ProfilePage() {
                     </CardContent>
                   </Card>
                 </TabsContent>
-
-                <TabsContent value="security" className="space-y-4 w-full bg-white rounded-lg p-6 shadow-sm mt-4">
+                
+                <TabsContent value="security" className="space-y-6 w-full">
                   <Card className="w-full">
                     <CardHeader>
                       <CardTitle>Security Settings</CardTitle>
@@ -543,10 +543,10 @@ export default function ProfilePage() {
                           </Button>
                         </form>
                       </Form>
-
+                      
                       <div className="pt-6 mt-6 border-t border-gray-200">
                         <h3 className="font-medium text-base mb-4">Account Management</h3>
-
+                        
                         <div className="mb-6">
                           <h4 className="text-sm font-medium mb-3">Subscription</h4>
                           {user?.is_premium ? (
@@ -575,7 +575,7 @@ export default function ProfilePage() {
                             </>
                           )}
                         </div>
-
+                        
                         <div className="mb-8 pt-6 border-t border-gray-100">
                           <h4 className="text-sm font-medium mb-3 text-red-600">Danger Zone</h4>
                           <Button variant="destructive" className="mb-3">
@@ -593,7 +593,7 @@ export default function ProfilePage() {
               </Tabs>
             </div>
           </main>
-
+          
           <MobileNavigation onAddLinkClick={() => {}} />
         </div>
       </div>

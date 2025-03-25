@@ -30,24 +30,6 @@
     scrollbar-color: rgba(203, 213, 225, 0.8) transparent;
   }
 
-/* Custom tab styling */
-[data-state="active"][role="tab"] {
-  @apply bg-white text-primary font-semibold shadow-sm ring-1 ring-gray-200/50;
-}
-
-[role="tab"] {
-  @apply text-gray-600 transition-all duration-200;
-}
-
-[role="tab"]:hover {
-  @apply text-gray-900 bg-gray-50;
-}
-
-.tabs-content {
-  @apply transition-all duration-200;
-}
-
-
   .tabs-scrollbar::-webkit-scrollbar {
     @apply h-1.5;
   }
