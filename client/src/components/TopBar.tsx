@@ -179,8 +179,16 @@ const TopBar = ({ user }: TopBarProps) => {
                       key={notification.id}
                       className={`flex items-start gap-4 p-2 rounded-lg hover:bg-gray-50 cursor-pointer ${notification.read ? 'opacity-70' : ''}`}
                       onClick={() => {
+                        // Mark as read first
                         markAsRead(notification.id);
-                        notification.action && notification.action();
+                        // Then navigate
+                        if (notification.action) {
+                          // Close the popover first
+                          const closeBtn = document.querySelector('[data-radix-popover-close]') as HTMLElement;
+                          if (closeBtn) closeBtn.click();
+                          // Give time for popover to close then navigate
+                          setTimeout(() => notification.action!(), 100);
+                        }
                       }}
                     >
                       <div className={`h-9 w-9 rounded-full ${notification.iconBgColor} flex items-center justify-center shrink-0`}>
