@@ -37,10 +37,14 @@ const CustomTabPage = () => {
   const { 
     data: tabLinks = [], 
     isLoading: isLinksLoading,
-    refetch: refetchLinks
+    refetch: refetchLinks,
+    error: linksError
   } = useQuery<LinkWithTags[]>({
     queryKey: ['/api/custom-tabs', tabId, 'links'],
     enabled: !!tabId,
+    onError: (error) => {
+      console.error("Error fetching custom tab links:", error);
+    }
   });
 
   // Create state for tab links to enable local filtering
