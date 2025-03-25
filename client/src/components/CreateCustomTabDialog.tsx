@@ -93,11 +93,21 @@ const CreateCustomTabDialog: React.FC<CreateCustomTabDialogProps> = ({ isOpen, o
       onClose();
     } catch (error) {
       console.error("Failed to create custom tab:", error);
-      toast({
-        title: "Error",
-        description: "Failed to create custom tab. Please try again.",
-        variant: "destructive"
-      });
+      // Check for unauthorized errors
+      if (error instanceof Error && error.message.includes("401")) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to create custom tabs.",
+          variant: "destructive"
+        });
+        onClose(); // Close the dialog if not authenticated
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to create custom tab. Please try again.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }

@@ -78,28 +78,26 @@ const CustomSidebar = ({ user, isLoading }: SidebarProps) => {
             </div>
           </Link>
           
-          {/* Custom Tabs Section - Always show for authenticated users */}
-          {user && (
-            <div className="mt-4">
-              <CustomTabsList
-                activeTab={activeCustomTab || 'all'} 
-                onTabChange={(tabId) => {
-                  setActiveCustomTab(tabId);
-                  
-                  // Create a custom event to notify LibraryPage about tab change
-                  const tabChangeEvent = new CustomEvent('customTabChange', { 
-                    detail: { tabId }
-                  });
-                  window.dispatchEvent(tabChangeEvent);
-                  
-                  // If we're not already on the library page, navigate there
-                  if (location !== '/library') {
-                    setLocation('/library');
-                  }
-                }}
-              />
-            </div>
-          )}
+          {/* Custom Tabs Section - Always rendered but displays appropriate message if not authenticated */}
+          <div className="mt-4">
+            <CustomTabsList
+              activeTab={activeCustomTab || 'all'} 
+              onTabChange={(tabId) => {
+                setActiveCustomTab(tabId);
+                
+                // Create a custom event to notify LibraryPage about tab change
+                const tabChangeEvent = new CustomEvent('customTabChange', { 
+                  detail: { tabId }
+                });
+                window.dispatchEvent(tabChangeEvent);
+                
+                // If we're not already on the library page, navigate there
+                if (location !== '/library') {
+                  setLocation('/library');
+                }
+              }}
+            />
+          </div>
         </nav>
         
         <div className="mt-auto">

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
+import { apiRequest, getQueryFn } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
@@ -48,7 +48,9 @@ const CustomTabsList: React.FC<CustomTabsListProps> = ({ activeTab, onTabChange 
   const { data: customTabs = [], isLoading, isError } = useQuery<CustomTabWithLinks[]>({
     queryKey: ['/api/custom-tabs'],
     retry: 1,
-    staleTime: 1000 * 60 * 5 // 5 minutes
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: true
   });
 
   // Delete custom tab mutation
