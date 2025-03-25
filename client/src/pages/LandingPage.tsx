@@ -19,7 +19,7 @@ export default function LandingPage() {
         </h1>
         
         <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed">
-          Save and organize your favorite short-form content from TikTok, YouTube Shorts, and Instagram Reels — all in one beautiful space.
+          Save and organize your favorite short-form content from TikTok, YouTube Shorts, and Instagram Reels.
         </p>
 
         <div className="flex gap-6 justify-center mb-20">
