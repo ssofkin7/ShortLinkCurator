@@ -53,9 +53,7 @@ const CustomTabsList: React.FC<CustomTabsListProps> = ({ activeTab, onTabChange 
   // Delete custom tab mutation
   const deleteTabMutation = useMutation({
     mutationFn: async (tabId: number) => {
-      await apiRequest(`/api/custom-tabs/${tabId}`, {
-        method: 'DELETE',
-      });
+      await apiRequest('DELETE', `/api/custom-tabs/${tabId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/custom-tabs'] });

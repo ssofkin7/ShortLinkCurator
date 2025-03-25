@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { LinkWithTags } from '@/lib/supabase';
+import { LinkWithTags } from '@shared/schema';
 
 interface EditTitleDialogProps {
   link: LinkWithTags;
@@ -36,13 +36,11 @@ const EditTitleDialog: React.FC<EditTitleDialogProps> = ({ link, isOpen, onClose
       setIsSubmitting(true);
       
       try {
-        await apiRequest(`/api/links/${link.id}/title`, {
-          method: "PATCH",
-          body: JSON.stringify({ title }),
-          headers: {
-            "Content-Type": "application/json"
-          }
-        });
+        await apiRequest(
+          "PATCH", 
+          `/api/links/${link.id}/title`, 
+          { title }
+        );
         
         toast({
           title: "Success",

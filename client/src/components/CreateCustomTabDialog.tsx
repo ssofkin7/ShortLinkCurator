@@ -69,17 +69,15 @@ const CreateCustomTabDialog: React.FC<CreateCustomTabDialogProps> = ({ isOpen, o
     setIsSubmitting(true);
     
     try {
-      await apiRequest('/api/custom-tabs', {
-        method: "POST",
-        body: JSON.stringify({ 
+      await apiRequest(
+        "POST",
+        '/api/custom-tabs', 
+        { 
           name, 
           icon, 
           description 
-        }),
-        headers: {
-          "Content-Type": "application/json"
         }
-      });
+      );
       
       toast({
         title: "Success",
