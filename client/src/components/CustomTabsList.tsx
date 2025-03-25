@@ -92,6 +92,10 @@ const CustomTabsList: React.FC<CustomTabsListProps> = ({ activeTab, onTabChange 
   };
 
   const handleTabClick = (tabId: number) => {
+    // For redirection to the dedicated tab page (new behavior)
+    window.location.href = `/tabs/${tabId}`;
+    
+    // For backwards compatibility with existing event-based tab changes
     onTabChange(`custom-${tabId}`);
   };
 

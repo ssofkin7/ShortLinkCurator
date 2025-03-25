@@ -9,6 +9,7 @@ import RegisterPage from "@/pages/RegisterPage";
 import LibraryPage from "@/pages/LibraryPage";
 import TagsPage from "@/pages/TagsPage";
 import AnalyticsPage from "@/pages/AnalyticsPage";
+import CustomTabPage from "@/pages/CustomTabPage";
 import GetStartedWizard from "@/components/GetStartedWizard";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -21,6 +22,7 @@ function Router() {
         <>
           <Route path="/" component={HomePage} />
           <Route path="/library" component={LibraryPage} />
+          <Route path="/tabs/:id" component={CustomTabPage} />
           <Route path="/tags" component={TagsPage} />
           <Route path="/analytics" component={AnalyticsPage} />
         </>
