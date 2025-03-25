@@ -1,4 +1,4 @@
-import express, { type Express, Request, Response } from "express";
+import express, { type Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { analyzeVideoContent, generateRecommendations, type LinkMetadata } from "./openai";
@@ -20,7 +20,7 @@ declare module 'express-session' {
 const SessionStore = MemoryStore(session);
 
 // Authentication middleware
-const authenticate = (req: Request, res: Response, next: Function) => {
+const authenticate = (req: Request, res: Response, next: NextFunction) => {
   if (!req.session || req.session.userId === undefined) {
     return res.status(401).json({ message: "Unauthorized" });
   }
@@ -28,7 +28,7 @@ const authenticate = (req: Request, res: Response, next: Function) => {
 };
 
 // Validation middleware
-const validate = (schema: z.ZodType<any, any>) => (req: Request, res: Response, next: Function) => {
+const validate = (schema: z.ZodType<any, any>) => (req: Request, res: Response, next: NextFunction) => {
   try {
     schema.parse(req.body);
     next();
@@ -50,19 +50,18 @@ const validate = (schema: z.ZodType<any, any>) => (req: Request, res: Response, 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup session middleware
   app.use(session({
-    cookie: { maxAge: 86400000 }, // 1 day
     store: new SessionStore({
       checkPeriod: 86400000 // prune expired entries every 24h
     }),
     resave: false,
     saveUninitialized: false,
-    secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
-  cookie: { 
-    maxAge: 86400000,
-    secure: process.env.NODE_ENV === 'production',
-    httpOnly: true,
-    sameSite: 'strict'
-  }
+    secret: process.env.SESSION_SECRET || "linkOrbit-secret-key",
+    cookie: { 
+      maxAge: 86400000, // 1 day
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      sameSite: 'lax' // Changed to 'lax' to allow cross-site navigation
+    }
   }));
 
   // User routes
