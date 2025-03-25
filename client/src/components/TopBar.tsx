@@ -101,10 +101,12 @@ const TopBar = ({ user }: TopBarProps) => {
     <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
       <div className="container mx-auto px-4 py-3.5 flex items-center justify-between">
         <div className="flex items-center md:hidden gap-2">
-          <div className="h-8 w-8 bg-blue-500 rounded-lg flex items-center justify-center">
+          <div className="h-8 w-8 bg-indigo-600 rounded-lg flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+              <circle cx="12" cy="12" r="8" />
+              <path d="M8 12a4 4 0 0 1 8 0" />
+              <path d="M18 12a6 6 0 0 0-12 0" />
+              <path d="M16 8l-4 4-4-4" />
             </svg>
           </div>
           <h1 className="text-xl font-semibold">LinkOrbit</h1>

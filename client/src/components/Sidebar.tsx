@@ -32,18 +32,20 @@ const CustomSidebar = ({ user, isLoading }: SidebarProps) => {
     <>
       <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 p-5 h-screen sticky top-0">
         <div className="flex items-center gap-2 mb-8">
-          <div className="h-8 w-8 bg-blue-500 rounded-lg flex items-center justify-center">
+          <div className="h-8 w-8 bg-indigo-600 rounded-lg flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+              <circle cx="12" cy="12" r="8" />
+              <path d="M8 12a4 4 0 0 1 8 0" />
+              <path d="M18 12a6 6 0 0 0-12 0" />
+              <path d="M16 8l-4 4-4-4" />
             </svg>
           </div>
-          <h1 className="text-xl font-semibold">LinkSnap</h1>
+          <h1 className="text-xl font-semibold">LinkOrbit</h1>
         </div>
         
         <nav className="space-y-1.5">
           <Link href="/">
-            <div className={`flex items-center gap-3 px-3 py-2.5 rounded-lg ${location === '/' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-100'} cursor-pointer`}>
+            <div className={`flex items-center gap-3 px-3 py-2.5 rounded-lg ${location === '/' ? 'bg-indigo-50 text-indigo-600 font-medium' : 'text-gray-700 hover:bg-gray-100'} cursor-pointer`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
@@ -104,7 +106,7 @@ const CustomSidebar = ({ user, isLoading }: SidebarProps) => {
         <div className="mt-auto">
           <div className="rounded-lg bg-gray-50 p-3.5 border border-gray-200">
             <div className="flex items-center gap-3 mb-2">
-              <div className="h-5 w-5 bg-blue-500 rounded-md flex items-center justify-center">
+              <div className="h-5 w-5 bg-indigo-500 rounded-md flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
                   <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
                 </svg>
@@ -118,7 +120,7 @@ const CustomSidebar = ({ user, isLoading }: SidebarProps) => {
             <Button 
               variant="link" 
               onClick={() => setShowSubscriptionModal(true)}
-              className="mt-2 text-sm text-blue-600 font-medium hover:text-blue-800 p-0 h-auto"
+              className="mt-2 text-sm text-indigo-600 font-medium hover:text-indigo-800 p-0 h-auto"
             >
               Upgrade to Pro
             </Button>
@@ -135,7 +137,7 @@ const CustomSidebar = ({ user, isLoading }: SidebarProps) => {
               </>
             ) : user ? (
               <>
-                <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold overflow-hidden">
+                <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-semibold overflow-hidden">
                   {user.avatar_url ? (
                     <img 
                       src={user.avatar_url} 
