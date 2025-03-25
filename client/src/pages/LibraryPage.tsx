@@ -10,6 +10,8 @@ import { useAuth } from "@/hooks/useAuth";
 import MobileNavigation from "@/components/MobileNavigation";
 import TagCorrectionModal from "@/components/TagCorrectionModal";
 import ContentLibrary from "@/components/ContentLibrary";
+import { useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
 
 export default function LibraryPage() {
   const { user, isLoading: isUserLoading } = useAuth();
@@ -19,6 +21,9 @@ export default function LibraryPage() {
   const [selectedLink, setSelectedLink] = useState<LinkWithTags | null>(null);
   const [customTabLinks, setCustomTabLinks] = useState<LinkWithTags[]>([]);
   const [isLoadingCustomTabLinks, setIsLoadingCustomTabLinks] = useState(false);
+  const [activeTagFilter, setActiveTagFilter] = useState<string | null>(null);
+  const [location] = useLocation();
+  const { toast } = useToast();
 
   // Query for all links
   const { data: links = [], isLoading: isLinksLoading } = useQuery<LinkWithTags[]>({
@@ -30,6 +35,21 @@ export default function LibraryPage() {
   const { data: customTabs = [] } = useQuery<CustomTabWithLinks[]>({
     queryKey: ['/api/custom-tabs'],
   });
+
+  // Parse URL parameters to check for tag filter
+  useEffect(() => {
+    // Parse URL search parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const tagParam = urlParams.get('tag');
+    
+    if (tagParam) {
+      setActiveTagFilter(decodeURIComponent(tagParam));
+      toast({
+        title: "Tag filter applied",
+        description: `Filtering by tag: ${decodeURIComponent(tagParam)}`,
+      });
+    }
+  }, [location, toast]);
 
   // Listen for custom tab change events from Sidebar
   useEffect(() => {
@@ -105,6 +125,29 @@ export default function LibraryPage() {
 
   const handleOpenTagModal = (link: LinkWithTags) => {
     setSelectedLink(link);
+  };
+  
+  // Handle tag click from ContentItem
+  const handleTagClick = (tagName: string) => {
+    setActiveTagFilter(tagName);
+    // Update URL with tag parameter without full page reload
+    const url = new URL(window.location.href);
+    url.searchParams.set('tag', tagName);
+    window.history.pushState({}, '', url.toString());
+    
+    toast({
+      title: "Tag filter applied",
+      description: `Filtering by tag: ${tagName}`,
+    });
+  };
+  
+  // Clear tag filter
+  const clearTagFilter = () => {
+    setActiveTagFilter(null);
+    // Remove tag parameter from URL
+    const url = new URL(window.location.href);
+    url.searchParams.delete('tag');
+    window.history.pushState({}, '', url.toString());
   };
   
   // Determine which links to display based on active tab
