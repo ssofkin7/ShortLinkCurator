@@ -54,7 +54,7 @@ const CustomSidebar = ({ user, isLoading }: SidebarProps) => {
             </div>
           </Link>
           <Link href="/library">
-            <div className={`flex items-center gap-3 px-3 py-2.5 rounded-lg ${location === '/library' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-100'} cursor-pointer`}>
+            <div className={`flex items-center gap-3 px-3 py-2.5 rounded-lg ${location === '/library' ? 'bg-indigo-50 text-indigo-600 font-medium' : 'text-gray-700 hover:bg-gray-100'} cursor-pointer`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
                 <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
@@ -63,7 +63,7 @@ const CustomSidebar = ({ user, isLoading }: SidebarProps) => {
             </div>
           </Link>
           <Link href="/tags">
-            <div className={`flex items-center gap-3 px-3 py-2.5 rounded-lg ${location === '/tags' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-100'} cursor-pointer`}>
+            <div className={`flex items-center gap-3 px-3 py-2.5 rounded-lg ${location === '/tags' ? 'bg-indigo-50 text-indigo-600 font-medium' : 'text-gray-700 hover:bg-gray-100'} cursor-pointer`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"></path>
                 <path d="M7 7h.01"></path>
@@ -72,7 +72,7 @@ const CustomSidebar = ({ user, isLoading }: SidebarProps) => {
             </div>
           </Link>
           <Link href="/analytics">
-            <div className={`flex items-center gap-3 px-3 py-2.5 rounded-lg ${location === '/analytics' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-100'} cursor-pointer`}>
+            <div className={`flex items-center gap-3 px-3 py-2.5 rounded-lg ${location === '/analytics' ? 'bg-indigo-50 text-indigo-600 font-medium' : 'text-gray-700 hover:bg-gray-100'} cursor-pointer`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 3v18h18"></path>
                 <path d="m19 9-5 5-4-4-3 3"></path>

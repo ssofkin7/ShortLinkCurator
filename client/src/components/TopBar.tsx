@@ -45,8 +45,8 @@ const TopBar = ({ user }: TopBarProps) => {
           <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
         </svg>
       ),
-      iconBgColor: "bg-blue-100",
-      iconTextColor: "text-blue-600"
+      iconBgColor: "bg-indigo-100",
+      iconTextColor: "text-indigo-600"
     },
     {
       id: 2,
@@ -124,7 +124,7 @@ const TopBar = ({ user }: TopBarProps) => {
                   <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
                 </svg>
                 {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 h-2 w-2 bg-blue-500 rounded-full"></span>
+                  <span className="absolute top-1 right-1 h-2 w-2 bg-indigo-500 rounded-full"></span>
                 )}
               </Button>
             </PopoverTrigger>
@@ -156,7 +156,7 @@ const TopBar = ({ user }: TopBarProps) => {
                         <p className="text-xs text-gray-400 mt-1">{notification.time}</p>
                       </div>
                       {!notification.read && (
-                        <div className="ml-auto h-2 w-2 bg-blue-500 rounded-full mt-2"></div>
+                        <div className="ml-auto h-2 w-2 bg-indigo-500 rounded-full mt-2"></div>
                       )}
                     </div>
                   ))}
