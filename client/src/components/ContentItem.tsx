@@ -490,7 +490,7 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
               {link.category}
             </Badge>
           )}
-          {link.tags.slice(0, 3).map((tag) => (
+          {showTags && link.tags.slice(0, 3).map((tag) => (
             <Badge
               key={tag.id}
               variant="secondary"
@@ -503,7 +503,7 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
               {tag.name}
             </Badge>
           ))}
-          {link.tags.length > 3 && (
+          {showTags && link.tags.length > 3 && (
             <Badge
               variant="outline"
               className="cursor-pointer"
@@ -692,7 +692,7 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
               {link.category}
             </Badge>
           )}
-          {link.tags.slice(0, 2).map((tag) => (
+          {showTags && link.tags.slice(0, 2).map((tag) => (
             <Badge
               key={tag.id}
               variant="secondary"
@@ -705,7 +705,7 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
               {tag.name}
             </Badge>
           ))}
-          {link.tags.length > 2 && (
+          {showTags && link.tags.length > 2 && (
             <Badge
               variant="outline"
               className="cursor-pointer text-xs"
