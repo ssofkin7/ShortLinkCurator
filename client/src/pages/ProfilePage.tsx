@@ -1,32 +1,74 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import CustomSidebar from "@/components/Sidebar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import TopBar from "@/components/TopBar";
+import MobileNavigation from "@/components/MobileNavigation";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Pencil } from "lucide-react";
+
 
 const profileSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
   email: z.string().email("Please enter a valid email address"),
-  bio: z.string().max(160, "Bio cannot exceed 160 characters"),
+  bio: z.string().optional(),
   displayName: z.string().optional(),
 });
 
+const passwordSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string().min(8, "Please confirm your password"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
+const notificationSchema = z.object({
+  emailNotifications: z.boolean().default(true),
+  newContentAlerts: z.boolean().default(true),
+  weeklyDigest: z.boolean().default(true),
+  platformUpdates: z.boolean().default(true),
+});
+
 type ProfileFormValues = z.infer<typeof profileSchema>;
+type PasswordFormValues = z.infer<typeof passwordSchema>;
+type NotificationFormValues = z.infer<typeof notificationSchema>;
 
 export default function ProfilePage() {
   const { user, isLoading, refetchUser } = useAuth();
+  const [activeTab, setActiveTab] = useState("profile");
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [isEditing, setIsEditing] = useState(false);
 
+  // Profile form
   const profileForm = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -37,17 +79,61 @@ export default function ProfilePage() {
     },
   });
 
+  // Password form
+  const passwordForm = useForm<PasswordFormValues>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
+  });
+
+  // Notification preferences form
+  const notificationForm = useForm<NotificationFormValues>({
+    resolver: zodResolver(notificationSchema),
+    defaultValues: {
+      emailNotifications: user?.notification_preferences?.email_notifications ?? true,
+      newContentAlerts: user?.notification_preferences?.new_content_alerts ?? true,
+      weeklyDigest: user?.notification_preferences?.weekly_digest ?? true,
+      platformUpdates: user?.notification_preferences?.platform_updates ?? false,
+    },
+  });
+
+  // Update form values when user data loads
+  useEffect(() => {
+    if (user && !isLoading) {
+      profileForm.reset({
+        username: user.username || "",
+        email: user.email || "",
+        bio: user.bio || "",
+        displayName: user.display_name || "",
+      });
+
+      notificationForm.reset({
+        emailNotifications: user.notification_preferences?.email_notifications ?? true,
+        newContentAlerts: user.notification_preferences?.new_content_alerts ?? true,
+        weeklyDigest: user.notification_preferences?.weekly_digest ?? true,
+        platformUpdates: user.notification_preferences?.platform_updates ?? false,
+      });
+    }
+  }, [user, isLoading, profileForm, notificationForm]);
+
+  // Profile update mutation
   const profileMutation = useMutation({
     mutationFn: async (data: ProfileFormValues) => {
-      return apiRequest("PATCH", "/api/profile", data);
+      return apiRequest(
+        "PATCH",
+        '/api/profile',
+        data
+      );
     },
     onSuccess: () => {
       toast({
         title: "Profile updated",
-        description: "Your profile has been updated successfully.",
+        description: "Your profile information has been updated successfully.",
       });
       refetchUser();
-      setIsEditing(false);
     },
     onError: (error) => {
       toast({
@@ -59,76 +145,443 @@ export default function ProfilePage() {
     },
   });
 
+  // Password update mutation
+  const passwordMutation = useMutation({
+    mutationFn: async (data: { currentPassword: string, newPassword: string }) => {
+      return apiRequest(
+        "PATCH",
+        '/api/profile/password',
+        data
+      );
+    },
+    onSuccess: () => {
+      toast({
+        title: "Password updated",
+        description: "Your password has been changed successfully.",
+      });
+      passwordForm.reset();
+    },
+    onError: (error: any) => {
+      if (error.status === 401) {
+        toast({
+          title: "Error",
+          description: "Current password is incorrect.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to update password. Please try again.",
+          variant: "destructive",
+        });
+      }
+      console.error("Password update error:", error);
+    },
+  });
+
+  // Notification preferences mutation
+  const notificationMutation = useMutation({
+    mutationFn: async (data: NotificationFormValues) => {
+      return apiRequest(
+        "PATCH",
+        '/api/profile/notifications',
+        data
+      );
+    },
+    onSuccess: () => {
+      toast({
+        title: "Preferences updated",
+        description: "Your notification preferences have been updated successfully.",
+      });
+      refetchUser();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update notification preferences. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Notification preferences update error:", error);
+    },
+  });
+
   const onProfileSubmit = (data: ProfileFormValues) => {
     profileMutation.mutate(data);
   };
 
-  const bioLength = profileForm.watch("bio")?.length || 0;
+  const onPasswordSubmit = (data: PasswordFormValues) => {
+    const { currentPassword, newPassword } = data;
+    passwordMutation.mutate({ currentPassword, newPassword });
+  };
+
+  const onNotificationSubmit = (data: NotificationFormValues) => {
+    notificationMutation.mutate(data);
+  };
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-        <div className="flex items-start justify-between">
-          <div className="flex gap-4">
-            <div className="w-16 h-16 rounded-full bg-gray-200" />
-            <div className="flex flex-col">
-              <h1 className="text-[18px] font-bold text-black">
-                {user?.display_name || user?.username}
-              </h1>
-              <span className="text-[14px] text-[#666666]">@{user?.username}</span>
-              <div className="flex items-center gap-2">
-                <span className="text-[14px] text-[#666666]">{user?.email}</span>
-                <span className="px-2 py-1 bg-[#4A90E2] text-white text-xs rounded-full">
-                  Active User
-                </span>
-              </div>
+    <SidebarProvider>
+      <div className="flex h-screen bg-gray-50">
+        <CustomSidebar user={user} isLoading={isLoading} />
+
+        <div className="flex-1 flex flex-col h-screen overflow-hidden">
+          <TopBar user={user} />
+
+          <main className="flex-1 overflow-auto w-full">
+            <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+              <h1 className="text-3xl font-bold tracking-tight text-center mb-8">Your Profile</h1>
+
+              <Tabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="w-full"
+              >
+                <TabsList className="w-full flex justify-center gap-4">
+                  <TabsTrigger value="profile">Profile Information</TabsTrigger>
+                  <TabsTrigger value="notifications">Notifications</TabsTrigger>
+                  <TabsTrigger value="security">Security</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="profile" className="space-y-6 w-full">
+                  <Card className="w-full">
+                    <CardHeader>
+                      <CardTitle>Profile Information</CardTitle>
+                      <CardDescription>
+                        Update your personal information and public profile.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <Form {...profileForm}>
+                        <form
+                          onSubmit={profileForm.handleSubmit(onProfileSubmit)}
+                          className="space-y-6 max-w-md mx-auto"
+                        >
+                          <div className="text-center mb-6">
+                            <p className="text-sm font-medium text-gray-900 mb-2">
+                              {user?.email}
+                            </p>
+                            <div className="inline-flex px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs">
+                              Active User
+                            </div>
+                          </div>
+
+                          <FormField
+                            control={profileForm.control}
+                            name="username"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Username</FormLabel>
+                                <FormControl>
+                                  <Input {...field} disabled={isLoading} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={profileForm.control}
+                            name="displayName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Display Name</FormLabel>
+                                <FormControl>
+                                  <Input {...field} placeholder="How others will see you" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={profileForm.control}
+                            name="email"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Email</FormLabel>
+                                <FormControl>
+                                  <Input {...field} type="email" disabled={isLoading} />
+                                </FormControl>
+                                <FormDescription>
+                                  Your email address is used for notifications.
+                                </FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={profileForm.control}
+                            name="bio"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Bio</FormLabel>
+                                <FormControl>
+                                  <Textarea
+                                    {...field}
+                                    placeholder="Tell others about yourself"
+                                    className="min-h-[120px]"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+
+
+                          <Button type="submit">Update Profile</Button>
+                        </form>
+                      </Form>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="notifications" className="space-y-6 w-full">
+                  <Card className="w-full">
+                    <CardHeader>
+                      <CardTitle>Notification Preferences</CardTitle>
+                      <CardDescription>
+                        Configure how you want to receive notifications.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <Form {...notificationForm}>
+                        <form
+                          onSubmit={notificationForm.handleSubmit(onNotificationSubmit)}
+                          className="space-y-4"
+                        >
+                          <FormField
+                            control={notificationForm.control}
+                            name="emailNotifications"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                                <div className="space-y-0.5">
+                                  <FormLabel className="text-base">
+                                    Email Notifications
+                                  </FormLabel>
+                                  <FormDescription>
+                                    Receive email notifications about your account and content.
+                                  </FormDescription>
+                                </div>
+                                <FormControl>
+                                  <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={notificationForm.control}
+                            name="newContentAlerts"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                                <div className="space-y-0.5">
+                                  <FormLabel className="text-base">
+                                    New Content Alerts
+                                  </FormLabel>
+                                  <FormDescription>
+                                    Get notified when new similar content is available.
+                                  </FormDescription>
+                                </div>
+                                <FormControl>
+                                  <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={notificationForm.control}
+                            name="weeklyDigest"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                                <div className="space-y-0.5">
+                                  <FormLabel className="text-base">
+                                    Weekly Digest
+                                  </FormLabel>
+                                  <FormDescription>
+                                    Receive a weekly summary of your content activity.
+                                  </FormDescription>
+                                </div>
+                                <FormControl>
+                                  <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={notificationForm.control}
+                            name="platformUpdates"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                                <div className="space-y-0.5">
+                                  <FormLabel className="text-base">
+                                    Platform Updates
+                                  </FormLabel>
+                                  <FormDescription>
+                                    Get notified about new features and improvements.
+                                  </FormDescription>
+                                </div>
+                                <FormControl>
+                                  <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+
+                          <Button type="submit">Save Preferences</Button>
+                        </form>
+                      </Form>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="security" className="space-y-6 w-full">
+                  <Card className="w-full">
+                    <CardHeader>
+                      <CardTitle>Security Settings</CardTitle>
+                      <CardDescription>
+                        Manage your account security and password.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <Form {...passwordForm}>
+                        <form
+                          onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
+                          className="space-y-4"
+                        >
+                          <FormField
+                            control={passwordForm.control}
+                            name="currentPassword"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Current Password</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    type="password"
+                                    placeholder="••••••••"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={passwordForm.control}
+                            name="newPassword"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>New Password</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    type="password"
+                                    placeholder="••••••••"
+                                  />
+                                </FormControl>
+                                <FormDescription>
+                                  Must be at least 8 characters with a number.
+                                </FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={passwordForm.control}
+                            name="confirmPassword"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Confirm New Password</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    type="password"
+                                    placeholder="••••••••"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <Button 
+                            type="submit"
+                            disabled={passwordMutation.isPending}
+                          >
+                            {passwordMutation.isPending ? "Updating..." : "Change Password"}
+                          </Button>
+                        </form>
+                      </Form>
+
+                      <div className="pt-6 mt-6 border-t border-gray-200">
+                        <h3 className="font-medium text-base mb-4">Account Management</h3>
+
+                        <div className="mb-6">
+                          <h4 className="text-sm font-medium mb-3">Subscription</h4>
+                          {user?.is_premium ? (
+                            <>
+                              <Button 
+                                variant="outline" 
+                                className="mb-3 border-amber-300 text-amber-700 hover:bg-amber-50"
+                              >
+                                Cancel Subscription Plan
+                              </Button>
+                              <p className="text-xs text-gray-500">
+                                Your premium subscription will remain active until the end of your current billing period.
+                              </p>
+                            </>
+                          ) : (
+                            <>
+                              <Button 
+                                variant="outline" 
+                                className="mb-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-0 hover:from-blue-600 hover:to-indigo-600"
+                              >
+                                Upgrade to Premium
+                              </Button>
+                              <p className="text-xs text-gray-500">
+                                Upgrade to premium for advanced features and unlimited content organization.
+                              </p>
+                            </>
+                          )}
+                        </div>
+
+                        <div className="mb-8 pt-6 border-t border-gray-100">
+                          <h4 className="text-sm font-medium mb-3 text-red-600">Danger Zone</h4>
+                          <Button variant="destructive" className="mb-3">
+                            Delete Account
+                          </Button>
+                          <p className="text-xs text-gray-500">
+                            This will permanently delete your account and all your data.
+                            This action cannot be undone.
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
             </div>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-[#4A90E2]"
-            onClick={() => setIsEditing(!isEditing)}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
+          </main>
+
+          <MobileNavigation onAddLinkClick={() => {}} />
         </div>
       </div>
-
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 className="text-[16px] font-bold text-black mb-4">Bio</h2>
-        <Form {...profileForm}>
-          <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-4">
-            <FormField
-              control={profileForm.control}
-              name="bio"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <div className="relative">
-                      <Textarea
-                        {...field}
-                        placeholder="Tell us about yourself..."
-                        className="min-h-[120px] border-gray-200 focus:border-[#4A90E2] transition-colors"
-                        disabled={!isEditing}
-                      />
-                      <span className="absolute bottom-2 right-2 text-[12px] text-[#666666]">
-                        {bioLength}/160
-                      </span>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {isEditing && (
-              <Button type="submit" disabled={isLoading}>
-                Save Changes
-              </Button>
-            )}
-          </form>
-        </Form>
-      </div>
-    </div>
+    </SidebarProvider>
   );
 }
