@@ -273,9 +273,6 @@ export default function ProfilePage() {
                                 <FormControl>
                                   <Input {...field} disabled={isLoading} />
                                 </FormControl>
-                                <FormDescription>
-                                  This is your public username.
-                                </FormDescription>
                                 <FormMessage />
                               </FormItem>
                             )}
@@ -288,11 +285,8 @@ export default function ProfilePage() {
                               <FormItem>
                                 <FormLabel>Display Name</FormLabel>
                                 <FormControl>
-                                  <Input {...field} placeholder="Your display name" />
+                                  <Input {...field} placeholder="How others will see you" />
                                 </FormControl>
-                                <FormDescription>
-                                  This is the name displayed to other users.
-                                </FormDescription>
                                 <FormMessage />
                               </FormItem>
                             )}
@@ -324,13 +318,10 @@ export default function ProfilePage() {
                                 <FormControl>
                                   <Textarea
                                     {...field}
-                                    placeholder="A short bio about yourself"
+                                    placeholder="Tell others about yourself"
                                     className="min-h-[120px]"
                                   />
                                 </FormControl>
-                                <FormDescription>
-                                  Tell others a little about yourself.
-                                </FormDescription>
                                 <FormMessage />
                               </FormItem>
                             )}
