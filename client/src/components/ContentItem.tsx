@@ -276,7 +276,6 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
     
     // Fallback to platform-specific placeholder
     switch (link.platform) {
-      // Video platforms
       case 'tiktok':
         return generatePlaceholder('TikTok');
       case 'youtube':
@@ -287,234 +286,228 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
         return generatePlaceholder('Facebook');
       case 'vimeo':
         return generatePlaceholder('Vimeo');
-        
-      // Social media platforms
       case 'twitter':
         return generatePlaceholder('Twitter');
       case 'linkedin':
         return generatePlaceholder('LinkedIn');
       case 'reddit':
         return generatePlaceholder('Reddit');
-        
-      // Content platforms
       case 'medium':
         return generatePlaceholder('Medium');
       case 'substack':
         return generatePlaceholder('Substack');
       case 'github':
         return generatePlaceholder('GitHub');
-        
-      // Generic types
       case 'article':
         return generatePlaceholder('Article');
       case 'document':
         return generatePlaceholder('Document');
       case 'webpage':
         return generatePlaceholder('Web Page');
-        
       default:
-        return generatePlaceholder('No Thumbnail');
+        return generatePlaceholder('Content');
     }
   };
 
-  // Render component based on view mode
   const renderListView = () => (
-    <Card className="flex items-center p-3 hover:shadow-md transition-shadow duration-300">
-      <div 
-        className="w-24 h-16 sm:w-32 sm:h-20 rounded overflow-hidden mr-4 flex-shrink-0"
-        onClick={() => window.open(link.url, "_blank")}
-      >
-        <img 
-          src={getThumbnailImage()} 
-          alt={link.title} 
-          className="w-full h-full object-cover rounded"
-        />
-      </div>
-      <div className="flex-grow min-w-0">
-        <div className="flex items-center justify-between">
-          <h3 
-            className="font-medium text-gray-900 truncate cursor-pointer hover:text-indigo-600"
-            onClick={() => window.open(link.url, "_blank")}
-          >
-            {link.title}
-          </h3>
-          <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="1"></circle>
-                  <circle cx="19" cy="12" r="1"></circle>
-                  <circle cx="5" cy="12" r="1"></circle>
-                </svg>
-                <span className="sr-only">Open menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => window.open(link.url, "_blank")}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                  <polyline points="15 3 21 3 21 9"></polyline>
-                  <line x1="10" y1="14" x2="21" y2="3"></line>
-                </svg>
-                Open Link
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => {
-                e.stopPropagation();
-                setEditTitleDialogOpen(true);
-              }}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                </svg>
-                Edit Title
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => {
-                e.stopPropagation();
-                setViewTagsModalOpen(true);
-              }}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
-                  <line x1="7" y1="7" x2="7.01" y2="7"></line>
-                </svg>
-                View Tags
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => {
-                e.stopPropagation();
-                onEditTags(e);
-              }}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                  <path d="M12 20h9"></path>
-                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                </svg>
-                Edit Tags
-              </DropdownMenuItem>
-              
-              <DropdownMenuSeparator />
-              
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+    <Card className="hover:shadow-md transition-shadow duration-300">
+      <div className="flex p-3">
+        <div 
+          className="relative w-24 min-w-24 h-16 mr-3 overflow-hidden cursor-pointer"
+          onClick={() => window.open(link.url, "_blank")}
+        >
+          <img
+            src={getThumbnailImage()}
+            alt={link.title}
+            className="h-full w-full object-cover rounded-sm"
+          />
+          <div className="absolute top-1 left-1">
+            <div className={`${platformBadge.bgColor} rounded-full p-1 flex items-center justify-center text-white`}>
+              {platformBadge.icon}
+            </div>
+          </div>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between">
+            <h3 
+              className="font-medium text-gray-900 truncate cursor-pointer hover:text-indigo-600"
+              onClick={() => window.open(link.url, "_blank")}
+            >
+              {link.title}
+            </h3>
+            <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="1"></circle>
+                    <circle cx="19" cy="12" r="1"></circle>
+                    <circle cx="5" cy="12" r="1"></circle>
                   </svg>
-                  Move to Tab
-                </DropdownMenuSubTrigger>
-                <DropdownMenuSubContent className="max-h-80 overflow-y-auto">
-                  {isLoadingTabs ? (
-                    <DropdownMenuItem disabled>
-                      Loading tabs...
-                    </DropdownMenuItem>
-                  ) : customTabs.length > 0 ? (
-                    <>
-                      {customTabs.map((tab) => (
-                        <DropdownMenuItem
-                          key={tab.id}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // Check if link is already in this tab
-                            const isInTab = tab.links && tab.links.some(l => l.id === link.id);
-                            if (isInTab) {
-                              toast({
-                                title: "Already in tab",
-                                description: `This link is already in the "${tab.name}" tab`,
-                              });
-                              return;
-                            }
-                            
-                            // Add link to tab
-                            addLinkToTab(tab.id);
-                          }}
-                        >
-                          {tab.name}
-                        </DropdownMenuItem>
-                      ))}
-                    </>
-                  ) : (
-                    <DropdownMenuItem disabled>
-                      No custom tabs available
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsCreateTabDialogOpen(true);
-                    }}
-                  >
+                  <span className="sr-only">Open menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => window.open(link.url, "_blank")}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                  </svg>
+                  Open Link
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => {
+                  e.stopPropagation();
+                  setEditTitleDialogOpen(true);
+                }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                  Edit Title
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => {
+                  e.stopPropagation();
+                  setShowTags(!showTags);
+                }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                    <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                  </svg>
+                  {showTags ? 'Hide Tags' : 'Show Tags'}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => {
+                  e.stopPropagation();
+                  onEditTags(e);
+                }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                    <path d="M12 20h9"></path>
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                  </svg>
+                  Edit Tags
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator />
+                
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                      <path d="M12 5v14M5 12h14" />
+                      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                     </svg>
-                    Create New Tab
-                  </DropdownMenuItem>
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-              
-              <DropdownMenuSeparator />
-              
-              <DropdownMenuItem 
+                    Move to Tab
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent className="max-h-80 overflow-y-auto">
+                    {isLoadingTabs ? (
+                      <DropdownMenuItem disabled>
+                        Loading tabs...
+                      </DropdownMenuItem>
+                    ) : customTabs.length > 0 ? (
+                      <>
+                        {customTabs.map((tab) => (
+                          <DropdownMenuItem
+                            key={tab.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Check if link is already in this tab
+                              const isInTab = tab.links && tab.links.some(l => l.id === link.id);
+                              if (isInTab) {
+                                toast({
+                                  title: "Already in tab",
+                                  description: `This link is already in the "${tab.name}" tab`,
+                                });
+                                return;
+                              }
+                              
+                              // Add link to tab
+                              addLinkToTab(tab.id);
+                            }}
+                          >
+                            {tab.name}
+                          </DropdownMenuItem>
+                        ))}
+                      </>
+                    ) : (
+                      <DropdownMenuItem disabled>
+                        No custom tabs available
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsCreateTabDialogOpen(true);
+                      }}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                        <path d="M12 5v14M5 12h14" />
+                      </svg>
+                      Create New Tab
+                    </DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+                
+                <DropdownMenuSeparator />
+                
+                <DropdownMenuItem 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (confirm("Are you sure you want to delete this link?")) {
+                      deleteLink();
+                    }
+                  }}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  disabled={isDeleting}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                    <path d="M3 6h18"></path>
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                  </svg>
+                  {isDeleting ? "Deleting..." : "Delete"}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          <div className="flex items-center text-xs text-gray-500 mt-1">
+            <span>{formatDate(new Date(link.created_at))}</span>
+            {link.last_viewed && (
+              <>
+                <span className="mx-1">•</span>
+                <span>Viewed {formatDate(new Date(link.last_viewed))}</span>
+              </>
+            )}
+          </div>
+          <div className="mt-2 flex flex-wrap gap-1">
+            {link.category && (
+              <Badge variant="outline" className="bg-gray-100 text-gray-800">
+                {link.category}
+              </Badge>
+            )}
+            {showTags && link.tags.slice(0, 3).map((tag) => (
+              <Badge
+                key={tag.id}
+                variant="secondary"
+                className="cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (confirm("Are you sure you want to delete this link?")) {
-                    deleteLink();
-                  }
+                  if (onTagClick) onTagClick(tag.name, e);
                 }}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                disabled={isDeleting}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                  <path d="M3 6h18"></path>
-                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                </svg>
-                {isDeleting ? "Deleting..." : "Delete"}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        <div className="flex items-center space-x-1 mt-1 text-sm text-gray-500">
-          <div className={`${platformBadge.bgColor} rounded-full p-1 flex items-center justify-center text-white`}>
-            {platformBadge.icon}
+                {tag.name}
+              </Badge>
+            ))}
+            {showTags && link.tags.length > 3 && (
+              <Badge
+                variant="outline"
+                className="cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setViewTagsModalOpen(true);
+                }}
+              >
+                +{link.tags.length - 3} more
+              </Badge>
+            )}
           </div>
-          <span className="capitalize">{link.platform}</span>
-          <span className="mx-1">•</span>
-          <span>{formatDate(new Date(link.created_at))}</span>
-          {link.last_viewed && (
-            <>
-              <span className="mx-1">•</span>
-              <span>Viewed {formatDate(new Date(link.last_viewed))}</span>
-            </>
-          )}
-        </div>
-        <div className="mt-2 flex flex-wrap gap-1">
-          {link.category && (
-            <Badge variant="outline" className="bg-gray-100 text-gray-800">
-              {link.category}
-            </Badge>
-          )}
-          {showTags && link.tags.slice(0, 3).map((tag) => (
-            <Badge
-              key={tag.id}
-              variant="secondary"
-              className="cursor-pointer"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (onTagClick) onTagClick(tag.name, e);
-              }}
-            >
-              {tag.name}
-            </Badge>
-          ))}
-          {showTags && link.tags.length > 3 && (
-            <Badge
-              variant="outline"
-              className="cursor-pointer"
-              onClick={(e) => {
-                e.stopPropagation();
-                setViewTagsModalOpen(true);
-              }}
-            >
-              +{link.tags.length - 3} more
-            </Badge>
-          )}
         </div>
       </div>
     </Card>
@@ -577,13 +570,13 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
               </DropdownMenuItem>
               <DropdownMenuItem onClick={(e) => {
                 e.stopPropagation();
-                setViewTagsModalOpen(true);
+                setShowTags(!showTags);
               }}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
                   <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
                   <line x1="7" y1="7" x2="7.01" y2="7"></line>
                 </svg>
-                View Tags
+                {showTags ? 'Hide Tags' : 'Show Tags'}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={(e) => {
                 e.stopPropagation();
