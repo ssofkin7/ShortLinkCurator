@@ -324,7 +324,20 @@ export class MemStorage implements IStorage {
   async createCustomTab(tab: InsertCustomTab): Promise<CustomTab> {
     const id = this.currentTabId++;
     const created_at = new Date();
-    const customTab: CustomTab = { ...tab, id, created_at };
+    
+    // Create the custom tab with properly typed fields
+    const customTab: CustomTab = { 
+      id,
+      name: tab.name, 
+      user_id: tab.user_id,
+      created_at,
+      // Ensure icon is never undefined by defaulting to null
+      icon: tab.icon ?? null,
+      // Ensure description is never undefined by defaulting to null
+      description: tab.description ?? null
+    };
+    
+    console.log("[MemStorage] Creating custom tab:", customTab);
     this.customTabs.set(id, customTab);
     return customTab;
   }
@@ -667,39 +680,85 @@ export class DatabaseStorage implements IStorage {
   }
 
   async addLinkToTab(linkId: number, tabId: number): Promise<void> {
-    // Check if link and tab exist first
-    const [link] = await db.select().from(links).where(eq(links.id, linkId));
-    const [tab] = await db.select().from(customTabs).where(eq(customTabs.id, tabId));
+    console.log(`[Storage] Adding link ${linkId} to tab ${tabId}`);
     
-    if (!link || !tab) {
-      throw new Error("Link or tab not found");
+    try {
+      // Check if link and tab exist first
+      console.log(`[Storage] Checking if link ${linkId} exists`);
+      const [link] = await db.select().from(links).where(eq(links.id, linkId));
+      console.log(`[Storage] Link check result:`, link ? `Found (user_id: ${link.user_id})` : 'Not found');
+      
+      console.log(`[Storage] Checking if tab ${tabId} exists`);
+      const [tab] = await db.select().from(customTabs).where(eq(customTabs.id, tabId));
+      console.log(`[Storage] Tab check result:`, tab ? `Found (user_id: ${tab.user_id})` : 'Not found');
+      
+      if (!link || !tab) {
+        const error = new Error(`Link or tab not found (link: ${!!link}, tab: ${!!tab})`);
+        console.error(`[Storage] Error:`, error);
+        throw error;
+      }
+      
+      // Check if association already exists
+      console.log(`[Storage] Checking if link-tab association already exists`);
+      const [existingAssociation] = await db.select()
+        .from(linkTabs)
+        .where(
+          and(
+            eq(linkTabs.link_id, linkId),
+            eq(linkTabs.tab_id, tabId)
+          )
+        );
+      
+      console.log(`[Storage] Association check result:`, existingAssociation ? 'Already exists' : 'Does not exist');
+      
+      if (!existingAssociation) {
+        console.log(`[Storage] Creating new association between link ${linkId} and tab ${tabId}`);
+        await db.insert(linkTabs).values({
+          link_id: linkId,
+          tab_id: tabId
+        });
+        console.log(`[Storage] Successfully created link-tab association`);
+      } else {
+        console.log(`[Storage] Skipping insert as association already exists`);
+      }
+    } catch (error) {
+      console.error(`[Storage] Error in addLinkToTab:`, error);
+      throw error;
     }
+  }
+
+  async removeLinkFromTab(linkId: number, tabId: number): Promise<void> {
+    console.log(`[Storage] Removing link ${linkId} from tab ${tabId}`);
     
-    // Check if association already exists
-    const [existingAssociation] = await db.select()
-      .from(linkTabs)
-      .where(
+    try {
+      // Verify the association exists before trying to delete
+      console.log(`[Storage] Checking if link-tab association exists`);
+      const [existingAssociation] = await db.select()
+        .from(linkTabs)
+        .where(
+          and(
+            eq(linkTabs.link_id, linkId),
+            eq(linkTabs.tab_id, tabId)
+          )
+        );
+      
+      if (!existingAssociation) {
+        console.log(`[Storage] Warning: Attempted to remove non-existent association between link ${linkId} and tab ${tabId}`);
+        return; // No error, just a no-op if it doesn't exist
+      }
+      
+      console.log(`[Storage] Deleting association between link ${linkId} and tab ${tabId}`);
+      await db.delete(linkTabs).where(
         and(
           eq(linkTabs.link_id, linkId),
           eq(linkTabs.tab_id, tabId)
         )
       );
-    
-    if (!existingAssociation) {
-      await db.insert(linkTabs).values({
-        link_id: linkId,
-        tab_id: tabId
-      });
+      console.log(`[Storage] Successfully removed link ${linkId} from tab ${tabId}`);
+    } catch (error) {
+      console.error(`[Storage] Error in removeLinkFromTab:`, error);
+      throw error;
     }
-  }
-
-  async removeLinkFromTab(linkId: number, tabId: number): Promise<void> {
-    await db.delete(linkTabs).where(
-      and(
-        eq(linkTabs.link_id, linkId),
-        eq(linkTabs.tab_id, tabId)
-      )
-    );
   }
 
   async getLinksByTabId(tabId: number): Promise<LinkWithTags[]> {
