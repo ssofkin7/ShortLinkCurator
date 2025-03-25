@@ -222,35 +222,25 @@ const TopBar = ({ user }: TopBarProps) => {
           </Popover>
           
           {user ? (
-            <div className="flex items-center space-x-2">
-              <ProfileModal 
-                trigger={
-                  <Button 
-                    variant="outline" 
-                    size="icon" 
-                    className="h-9 w-9 rounded-lg bg-gray-100 text-gray-600"
-                    data-component="profileModal"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="9" cy="7" r="4"></circle>
-                      <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
-                  </Button>
-                }
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                className="font-medium text-sm"
-                onClick={handleLogout}
-              >
-                Logout
-              </Button>
-            </div>
+            <ProfileModal 
+              trigger={
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className="h-9 w-9 rounded-lg bg-gray-100 text-gray-600"
+                  data-component="profileModal"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                </Button>
+              }
+            />
           ) : (
-            <Skeleton className="h-9 w-16" />
+            <Skeleton className="h-9 w-9" />
           )}
         </div>
       </div>

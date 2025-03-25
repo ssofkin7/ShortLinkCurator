@@ -545,7 +545,27 @@ export default function ProfileModal({ trigger }: ProfileModalProps) {
                   </Button>
                 </div>
                 
-                <div>
+                <div className="flex flex-col gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="w-full text-xs"
+                    size="sm"
+                    onClick={async () => {
+                      try {
+                        await apiRequest("POST", "/api/logout");
+                        window.location.href = "/";
+                      } catch (error) {
+                        toast({
+                          title: "Error logging out",
+                          description: "Please try again",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                  >
+                    Log Out
+                  </Button>
+                  
                   <Button 
                     variant="destructive" 
                     className="w-full text-xs"
