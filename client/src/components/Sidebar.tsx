@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import SubscriptionModal from "./SubscriptionModal";
 import CustomTabsList from "./CustomTabsList";
+import ProfileModal from "./ProfileModal";
 
 interface SidebarProps {
   user: User | undefined;
@@ -145,12 +146,14 @@ const CustomSidebar = ({ user, isLoading }: SidebarProps) => {
                     <span>{user.username.charAt(0).toUpperCase()}</span>
                   )}
                 </div>
-                <Link href="/profile" className="flex-1 hover:underline">
-                  <div>
-                    <p className="text-sm font-medium">{user.username}</p>
-                    <p className="text-xs text-gray-500">{user.email}</p>
-                  </div>
-                </Link>
+                <ProfileModal 
+                  trigger={
+                    <div className="flex-1 cursor-pointer hover:underline">
+                      <p className="text-sm font-medium">{user.username}</p>
+                      <p className="text-xs text-gray-500">{user.email}</p>
+                    </div>
+                  }
+                />
               </>
             ) : (
               <Link href="/">
