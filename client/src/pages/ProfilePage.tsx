@@ -241,7 +241,7 @@ export default function ProfilePage() {
                   <TabsTrigger value="security">Security</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="profile" className="space-y-6 w-full">
+                <TabsContent value="profile" className="space-y-4 w-full bg-white rounded-lg p-6 shadow-sm mt-4">
                   <Card className="w-full">
                     <CardHeader>
                       <CardTitle>Profile Information</CardTitle>
@@ -336,7 +336,7 @@ export default function ProfilePage() {
                   </Card>
                 </TabsContent>
 
-                <TabsContent value="notifications" className="space-y-6 w-full">
+                <TabsContent value="notifications" className="space-y-4 w-full bg-white rounded-lg p-6 shadow-sm mt-4">
                   <Card className="w-full">
                     <CardHeader>
                       <CardTitle>Notification Preferences</CardTitle>
@@ -449,7 +449,7 @@ export default function ProfilePage() {
                   </Card>
                 </TabsContent>
 
-                <TabsContent value="security" className="space-y-6 w-full">
+                <TabsContent value="security" className="space-y-4 w-full bg-white rounded-lg p-6 shadow-sm mt-4">
                   <Card className="w-full">
                     <CardHeader>
                       <CardTitle>Security Settings</CardTitle>
