@@ -299,6 +299,14 @@ const CustomTabPage = () => {
                   link={link}
                   viewMode={viewMode}
                   onEditTags={() => handleOpenTagModal(link)}
+                  onTagClick={(tagName) => {
+                    // Filter by tag (implementation can be added later)
+                    setSearchQuery(tagName);
+                    toast({
+                      title: "Filtering by tag",
+                      description: `Showing content with tag "${tagName}"`,
+                    });
+                  }}
                 />
               ))}
             </div>

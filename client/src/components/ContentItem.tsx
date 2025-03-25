@@ -493,7 +493,7 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
                 {tag.name}
               </Badge>
             ))}
-            {showTags && link.tags.length > 3 && (
+            {showTags && link.tags && link.tags.length > 3 && (
               <Badge
                 variant="outline"
                 className="cursor-pointer"
@@ -694,7 +694,7 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
               {tag.name}
             </Badge>
           ))}
-          {showTags && link.tags.length > 2 && (
+          {showTags && link.tags && link.tags.length > 2 && (
             <Badge
               variant="outline"
               className="cursor-pointer text-xs"

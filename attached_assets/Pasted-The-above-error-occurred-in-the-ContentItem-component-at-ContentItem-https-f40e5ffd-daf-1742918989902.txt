@@ -1,0 +1,38 @@
+The above error occurred in the <ContentItem> component:
+
+    at ContentItem (https://f40e5ffd-daf7-4603-a3fa-a0d205fd7ab9-00-vcpnqsbpcg7t.spock.replit.dev/src/components/ContentItem.tsx:46:24)
+    at div
+    at main
+    at div
+    at div
+    at CustomTabPage (https://f40e5ffd-daf7-4603-a3fa-a0d205fd7ab9-00-vcpnqsbpcg7t.spock.replit.dev/src/pages/CustomTabPage.tsx:35:27)
+    at Route (https://f40e5ffd-daf7-4603-a3fa-a0d205fd7ab9-00-vcpnqsbpcg7t.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=e0974270:323:16)
+    at Switch (https://f40e5ffd-daf7-4603-a3fa-a0d205fd7ab9-00-vcpnqsbpcg7t.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=e0974270:379:17)
+    at Router (https://f40e5ffd-daf7-4603-a3fa-a0d205fd7ab9-00-vcpnqsbpcg7t.spock.replit.dev/src/App.tsx?v=bJvH6SICbCK-NbkFsaU1m:34:31)
+    at AppContent (https://f40e5ffd-daf7-4603-a3fa-a0d205fd7ab9-00-vcpnqsbpcg7t.spock.replit.dev/src/App.tsx?v=bJvH6SICbCK-NbkFsaU1m:118:31)
+    at QueryClientProvider (https://f40e5ffd-daf7-4603-a3fa-a0d205fd7ab9-00-vcpnqsbpcg7t.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=e0974270:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+at ContentItem (https://f40e5ffd-daf7-4603-a3fa-a0d205fd7ab9-00-vcpnqsbpcg7t.spock.replit.dev/src/components/ContentItem.tsx:46:24)
+at div
+at main
+at div
+at div
+at CustomTabPage (https://f40e5ffd-daf7-4603-a3fa-a0d205fd7ab9-00-vcpnqsbpcg7t.spock.replit.dev/src/pages/CustomTabPage.tsx:35:27)
+at Route (https://f40e5ffd-daf7-4603-a3fa-a0d205fd7ab9-00-vcpnqsbpcg7t.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=e0974270:323:16)
+at Switch (https://f40e5ffd-daf7-4603-a3fa-a0d205fd7ab9-00-vcpnqsbpcg7t.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=e0974270:379:17)
+at Router (https://f40e5ffd-daf7-4603-a3fa-a0d205fd7ab9-00-vcpnqsbpcg7t.spock.replit.dev/src/App.tsx?v=bJvH6SICbCK-NbkFsaU1m:34:31)
+at AppContent (https://f40e5ffd-daf7-4603-a3fa-a0d205fd7ab9-00-vcpnqsbpcg7t.spock.replit.dev/src/App.tsx?v=bJvH6SICbCK-NbkFsaU1m:118:31)
+at QueryClientProvider (https://f40e5ffd-daf7-4603-a3fa-a0d205fd7ab9-00-vcpnqsbpcg7t.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=e0974270:2805:3)
+at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+at t.value (https://f40e5ffd-daf7-4603-a3fa-a0d205fd7ab9-00-vcpnqsbpcg7t.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://f40e5ffd-daf7-4603-a3fa-a0d205fd7ab9-00-vcpnqsbpcg7t.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://f40e5ffd-daf7-4603-a3fa-a0d205fd7ab9-00-vcpnqsbpcg7t.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://f40e5ffd-daf7-4603-a3fa-a0d205fd7ab9-00-vcpnqsbpcg7t.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+Cannot read properties of undefined (reading 'length')
