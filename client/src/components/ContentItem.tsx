@@ -33,9 +33,18 @@ interface ContentItemProps {
   viewMode: "grid" | "list";
   onEditTags: (e?: React.MouseEvent) => void;
   onTagClick?: (tagName: string, e?: React.MouseEvent) => void;
+  customTabId?: number; // Optional ID of the custom tab when viewing from a custom tab page
+  onRemoveFromTab?: () => void; // Callback when removing from a tab
 }
 
-const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProps) => {
+const ContentItem = ({ 
+  link, 
+  viewMode, 
+  onEditTags, 
+  onTagClick,
+  customTabId,
+  onRemoveFromTab
+}: ContentItemProps) => {
   const { toast } = useToast();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [viewTagsModalOpen, setViewTagsModalOpen] = useState(false);
@@ -99,6 +108,41 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
       console.error("Error adding link to tab:", error);
       toast({
         title: "Failed to add link to tab",
+        description: error instanceof Error ? error.message : "Please try again",
+        variant: "destructive",
+      });
+    }
+  });
+  
+  // Remove link from tab mutation
+  const { mutate: removeLinkFromTab, isPending: isRemovingFromTab } = useMutation({
+    mutationFn: async () => {
+      if (!customTabId) {
+        throw new Error("Tab ID is required");
+      }
+      console.log(`Removing link ID ${link.id} from tab ID ${customTabId}`);
+      try {
+        const response = await apiRequest("DELETE", `/api/custom-tabs/${customTabId}/links/${link.id}`);
+        console.log("Successfully removed link from tab, response:", response);
+        return response;
+      } catch (error) {
+        console.error(`Failed to remove link ID ${link.id} from tab ID ${customTabId}:`, error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      toast({
+        title: "Link removed from tab",
+        description: "The link has been removed from the tab",
+      });
+      if (onRemoveFromTab) {
+        onRemoveFromTab();
+      }
+    },
+    onError: (error) => {
+      console.error("Error removing link from tab:", error);
+      toast({
+        title: "Failed to remove link from tab",
         description: error instanceof Error ? error.message : "Please try again",
         variant: "destructive",
       });
