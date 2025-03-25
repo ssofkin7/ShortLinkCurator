@@ -52,13 +52,23 @@ function App() {
 function AppContent() {
   const { isAuthenticated } = useAuth();
   const [location] = useLocation();
-  
+
   // Show LandingPage only on root path when not authenticated
   const showLandingPage = !isAuthenticated && location === "/";
-  
+
   return (
     <>
-      {showLandingPage ? <LandingPage /> : <Router />}
+      <Switch>
+        {!isAuthenticated ? (
+          <>
+            <Route path="/" component={LandingPage} />
+            <Route path="/login" component={LoginPage} />
+            <Route path="/register" component={RegisterPage} />
+          </>
+        ) : (
+          <Router />
+        )}
+      </Switch>
       {isAuthenticated && <GetStartedWizard />}
     </>
   );
