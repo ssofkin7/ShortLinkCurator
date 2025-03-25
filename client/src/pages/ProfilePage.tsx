@@ -33,8 +33,7 @@ import TopBar from "@/components/TopBar";
 import MobileNavigation from "@/components/MobileNavigation";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Camera } from "lucide-react";
+
 
 const profileSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
@@ -77,7 +76,6 @@ export default function ProfilePage() {
       email: user?.email || "",
       bio: user?.bio || "",
       displayName: user?.display_name || "",
-      avatar_url: user?.avatar_url || "",
     },
   });
 
@@ -110,7 +108,6 @@ export default function ProfilePage() {
         email: user.email || "",
         bio: user.bio || "",
         displayName: user.display_name || "",
-        avatar_url: user.avatar_url || "",
       });
 
       notificationForm.reset({
@@ -268,9 +265,6 @@ export default function ProfilePage() {
                             </p>
                             <div className="flex items-center space-x-2 mt-3">
                               <div className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs">
-                                {user?.links_count || 0} Links
-                              </div>
-                              <div className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs">
                                 Active User
                               </div>
                             </div>
@@ -348,18 +342,7 @@ export default function ProfilePage() {
                             )}
                           />
 
-                          {/* Hidden avatar_url field */}
-                          <FormField
-                            control={profileForm.control}
-                            name="avatar_url"
-                            render={({ field }) => (
-                              <FormItem className="hidden">
-                                <FormControl>
-                                  <Input {...field} type="hidden" />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
+
 
                           <Button type="submit">Update Profile</Button>
                         </form>
