@@ -37,8 +37,17 @@ export default function RegisterPage() {
       setIsLoading(true);
       await apiRequest("POST", "/api/register", data);
       
-      // Registration successful, redirect to home page
-      window.location.href = "/";
+      // Display success toast and redirect to home page
+      toast({
+        title: "Registration successful",
+        description: "Welcome to LinkSnap!",
+      });
+      
+      // Use wouter navigation instead of full page reload
+      // This will trigger a re-render and fetch auth state
+      setTimeout(() => {
+        setLocation("/");
+      }, 500);
     } catch (error) {
       toast({
         title: "Registration failed",

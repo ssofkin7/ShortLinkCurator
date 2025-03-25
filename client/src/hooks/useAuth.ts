@@ -6,9 +6,11 @@ export function useAuth() {
   const queryClient = useQueryClient();
   const { data: user, isLoading, error, refetch } = useQuery<User>({
     queryKey: ["/api/user"],
-    staleTime: 60 * 60 * 1000, // 1 hour
-    retry: false,
+    staleTime: 60 * 1000, // 1 minute
+    retry: 1,
     refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
   });
 
   const isAuthenticated = useMemo(() => {

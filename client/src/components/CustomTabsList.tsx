@@ -48,10 +48,7 @@ const CustomTabsList: React.FC<CustomTabsListProps> = ({ activeTab, onTabChange 
   const { data: customTabs = [], isLoading, isError } = useQuery<CustomTabWithLinks[]>({
     queryKey: ['/api/custom-tabs'],
     retry: 1,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    onError: (error) => {
-      console.error("Error fetching custom tabs:", error);
-    }
+    staleTime: 1000 * 60 * 5 // 5 minutes
   });
 
   // Delete custom tab mutation
@@ -156,9 +153,9 @@ const CustomTabsList: React.FC<CustomTabsListProps> = ({ activeTab, onTabChange 
               Unable to load custom tabs. Please sign in to view your tabs.
             </p>
           </div>
-        ) : customTabs.length > 0 ? (
+        ) : (customTabs as CustomTabWithLinks[]).length > 0 ? (
           <div className="space-y-1">
-            {customTabs.map((tab: CustomTabWithLinks) => (
+            {(customTabs as CustomTabWithLinks[]).map((tab: CustomTabWithLinks) => (
               <div key={tab.id} className="flex items-center">
                 <Button
                   variant={activeTab === `custom-${tab.id}` ? "secondary" : "ghost"}
