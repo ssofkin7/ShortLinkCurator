@@ -40,6 +40,7 @@ export const tags = pgTable("tags", {
 export const customTabs = pgTable("custom_tabs", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  icon: text("icon").default("folder"),
   user_id: integer("user_id").notNull().references(() => users.id),
   created_at: timestamp("created_at").defaultNow().notNull(),
 });

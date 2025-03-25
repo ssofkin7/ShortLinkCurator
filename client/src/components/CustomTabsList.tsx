@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/tooltip";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
-import { CustomTabWithLinks } from '@/lib/supabase';
+import { CustomTabWithLinks } from '@shared/schema';
 import { PlusIcon, TrashIcon } from 'lucide-react';
 import { 
   BookmarkIcon, 
@@ -20,16 +20,16 @@ import {
   TagIcon, 
   StarIcon, 
   HeartIcon, 
-  AcademicCapIcon,
+  GraduationCapIcon as AcademicCapIcon,
   BeakerIcon,
   BriefcaseIcon,
   CodeIcon,
-  CurrencyDollarIcon,
-  MusicalNoteIcon,
-  VideoCameraIcon,
-  GlobeAltIcon,
+  CurrencyIcon as CurrencyDollarIcon,
+  MusicIcon as MusicalNoteIcon,
+  VideoIcon as VideoCameraIcon,
+  GlobeIcon as GlobeAltIcon,
   HomeIcon,
-  Loader2Icon
+  Loader2 as Loader2Icon
 } from "lucide-react";
 import CreateCustomTabDialog from './CreateCustomTabDialog';
 
@@ -45,7 +45,7 @@ const CustomTabsList: React.FC<CustomTabsListProps> = ({ activeTab, onTabChange 
   const queryClient = useQueryClient();
 
   // Query custom tabs
-  const { data: customTabs = [], isLoading } = useQuery({
+  const { data: customTabs = [], isLoading } = useQuery<CustomTabWithLinks[]>({
     queryKey: ['/api/custom-tabs'],
     enabled: true
   });
@@ -156,7 +156,7 @@ const CustomTabsList: React.FC<CustomTabsListProps> = ({ activeTab, onTabChange 
                   className="justify-start w-full h-7 px-2 text-xs"
                   onClick={() => handleTabClick(tab.id)}
                 >
-                  <span className="mr-2">{getIconComponent(tab.icon)}</span>
+                  <span className="mr-2">{getIconComponent(tab.icon || 'folder')}</span>
                   <span className="truncate">{tab.name}</span>
                   {tab.links && tab.links.length > 0 && (
                     <span className="ml-auto bg-muted rounded-full px-1.5 py-0.5 text-[0.6rem]">
