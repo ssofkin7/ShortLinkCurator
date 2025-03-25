@@ -6,9 +6,7 @@ import postgres from 'postgres';
 let connectionString = process.env.DATABASE_URL;
 
 if (!connectionString) {
-  console.error('DATABASE_URL is not defined, using fallback configuration');
-  // Use a fallback config for development only
-  connectionString = 'postgres://default:default@0.0.0.0:5432/default';
+  throw new Error('DATABASE_URL is required. Please set it in your environment variables.');
 }
 
 // Create a postgres connection with postgres.js
