@@ -78,6 +78,7 @@ export const insertTagSchema = createInsertSchema(tags).pick({
 
 export const insertCustomTabSchema = createInsertSchema(customTabs).pick({
   name: true,
+  icon: true,
   user_id: true,
 });
 

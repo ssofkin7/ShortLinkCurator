@@ -13,14 +13,14 @@ import {
   TagIcon, 
   StarIcon, 
   HeartIcon, 
-  AcademicCapIcon,
+  GraduationCapIcon as AcademicCapIcon,
   BeakerIcon,
   BriefcaseIcon,
   CodeIcon,
-  CurrencyDollarIcon,
-  MusicalNoteIcon,
-  VideoCameraIcon,
-  GlobeAltIcon,
+  CurrencyIcon as CurrencyDollarIcon,
+  MusicIcon as MusicalNoteIcon,
+  VideoIcon as VideoCameraIcon,
+  GlobeIcon as GlobeAltIcon,
   HomeIcon
 } from "lucide-react";
 
