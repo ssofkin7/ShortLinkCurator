@@ -12,7 +12,7 @@ const openai = new OpenAI({
 });
 
 if (!process.env.OPENAI_API_KEY) {
-  console.error('OpenAI API key not configured');
+  throw new Error('OpenAI API key must be configured in environment variables');
 }
 
 // Switched to GPT-3.5-turbo for cost optimization as requested by the user
