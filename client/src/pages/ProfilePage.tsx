@@ -222,25 +222,25 @@ export default function ProfilePage() {
     <SidebarProvider>
       <div className="flex h-screen bg-gray-50">
         <CustomSidebar user={user} isLoading={isLoading} />
-        
+
         <div className="flex-1 flex flex-col h-screen overflow-hidden">
           <TopBar user={user} />
-          
+
           <main className="flex-1 overflow-auto w-full">
-            <div style={{width: "calc(100% - 40px)", maxWidth: "1200px"}} className="mx-auto px-4 py-6">
-              <h1 className="text-2xl font-bold mb-6">Your Profile</h1>
-              
+            <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+              <h1 className="text-3xl font-bold tracking-tight text-center mb-8">Your Profile</h1>
+
               <Tabs
                 value={activeTab}
                 onValueChange={setActiveTab}
-                className="space-y-6 mb-10 w-full"
+                className="w-full"
               >
-                <TabsList className="bg-white border border-gray-200">
+                <TabsList className="bg-white border border-gray-200 w-full justify-center">
                   <TabsTrigger value="profile">Profile Information</TabsTrigger>
                   <TabsTrigger value="notifications">Notifications</TabsTrigger>
                   <TabsTrigger value="security">Security</TabsTrigger>
                 </TabsList>
-                
+
                 <TabsContent value="profile" className="space-y-6 w-full">
                   <Card className="w-full">
                     <CardHeader>
@@ -253,20 +253,14 @@ export default function ProfilePage() {
                       <Form {...profileForm}>
                         <form
                           onSubmit={profileForm.handleSubmit(onProfileSubmit)}
-                          className="space-y-4"
+                          className="space-y-6 max-w-md mx-auto"
                         >
-                          <div className="flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-6 mb-6">
-                            <div className="h-20 w-20 rounded-full bg-blue-500 flex items-center justify-center text-white text-xl font-bold mb-3">
-                              <span>{user?.username?.charAt(0).toUpperCase() || "U"}</span>
-                            </div>
-                            <h3 className="font-medium text-lg">{user?.display_name || user?.username}</h3>
-                            <p className="text-sm text-gray-500 mt-1 text-center max-w-xs">
+                          <div className="text-center mb-6">
+                            <p className="text-sm font-medium text-gray-900 mb-2">
                               {user?.email}
                             </p>
-                            <div className="flex items-center space-x-2 mt-3">
-                              <div className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs">
-                                Active User
-                              </div>
+                            <div className="inline-flex px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs">
+                              Active User
                             </div>
                           </div>
 
@@ -350,7 +344,7 @@ export default function ProfilePage() {
                     </CardContent>
                   </Card>
                 </TabsContent>
-                
+
                 <TabsContent value="notifications" className="space-y-6 w-full">
                   <Card className="w-full">
                     <CardHeader>
@@ -463,7 +457,7 @@ export default function ProfilePage() {
                     </CardContent>
                   </Card>
                 </TabsContent>
-                
+
                 <TabsContent value="security" className="space-y-6 w-full">
                   <Card className="w-full">
                     <CardHeader>
@@ -543,10 +537,10 @@ export default function ProfilePage() {
                           </Button>
                         </form>
                       </Form>
-                      
+
                       <div className="pt-6 mt-6 border-t border-gray-200">
                         <h3 className="font-medium text-base mb-4">Account Management</h3>
-                        
+
                         <div className="mb-6">
                           <h4 className="text-sm font-medium mb-3">Subscription</h4>
                           {user?.is_premium ? (
@@ -575,7 +569,7 @@ export default function ProfilePage() {
                             </>
                           )}
                         </div>
-                        
+
                         <div className="mb-8 pt-6 border-t border-gray-100">
                           <h4 className="text-sm font-medium mb-3 text-red-600">Danger Zone</h4>
                           <Button variant="destructive" className="mb-3">
@@ -593,7 +587,7 @@ export default function ProfilePage() {
               </Tabs>
             </div>
           </main>
-          
+
           <MobileNavigation onAddLinkClick={() => {}} />
         </div>
       </div>
