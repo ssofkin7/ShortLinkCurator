@@ -281,7 +281,7 @@ export default function ProfileModal({ trigger }: ProfileModalProps) {
                         <FormControl>
                           <Input {...field} disabled={isLoading} />
                         </FormControl>
-                        <FormDescription>
+                        <FormDescription className="text-xs">
                           This is your public username.
                         </FormDescription>
                         <FormMessage />
@@ -298,7 +298,7 @@ export default function ProfileModal({ trigger }: ProfileModalProps) {
                         <FormControl>
                           <Input {...field} placeholder="Your display name" />
                         </FormControl>
-                        <FormDescription>
+                        <FormDescription className="text-xs">
                           This is the name displayed to other users.
                         </FormDescription>
                         <FormMessage />
@@ -315,7 +315,7 @@ export default function ProfileModal({ trigger }: ProfileModalProps) {
                         <FormControl>
                           <Input {...field} type="email" disabled={isLoading} />
                         </FormControl>
-                        <FormDescription>
+                        <FormDescription className="text-xs">
                           Your email address is used for notifications.
                         </FormDescription>
                         <FormMessage />
@@ -333,10 +333,10 @@ export default function ProfileModal({ trigger }: ProfileModalProps) {
                           <Textarea
                             {...field}
                             placeholder="A short bio about yourself"
-                            className="min-h-[80px]"
+                            className="min-h-[60px]"
                           />
                         </FormControl>
-                        <FormDescription>
+                        <FormDescription className="text-xs">
                           Tell others a little about yourself.
                         </FormDescription>
                         <FormMessage />
