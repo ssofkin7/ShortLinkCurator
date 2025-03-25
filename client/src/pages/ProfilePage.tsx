@@ -235,21 +235,36 @@ export default function ProfilePage() {
                 onValueChange={setActiveTab}
                 className="w-full"
               >
-                <TabsList className="w-full flex justify-center space-x-1 bg-muted/30 rounded-lg p-1">
-                  <TabsTrigger className="flex-1 py-3 font-medium transition-colors hover:bg-muted/50" value="profile">Profile Information</TabsTrigger>
-                  <TabsTrigger className="flex-1 py-3 font-medium transition-colors hover:bg-muted/50" value="notifications">Notifications</TabsTrigger>
-                  <TabsTrigger className="flex-1 py-3 font-medium transition-colors hover:bg-muted/50" value="security">Security</TabsTrigger>
+                <TabsList className="w-full flex justify-center bg-gray-100/80 rounded-xl p-2 space-x-2 border border-gray-200">
+                  <TabsTrigger 
+                    className="flex-1 py-3 px-4 font-medium rounded-lg transition-all data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm hover:bg-gray-50" 
+                    value="profile"
+                  >
+                    Profile Information
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    className="flex-1 py-3 px-4 font-medium rounded-lg transition-all data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm hover:bg-gray-50" 
+                    value="notifications"
+                  >
+                    Notifications
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    className="flex-1 py-3 px-4 font-medium rounded-lg transition-all data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm hover:bg-gray-50" 
+                    value="security"
+                  >
+                    Security
+                  </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="profile" className="space-y-4 w-full bg-white rounded-lg p-6 shadow-sm mt-4">
-                  <Card className="w-full">
-                    <CardHeader>
-                      <CardTitle>Profile Information</CardTitle>
-                      <CardDescription>
+                <TabsContent value="profile" className="space-y-6 w-full bg-white rounded-xl p-8 shadow-sm mt-6">
+                  <Card className="w-full border-0 shadow-none">
+                    <CardHeader className="px-0 pt-0">
+                      <CardTitle className="text-2xl font-semibold">Profile Information</CardTitle>
+                      <CardDescription className="text-base text-gray-600 mt-2">
                         Update your personal information and public profile.
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-6">
+                    <CardContent className="space-y-8 px-0">
                       <Form {...profileForm}>
                         <form
                           onSubmit={profileForm.handleSubmit(onProfileSubmit)}
