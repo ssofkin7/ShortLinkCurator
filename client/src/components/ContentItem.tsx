@@ -20,6 +20,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import EditTitleDialog from "./EditTitleDialog";
 
 interface ContentItemProps {
   link: LinkWithTags;
@@ -32,6 +33,7 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
   const { toast } = useToast();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [viewTagsModalOpen, setViewTagsModalOpen] = useState(false);
+  const [editTitleDialogOpen, setEditTitleDialogOpen] = useState(false);
 
   // Function to format date
   const formatDate = (date: Date) => {
