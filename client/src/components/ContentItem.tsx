@@ -41,6 +41,7 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
   const [viewTagsModalOpen, setViewTagsModalOpen] = useState(false);
   const [editTitleDialogOpen, setEditTitleDialogOpen] = useState(false);
   const [isCreateTabDialogOpen, setIsCreateTabDialogOpen] = useState(false);
+  const [showTags, setShowTags] = useState(false);
   
   // Fetch custom tabs
   const { data: customTabs = [], isLoading: isLoadingTabs } = useQuery<CustomTabWithLinks[]>({
