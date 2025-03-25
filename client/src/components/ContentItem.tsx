@@ -586,7 +586,8 @@ const ContentItem = ({
     </Card>
   );
 
-  const renderGridView = () => (
+  const renderGridView = () => {
+    return 
     <Card className="overflow-hidden hover:shadow-md transition-shadow duration-300">
       <div 
         className="relative aspect-video cursor-pointer"
@@ -779,14 +780,14 @@ const ContentItem = ({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <div className="flex items-center text-xs text-gray500 mt-1">
+        <div className="flex items-center text-xs text-gray-500 mt-1">
             {link.last_viewed ? (
               <span>Viewed {formatDate(new Date(link.last_viewed))}</span>
             ) : (
               <span>Added {formatDate(new Date(link.created_at))}</span>
             )}
-          </div>
-          <div className="mt-2 flex flex-wrap gap-1">
+        </div>
+        <div className="mt-2 flex flex-wrap gap-1">
             {link.category && (
               <Badge variant="outline" className="bg-gray-100 text-gray-800 text-xs">
                 {link.category}
@@ -817,7 +818,6 @@ const ContentItem = ({
                 +{link.tags.length - 2} more
               </Badge>
             )}
-          </div>
         </div>
       </div>
     </Card>
