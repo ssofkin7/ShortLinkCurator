@@ -41,6 +41,7 @@ export const customTabs = pgTable("custom_tabs", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   icon: text("icon").default("folder"),
+  description: text("description"),
   user_id: integer("user_id").notNull().references(() => users.id),
   created_at: timestamp("created_at").defaultNow().notNull(),
 });
@@ -79,6 +80,7 @@ export const insertTagSchema = createInsertSchema(tags).pick({
 export const insertCustomTabSchema = createInsertSchema(customTabs).pick({
   name: true,
   icon: true,
+  description: true,
   user_id: true,
 });
 
