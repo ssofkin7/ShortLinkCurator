@@ -316,6 +316,11 @@ const CustomTabPage = () => {
                   key={link.id} 
                   link={link}
                   viewMode={viewMode}
+                  customTabId={tabId}
+                  onRemoveFromTab={() => {
+                    // Refresh the links in the tab after removing
+                    refetchLinks();
+                  }}
                   onEditTags={() => handleOpenTagModal(link)}
                   onTagClick={(tagName) => {
                     // Filter by tag (implementation can be added later)
