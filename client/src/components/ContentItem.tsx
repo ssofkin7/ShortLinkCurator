@@ -480,7 +480,7 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
                 {link.category}
               </Badge>
             )}
-            {showTags && link.tags.slice(0, 3).map((tag) => (
+            {showTags && link.tags && link.tags.slice(0, 3).map((tag) => (
               <Badge
                 key={tag.id}
                 variant="secondary"
@@ -681,7 +681,7 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
               {link.category}
             </Badge>
           )}
-          {showTags && link.tags.slice(0, 2).map((tag) => (
+          {showTags && link.tags && link.tags.slice(0, 2).map((tag) => (
             <Badge
               key={tag.id}
               variant="secondary"
@@ -725,9 +725,9 @@ const ContentItem = ({ link, viewMode, onEditTags, onTagClick }: ContentItemProp
             </DialogDescription>
           </DialogHeader>
           <div className="p-4">
-            {link.tags.length > 0 ? (
+            {link.tags && link.tags.length > 0 ? (
               <div className="flex flex-wrap gap-2">
-                {link.tags.map((tag) => (
+                {link.tags && link.tags.map((tag) => (
                   <Badge
                     key={tag.id}
                     variant="secondary"

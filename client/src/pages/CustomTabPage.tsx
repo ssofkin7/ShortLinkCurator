@@ -64,7 +64,7 @@ const CustomTabPage = () => {
         link.title.toLowerCase().includes(query) || 
         link.url.toLowerCase().includes(query) || 
         link.category.toLowerCase().includes(query) ||
-        link.tags.some(tag => tag.name.toLowerCase().includes(query))
+        link.tags && link.tags.some(tag => tag.name.toLowerCase().includes(query))
       );
     }
 
