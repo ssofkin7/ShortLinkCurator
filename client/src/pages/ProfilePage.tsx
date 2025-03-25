@@ -41,7 +41,6 @@ const profileSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   bio: z.string().optional(),
   displayName: z.string().optional(),
-  avatar_url: z.string().optional(),
 });
 
 const passwordSchema = z.object({
@@ -259,58 +258,21 @@ export default function ProfilePage() {
                           onSubmit={profileForm.handleSubmit(onProfileSubmit)}
                           className="space-y-4"
                         >
-                          <div className="flex items-center space-x-4 mb-6">
-                            <div className="relative">
-                              <div className="h-20 w-20 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xl font-semibold overflow-hidden">
-                                {user?.avatar_url ? (
-                                  <img 
-                                    src={user.avatar_url} 
-                                    alt={`${user.username}'s avatar`}
-                                    className="w-full h-full object-cover"
-                                  />
-                                ) : (
-                                  <span>{user?.username?.charAt(0).toUpperCase() || "U"}</span>
-                                )}
-                              </div>
-                              <div className="absolute -bottom-1 -right-1">
-                                <div className="p-1 bg-white rounded-full shadow-md">
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Button 
-                                          variant="ghost" 
-                                          size="icon" 
-                                          className="h-8 w-8 rounded-full bg-primary hover:bg-primary/90 text-white"
-                                          onClick={() => {
-                                            // Open dialog to set avatar URL
-                                            const avatarUrl = prompt("Enter the URL for your avatar image:", profileForm.getValues().avatar_url || "");
-                                            if (avatarUrl !== null) {
-                                              profileForm.setValue("avatar_url", avatarUrl);
-                                              // Show toast about avatar URL being set
-                                              toast({
-                                                title: "Avatar URL set",
-                                                description: "Your avatar URL has been set. Save your profile to apply changes.",
-                                                variant: "default"
-                                              });
-                                            }
-                                          }}
-                                        >
-                                          <Camera className="h-4 w-4" />
-                                        </Button>
-                                      </TooltipTrigger>
-                                      <TooltipContent side="right">
-                                        Change avatar
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </TooltipProvider>
-                                </div>
-                              </div>
+                          <div className="flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-6 mb-6">
+                            <div className="h-20 w-20 rounded-full bg-blue-500 flex items-center justify-center text-white text-xl font-bold mb-3">
+                              <span>{user?.username?.charAt(0).toUpperCase() || "U"}</span>
                             </div>
-                            <div>
-                              <h3 className="font-medium">{user?.display_name || user?.username}</h3>
-                              <p className="text-xs text-gray-500 mt-1">
-                                Personalize your profile with a custom avatar
-                              </p>
+                            <h3 className="font-medium text-lg">{user?.display_name || user?.username}</h3>
+                            <p className="text-sm text-gray-500 mt-1 text-center max-w-xs">
+                              {user?.email}
+                            </p>
+                            <div className="flex items-center space-x-2 mt-3">
+                              <div className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs">
+                                {user?.links_count || 0} Links
+                              </div>
+                              <div className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs">
+                                Active User
+                              </div>
                             </div>
                           </div>
 
