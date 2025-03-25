@@ -53,7 +53,7 @@ function AppContent() {
   
   return (
     <>
-      <Router />
+      {!isAuthenticated ? <LandingPage /> : <Router />}
       {isAuthenticated && <GetStartedWizard />}
     </>
   );
