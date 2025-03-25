@@ -226,14 +226,14 @@ export default function ProfilePage() {
         <div className="flex-1 flex flex-col h-screen overflow-hidden">
           <TopBar user={user} />
           
-          <main className="flex-1 overflow-auto">
+          <main className="flex-1 overflow-auto pb-20">
             <div className="container mx-auto px-4 py-6">
               <h1 className="text-2xl font-bold mb-6">Your Profile</h1>
               
               <Tabs
                 value={activeTab}
                 onValueChange={setActiveTab}
-                className="space-y-6"
+                className="space-y-6 mb-10"
               >
                 <TabsList className="bg-white border border-gray-200">
                   <TabsTrigger value="profile">Profile Information</TabsTrigger>
@@ -544,16 +544,18 @@ export default function ProfilePage() {
                         </form>
                       </Form>
                       
-                      <div className="pt-6 border-t border-gray-200">
+                      <div className="pt-6 mt-6 border-t border-gray-200">
                         <h3 className="font-medium text-base mb-4">Account Management</h3>
                         
-                        <Button variant="destructive" className="mb-2">
-                          Delete Account
-                        </Button>
-                        <p className="text-xs text-gray-500">
-                          This will permanently delete your account and all your data.
-                          This action cannot be undone.
-                        </p>
+                        <div className="mb-8">
+                          <Button variant="destructive" className="mb-3">
+                            Delete Account
+                          </Button>
+                          <p className="text-xs text-gray-500">
+                            This will permanently delete your account and all your data.
+                            This action cannot be undone.
+                          </p>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
