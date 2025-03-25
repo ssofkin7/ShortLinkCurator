@@ -55,12 +55,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }),
     resave: false,
     saveUninitialized: false,
-    secret: process.env.SESSION_SECRET || "linkOrbit-secret-key",
+    secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
     cookie: { 
       maxAge: 86400000, // 1 day
       secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
-      sameSite: 'lax' // Changed to 'lax' to allow cross-site navigation
+      sameSite: 'strict',
+      path: '/',
+      domain: process.env.NODE_ENV === 'production' ? process.env.DOMAIN : undefined
     }
   }));
 
@@ -76,7 +78,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Hash password
-      const hashedPassword = await bcrypt.hash(password, 10);
+      // Validate password strength
+      if (password.length < 8 || !/\d/.test(password) || !/[A-Z]/.test(password)) {
+        return res.status(400).json({ 
+          message: "Password must be at least 8 characters and contain a number and uppercase letter" 
+        });
+      }
+      const hashedPassword = await bcrypt.hash(password, 12);
 
       // Create new user
       const user = await storage.createUser({
