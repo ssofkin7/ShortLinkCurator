@@ -235,46 +235,46 @@ export default function ProfilePage() {
                 onValueChange={setActiveTab}
                 className="w-full"
               >
-                <TabsList className="w-full flex justify-center bg-gray-100 rounded-xl p-2 space-x-3 border border-gray-200/80 shadow-sm">
+                <TabsList className="w-full flex justify-center bg-gray-100/80 rounded-xl p-2 space-x-2 border border-gray-200">
                   <TabsTrigger 
-                    className="flex-1 py-3.5 px-5 font-medium rounded-lg transition-all data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md hover:bg-white/80 text-gray-700" 
+                    className="flex-1 py-3 px-4 font-medium rounded-lg transition-all data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm hover:bg-gray-50" 
                     value="profile"
                   >
                     Profile Information
                   </TabsTrigger>
                   <TabsTrigger 
-                    className="flex-1 py-3.5 px-5 font-medium rounded-lg transition-all data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md hover:bg-white/80 text-gray-700" 
+                    className="flex-1 py-3 px-4 font-medium rounded-lg transition-all data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm hover:bg-gray-50" 
                     value="notifications"
                   >
                     Notifications
                   </TabsTrigger>
                   <TabsTrigger 
-                    className="flex-1 py-3.5 px-5 font-medium rounded-lg transition-all data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md hover:bg-white/80 text-gray-700" 
+                    className="flex-1 py-3 px-4 font-medium rounded-lg transition-all data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm hover:bg-gray-50" 
                     value="security"
                   >
                     Security
                   </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="profile" className="space-y-8 w-full bg-white rounded-xl p-10 shadow-md mt-8">
+                <TabsContent value="profile" className="space-y-6 w-full bg-white rounded-xl p-8 shadow-sm mt-6">
                   <Card className="w-full border-0 shadow-none">
                     <CardHeader className="px-0 pt-0">
-                      <CardTitle className="text-2xl font-bold text-gray-900">Profile Information</CardTitle>
-                      <CardDescription className="text-base text-gray-600 mt-3 leading-relaxed">
+                      <CardTitle className="text-2xl font-semibold">Profile Information</CardTitle>
+                      <CardDescription className="text-base text-gray-600 mt-2">
                         Update your personal information and public profile.
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-8 px-0 mt-4">
+                    <CardContent className="space-y-8 px-0">
                       <Form {...profileForm}>
                         <form
                           onSubmit={profileForm.handleSubmit(onProfileSubmit)}
-                          className="space-y-8 max-w-md mx-auto"
+                          className="space-y-6 max-w-md mx-auto"
                         >
-                          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100">
-                            <p className="text-md font-medium text-gray-800">
+                          <div className="text-center mb-6">
+                            <p className="text-sm font-medium text-gray-900 mb-2">
                               {user?.email}
                             </p>
-                            <div className="inline-flex px-3 py-1 rounded-full bg-primary/10 text-primary font-medium text-sm">
+                            <div className="inline-flex px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs">
                               Active User
                             </div>
                           </div>
