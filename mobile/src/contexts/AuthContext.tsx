@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, ReactNode, useContext } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../services/api';
@@ -21,73 +21,64 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export default function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // Check if user is already logged in on app start
   useEffect(() => {
-    const loadUser = async () => {
+    // Check if user is logged in on app startup
+    const checkAuthStatus = async () => {
       try {
         setIsLoading(true);
         const currentUser = await api.getCurrentUser();
-        setUser(currentUser);
+        if (currentUser) {
+          setUser(currentUser);
+        }
       } catch (err) {
-        console.error('Error loading user:', err);
-        // Don't set error here as this is just initial load
+        console.error('Failed to check auth status:', err);
+        // We don't set an error here since this is an automatic check
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadUser();
+    checkAuthStatus();
   }, []);
 
   const login = async (email: string, password: string): Promise<User> => {
     try {
-      setIsLoading(true);
       setError(null);
-      const user = await api.login(email, password);
-      setUser(user);
-      return user;
+      const loggedInUser = await api.login(email, password);
+      setUser(loggedInUser);
+      return loggedInUser;
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to login');
+      const error = err instanceof Error ? err : new Error('Login failed');
       setError(error);
       throw error;
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const register = async (username: string, email: string, password: string): Promise<User> => {
     try {
-      setIsLoading(true);
       setError(null);
-      const user = await api.register(username, email, password);
-      setUser(user);
-      return user;
+      const newUser = await api.register(username, email, password);
+      setUser(newUser);
+      return newUser;
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to register');
+      const error = err instanceof Error ? err : new Error('Registration failed');
       setError(error);
       throw error;
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const logout = async (): Promise<void> => {
     try {
-      setIsLoading(true);
       setError(null);
       await api.logout();
       setUser(null);
-      // Clear any stored tokens
-      await AsyncStorage.removeItem('auth_token');
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to logout');
+      const error = err instanceof Error ? err : new Error('Logout failed');
       setError(error);
-      Alert.alert('Logout Error', error.message);
-    } finally {
-      setIsLoading(false);
+      throw error;
     }
   };
 
