@@ -7,342 +7,391 @@ import {
   TouchableOpacity,
   Switch,
   Alert,
-  SafeAreaView,
-  Image,
-  Share,
+  TextInput,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Image
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
-import { colors, typography, spacing } from '../components/ui/theme';
 import { Button } from '../components/ui/Button';
+import { colors, typography, spacing } from '../components/ui/theme';
 import { shareAppInvite } from '../services/sharingService';
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-  
-  // Notification settings states
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [newContentAlerts, setNewContentAlerts] = useState(true);
-  const [weeklyDigest, setWeeklyDigest] = useState(false);
-  const [platformUpdates, setPlatformUpdates] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  // Profile editing
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [displayName, setDisplayName] = useState(user?.displayName || '');
+  const [bio, setBio] = useState(user?.bio || '');
+
+  // Settings
+  const [emailNotifications, setEmailNotifications] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+  const [linkCount, setLinkCount] = useState<number | null>(null);
 
   const handleLogout = async () => {
     try {
-      setIsLoggingOut(true);
+      setLoading(true);
       await logout();
-      // Navigation is handled by RootNavigator
+      // No need to navigate - RootNavigator will handle this
     } catch (error) {
       Alert.alert(
-        'Logout Failed',
-        error instanceof Error ? error.message : 'Unable to log out. Please try again.'
+        'Logout Error',
+        error instanceof Error ? error.message : 'Failed to log out'
       );
     } finally {
-      setIsLoggingOut(false);
+      setLoading(false);
     }
   };
 
-  const handleShare = async () => {
-    try {
-      await shareAppInvite();
-    } catch (error) {
-      Alert.alert('Error', 'Could not share the app at this time.');
+  const handleSaveProfile = () => {
+    // In a real app, we would save the profile changes to the backend
+    Alert.alert('Success', 'Profile updated successfully');
+    setIsEditingProfile(false);
+  };
+
+  const handleShareApp = async () => {
+    const success = await shareAppInvite();
+    if (!success) {
+      Alert.alert('Share Error', 'Failed to share the app. Please try again.');
     }
   };
 
-  // Display loading state while user data is loading
-  if (!user) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.primary[500]} />
-      </View>
-    );
-  }
+  const renderProfileSection = () => (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>Profile</Text>
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView}>
-        <View style={styles.header}>
-          <Text style={styles.screenTitle}>Profile</Text>
-        </View>
-
-        {/* User Info Section */}
-        <View style={styles.userInfoSection}>
-          <View style={styles.avatarContainer}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>
-                {user.displayName 
-                  ? user.displayName.substring(0, 2).toUpperCase() 
-                  : user.username.substring(0, 2).toUpperCase()}
+      <View style={styles.profileHeader}>
+        <View style={styles.avatarContainer}>
+          {user?.avatar_url ? (
+            <Image source={{ uri: user.avatar_url }} style={styles.avatar} />
+          ) : (
+            <View style={styles.avatarPlaceholder}>
+              <Text style={styles.avatarInitial}>
+                {user?.username ? user.username.charAt(0).toUpperCase() : '?'}
               </Text>
             </View>
-          </View>
-          <Text style={styles.userName}>{user.displayName || user.username}</Text>
-          <Text style={styles.userEmail}>{user.email}</Text>
-          <Text style={styles.joinDate}>Member since {new Date(user.created_at).toLocaleDateString()}</Text>
+          )}
         </View>
 
-        {/* Account Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Account</Text>
-          
-          <View style={styles.card}>
-            <TouchableOpacity style={styles.menuItem}>
-              <Text style={styles.menuItemText}>Edit Profile</Text>
-              <Text style={styles.menuItemArrow}>›</Text>
+        <View style={styles.profileInfo}>
+          <Text style={styles.username}>{user?.username || 'User'}</Text>
+          <Text style={styles.email}>{user?.email || 'email@example.com'}</Text>
+          {!isEditingProfile && (
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={() => setIsEditingProfile(true)}
+            >
+              <Text style={styles.editButtonText}>Edit Profile</Text>
             </TouchableOpacity>
-            
-            <View style={styles.divider} />
-            
-            <TouchableOpacity style={styles.menuItem}>
-              <Text style={styles.menuItemText}>Change Password</Text>
-              <Text style={styles.menuItemArrow}>›</Text>
-            </TouchableOpacity>
-            
-            <View style={styles.divider} />
-            
-            <TouchableOpacity style={styles.menuItem}>
-              <View style={styles.menuItemLeft}>
-                <Text style={styles.menuItemText}>Premium Membership</Text>
-                {user.is_premium ? (
-                  <View style={styles.premiumBadge}>
-                    <Text style={styles.premiumText}>PRO</Text>
-                  </View>
-                ) : null}
-              </View>
-              <Text style={styles.menuItemArrow}>›</Text>
-            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+
+      {isEditingProfile ? (
+        <View style={styles.editForm}>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Display Name</Text>
+            <TextInput
+              style={styles.input}
+              value={displayName}
+              onChangeText={setDisplayName}
+              placeholder="Your display name"
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Bio</Text>
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              value={bio}
+              onChangeText={setBio}
+              placeholder="Tell us about yourself"
+              multiline
+              numberOfLines={4}
+            />
+          </View>
+
+          <View style={styles.editActions}>
+            <Button
+              title="Cancel"
+              onPress={() => setIsEditingProfile(false)}
+              variant="outline"
+              size="md"
+              style={{ flex: 1, marginRight: 10 }}
+            />
+            <Button
+              title="Save"
+              onPress={handleSaveProfile}
+              variant="primary"
+              size="md"
+              style={{ flex: 1 }}
+            />
           </View>
         </View>
+      ) : (
+        <View style={styles.profileDetails}>
+          {displayName ? (
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>Display Name</Text>
+              <Text style={styles.detailValue}>{displayName}</Text>
+            </View>
+          ) : null}
 
-        {/* Notifications Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Notifications</Text>
-          
-          <View style={styles.card}>
-            <View style={styles.switchItem}>
-              <Text style={styles.menuItemText}>Email Notifications</Text>
-              <Switch
-                value={emailNotifications}
-                onValueChange={setEmailNotifications}
-                trackColor={{ false: colors.gray[300], true: colors.primary[400] }}
-                thumbColor={emailNotifications ? colors.primary[600] : colors.gray[100]}
-              />
+          {bio ? (
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>Bio</Text>
+              <Text style={styles.detailValue}>{bio}</Text>
             </View>
-            
-            <View style={styles.divider} />
-            
-            <View style={styles.switchItem}>
-              <Text style={styles.menuItemText}>New Content Alerts</Text>
-              <Switch
-                value={newContentAlerts}
-                onValueChange={setNewContentAlerts}
-                trackColor={{ false: colors.gray[300], true: colors.primary[400] }}
-                thumbColor={newContentAlerts ? colors.primary[600] : colors.gray[100]}
-              />
-            </View>
-            
-            <View style={styles.divider} />
-            
-            <View style={styles.switchItem}>
-              <Text style={styles.menuItemText}>Weekly Digest</Text>
-              <Switch
-                value={weeklyDigest}
-                onValueChange={setWeeklyDigest}
-                trackColor={{ false: colors.gray[300], true: colors.primary[400] }}
-                thumbColor={weeklyDigest ? colors.primary[600] : colors.gray[100]}
-              />
-            </View>
-            
-            <View style={styles.divider} />
-            
-            <View style={styles.switchItem}>
-              <Text style={styles.menuItemText}>Platform Updates</Text>
-              <Switch
-                value={platformUpdates}
-                onValueChange={setPlatformUpdates}
-                trackColor={{ false: colors.gray[300], true: colors.primary[400] }}
-                thumbColor={platformUpdates ? colors.primary[600] : colors.gray[100]}
-              />
-            </View>
+          ) : null}
+
+          <View style={styles.detailItem}>
+            <Text style={styles.detailLabel}>Member Since</Text>
+            <Text style={styles.detailValue}>
+              {user?.created_at
+                ? new Date(user.created_at).toLocaleDateString()
+                : 'N/A'}
+            </Text>
           </View>
-        </View>
 
-        {/* Share & Support Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Share & Support</Text>
-          
-          <View style={styles.card}>
-            <TouchableOpacity style={styles.menuItem} onPress={handleShare}>
-              <Text style={styles.menuItemText}>Invite Friends</Text>
-              <Text style={styles.menuItemArrow}>›</Text>
-            </TouchableOpacity>
-            
-            <View style={styles.divider} />
-            
-            <TouchableOpacity style={styles.menuItem}>
-              <Text style={styles.menuItemText}>Help & Support</Text>
-              <Text style={styles.menuItemArrow}>›</Text>
-            </TouchableOpacity>
-            
-            <View style={styles.divider} />
-            
-            <TouchableOpacity style={styles.menuItem}>
-              <Text style={styles.menuItemText}>Privacy Policy</Text>
-              <Text style={styles.menuItemArrow}>›</Text>
-            </TouchableOpacity>
-            
-            <View style={styles.divider} />
-            
-            <TouchableOpacity style={styles.menuItem}>
-              <Text style={styles.menuItemText}>Terms of Service</Text>
-              <Text style={styles.menuItemArrow}>›</Text>
-            </TouchableOpacity>
-          </View>
+          {linkCount !== null && (
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>Saved Links</Text>
+              <Text style={styles.detailValue}>{linkCount}</Text>
+            </View>
+          )}
         </View>
+      )}
+    </View>
+  );
 
-        {/* Logout Button */}
-        <Button
-          title={isLoggingOut ? "Logging out..." : "Log Out"}
-          onPress={handleLogout}
-          variant="outline"
-          disabled={isLoggingOut}
-          loading={isLoggingOut}
-          style={styles.logoutButton}
+  const renderSettingsSection = () => (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>Settings</Text>
+
+      <View style={styles.settingItem}>
+        <Text style={styles.settingLabel}>Email Notifications</Text>
+        <Switch
+          value={emailNotifications}
+          onValueChange={setEmailNotifications}
+          trackColor={{ false: colors.gray[300], true: colors.primary[600] }}
+          thumbColor={colors.white}
         />
+      </View>
+
+      <View style={styles.settingItem}>
+        <Text style={styles.settingLabel}>Dark Mode</Text>
+        <Switch
+          value={darkMode}
+          onValueChange={setDarkMode}
+          trackColor={{ false: colors.gray[300], true: colors.primary[600] }}
+          thumbColor={colors.white}
+        />
+      </View>
+    </View>
+  );
+
+  const renderActionsSection = () => (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>Actions</Text>
+
+      <Button
+        title="Share App with Friends"
+        onPress={handleShareApp}
+        variant="outline"
+        size="md"
+        fullWidth
+        style={styles.actionButton}
+      />
+
+      <Button
+        title="Privacy Policy"
+        onPress={() => Alert.alert('Privacy', 'Privacy policy will open here')}
+        variant="outline"
+        size="md"
+        fullWidth
+        style={styles.actionButton}
+      />
+
+      <Button
+        title="Terms of Service"
+        onPress={() => Alert.alert('Terms', 'Terms of service will open here')}
+        variant="outline"
+        size="md"
+        fullWidth
+        style={styles.actionButton}
+      />
+
+      <Button
+        title="Log Out"
+        onPress={handleLogout}
+        variant="primary"
+        size="md"
+        fullWidth
+        loading={loading}
+        disabled={loading}
+        style={[styles.actionButton, styles.logoutButton]}
+      />
+    </View>
+  );
+
+  return (
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        {renderProfileSection()}
+        {renderSettingsSection()}
+        {renderActionsSection()}
       </ScrollView>
-    </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.gray[50],
+    backgroundColor: colors.white,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.gray[50],
-  },
-  scrollView: {
-    flex: 1,
-    paddingHorizontal: spacing.lg,
-  },
-  header: {
-    paddingVertical: spacing.lg,
-    marginTop: spacing.sm,
-  },
-  screenTitle: {
-    fontSize: typography.fontSizes['2xl'],
-    fontWeight: typography.fontWeights.bold as any,
-    color: colors.gray[900],
-  },
-  userInfoSection: {
-    alignItems: 'center',
-    paddingVertical: spacing.xl,
-  },
-  avatarContainer: {
-    marginBottom: spacing.md,
-  },
-  avatar: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    backgroundColor: colors.primary[500],
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    fontSize: typography.fontSizes['2xl'],
-    fontWeight: typography.fontWeights.bold as any,
-    color: 'white',
-  },
-  userName: {
-    fontSize: typography.fontSizes.xl,
-    fontWeight: typography.fontWeights.bold as any,
-    color: colors.gray[900],
-    marginBottom: spacing.xs,
-  },
-  userEmail: {
-    fontSize: typography.fontSizes.md,
-    color: colors.gray[500],
-    marginBottom: spacing.xs,
-  },
-  joinDate: {
-    fontSize: typography.fontSizes.sm,
-    color: colors.gray[400],
+  scrollContainer: {
+    padding: spacing.md,
   },
   section: {
-    marginBottom: spacing.xl,
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+    shadowColor: colors.gray[900],
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 3,
   },
   sectionTitle: {
     fontSize: typography.fontSizes.lg,
-    fontWeight: typography.fontWeights.semibold as any,
+    fontWeight: typography.fontWeights.bold,
     color: colors.gray[900],
     marginBottom: spacing.md,
   },
-  card: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    ...Platform.select({
-      ios: {
-        shadowColor: colors.gray[900],
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
-  },
-  menuItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-  },
-  menuItemLeft: {
+  profileHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: spacing.md,
   },
-  menuItemText: {
-    fontSize: typography.fontSizes.md,
-    color: colors.gray[800],
+  avatarContainer: {
+    marginRight: spacing.md,
   },
-  menuItemArrow: {
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
+  avatarPlaceholder: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: colors.primary[100],
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarInitial: {
+    fontSize: typography.fontSizes['2xl'],
+    fontWeight: typography.fontWeights.bold,
+    color: colors.primary[600],
+  },
+  profileInfo: {
+    flex: 1,
+  },
+  username: {
     fontSize: typography.fontSizes.lg,
-    color: colors.gray[400],
-    fontWeight: typography.fontWeights.light as any,
+    fontWeight: typography.fontWeights.bold,
+    color: colors.gray[900],
+    marginBottom: spacing.xs / 2,
   },
-  switchItem: {
+  email: {
+    fontSize: typography.fontSizes.sm,
+    color: colors.gray[600],
+    marginBottom: spacing.xs,
+  },
+  editButton: {
+    paddingVertical: spacing.xs / 2,
+    paddingHorizontal: spacing.sm,
+    backgroundColor: colors.primary[50],
+    borderRadius: 4,
+    alignSelf: 'flex-start',
+  },
+  editButtonText: {
+    fontSize: typography.fontSizes.xs,
+    fontWeight: typography.fontWeights.medium,
+    color: colors.primary[600],
+  },
+  profileDetails: {
+    marginTop: spacing.sm,
+  },
+  detailItem: {
+    marginBottom: spacing.sm,
+  },
+  detailLabel: {
+    fontSize: typography.fontSizes.xs,
+    fontWeight: typography.fontWeights.medium,
+    color: colors.gray[500],
+    marginBottom: spacing.xs / 2,
+  },
+  detailValue: {
+    fontSize: typography.fontSizes.md,
+    color: colors.gray[900],
+  },
+  editForm: {
+    marginTop: spacing.sm,
+  },
+  inputContainer: {
+    marginBottom: spacing.md,
+  },
+  label: {
+    fontSize: typography.fontSizes.sm,
+    fontWeight: typography.fontWeights.medium,
+    color: colors.gray[700],
+    marginBottom: spacing.xs,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: colors.gray[300],
+    borderRadius: 8,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    fontSize: typography.fontSizes.md,
+    color: colors.gray[900],
+    backgroundColor: colors.white,
+  },
+  textArea: {
+    minHeight: 100,
+    paddingTop: spacing.sm,
+    textAlignVertical: 'top',
+  },
+  editActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: spacing.sm,
+  },
+  settingItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.gray[100],
   },
-  divider: {
-    height: 1,
-    backgroundColor: colors.gray[200],
-    marginHorizontal: spacing.lg,
+  settingLabel: {
+    fontSize: typography.fontSizes.md,
+    color: colors.gray[900],
+  },
+  actionButton: {
+    marginBottom: spacing.sm,
   },
   logoutButton: {
-    marginVertical: spacing.xl,
-  },
-  premiumBadge: {
-    backgroundColor: colors.primary[100],
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs / 2,
-    borderRadius: 4,
-    marginLeft: spacing.md,
-  },
-  premiumText: {
-    fontSize: typography.fontSizes.xs,
-    fontWeight: typography.fontWeights.bold as any,
-    color: colors.primary[700],
+    marginTop: spacing.md,
   },
 });
