@@ -10,7 +10,8 @@ import {
   TextInput,
   ActivityIndicator,
   KeyboardAvoidingView,
-  Image
+  Image,
+  Platform
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';

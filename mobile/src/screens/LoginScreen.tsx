@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TextInput, 
-  TouchableOpacity, 
-  Image,
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
   Alert,
   ActivityIndicator
 } from 'react-native';
@@ -31,19 +31,24 @@ export default function LoginScreen() {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
-  const validateForm = () => {
+  // Reset errors when inputs change
+  useEffect(() => {
+    if (email) setEmailError('');
+  }, [email]);
+  
+  useEffect(() => {
+    if (password) setPasswordError('');
+  }, [password]);
+
+  const validateInputs = (): boolean => {
     let isValid = true;
     
-    // Reset errors
-    setEmailError('');
-    setPasswordError('');
-    
-    // Email validation
-    if (!email.trim()) {
+    // Simple email validation
+    if (!email) {
       setEmailError('Email is required');
       isValid = false;
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      setEmailError('Please enter a valid email address');
+      setEmailError('Please enter a valid email');
       isValid = false;
     }
     
@@ -51,94 +56,95 @@ export default function LoginScreen() {
     if (!password) {
       setPasswordError('Password is required');
       isValid = false;
-    } else if (password.length < 6) {
-      setPasswordError('Password must be at least 6 characters');
-      isValid = false;
     }
     
     return isValid;
   };
 
   const handleLogin = async () => {
-    if (!validateForm()) return;
+    if (!validateInputs()) return;
     
     try {
       setLoading(true);
       await login(email, password);
-      // No need to navigate - RootNavigator will automatically redirect
+      // No need to navigate - RootNavigator will handle this
     } catch (error) {
       Alert.alert(
         'Login Failed',
-        error instanceof Error ? error.message : 'An unexpected error occurred'
+        error instanceof Error ? error.message : 'Invalid email or password'
       );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleRegister = () => {
-    navigation.navigate('Register');
-  };
-
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.logoContainer}>
-          <Text style={styles.logo}>LinkOrbit</Text>
-          <Text style={styles.tagline}>Your content universe</Text>
+        <View style={styles.header}>
+          <View style={styles.logoContainer}>
+            <View style={styles.logoCircle}>
+              <Text style={styles.logoText}>L</Text>
+            </View>
+          </View>
+          <Text style={styles.title}>LinkOrbit</Text>
+          <Text style={styles.subtitle}>Your personal content library</Text>
         </View>
-        
+
         <View style={styles.formContainer}>
-          <Text style={styles.title}>Welcome Back</Text>
-          <Text style={styles.subtitle}>Sign in to your account</Text>
-          
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Email</Text>
             <TextInput
               style={[styles.input, emailError ? styles.inputError : null]}
               placeholder="Enter your email"
+              placeholderTextColor={colors.gray[400]}
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
               keyboardType="email-address"
-              textContentType="emailAddress"
+              returnKeyType="next"
               autoCorrect={false}
+              editable={!loading}
             />
             {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
           </View>
-          
+
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Password</Text>
             <TextInput
               style={[styles.input, passwordError ? styles.inputError : null]}
               placeholder="Enter your password"
+              placeholderTextColor={colors.gray[400]}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
-              textContentType="password"
+              returnKeyType="go"
+              autoCapitalize="none"
+              autoCorrect={false}
+              editable={!loading}
             />
             {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
           </View>
-          
+
           <Button
-            title="Sign In"
+            title={loading ? 'Logging in...' : 'Login'}
             onPress={handleLogin}
             variant="primary"
             size="lg"
             disabled={loading}
             loading={loading}
             fullWidth
+            style={styles.loginButton}
           />
-          
-          <View style={styles.registerContainer}>
-            <Text style={styles.registerText}>
-              Don't have an account?
-            </Text>
-            <TouchableOpacity onPress={handleRegister}>
-              <Text style={styles.registerLink}>Create one</Text>
+
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Don't have an account? </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+              <Text style={styles.footerLink}>Register</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -154,25 +160,33 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-    paddingBottom: spacing.xl,
+    padding: spacing.lg,
+  },
+  header: {
+    alignItems: 'center',
+    marginTop: spacing.xl,
+    marginBottom: spacing.xl,
   },
   logoContainer: {
+    marginBottom: spacing.md,
+  },
+  logoCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: colors.primary[500],
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: spacing['2xl'],
-    marginBottom: spacing.lg,
+    shadowColor: colors.gray[900],
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  logo: {
-    fontSize: typography.fontSizes['3xl'],
+  logoText: {
+    fontSize: 40,
     fontWeight: typography.fontWeights.bold,
-    color: colors.primary[600],
-  },
-  tagline: {
-    fontSize: typography.fontSizes.md,
-    color: colors.gray[600],
-    marginTop: spacing.xs,
-  },
-  formContainer: {
-    paddingHorizontal: spacing.lg,
+    color: colors.white,
   },
   title: {
     fontSize: typography.fontSizes['2xl'],
@@ -183,7 +197,10 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: typography.fontSizes.md,
     color: colors.gray[600],
-    marginBottom: spacing.xl,
+    marginBottom: spacing.md,
+  },
+  formContainer: {
+    width: '100%',
   },
   inputContainer: {
     marginBottom: spacing.md,
@@ -195,37 +212,38 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   input: {
-    borderWidth: 1,
-    borderColor: colors.gray[300],
+    backgroundColor: colors.gray[50],
+    height: 50,
     borderRadius: 8,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
     fontSize: typography.fontSizes.md,
     color: colors.gray[900],
-    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.gray[200],
   },
   inputError: {
-    borderColor: '#ef4444', // tailwind rose-500
+    borderColor: colors.red[400],
   },
   errorText: {
-    fontSize: typography.fontSizes.sm,
-    color: '#ef4444', // tailwind rose-500
-    marginTop: spacing.xs,
+    fontSize: typography.fontSizes.xs,
+    color: colors.red[500],
+    marginTop: spacing.xs / 2,
   },
-  registerContainer: {
+  loginButton: {
+    marginTop: spacing.md,
+  },
+  footer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center',
     marginTop: spacing.lg,
   },
-  registerText: {
+  footerText: {
     fontSize: typography.fontSizes.sm,
     color: colors.gray[600],
-    marginRight: spacing.xs,
   },
-  registerLink: {
+  footerLink: {
     fontSize: typography.fontSizes.sm,
     fontWeight: typography.fontWeights.medium,
     color: colors.primary[600],
-  }
+  },
 });
