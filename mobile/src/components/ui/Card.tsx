@@ -1,15 +1,17 @@
 import React, { ReactNode } from 'react';
-import { 
-  View, 
-  TouchableOpacity, 
-  StyleSheet, 
-  StyleProp, 
-  ViewStyle,
-  Image,
+import {
+  View,
   Text,
-  Platform
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Platform,
+  StyleProp,
+  ViewStyle,
+  TextStyle,
+  ImageStyle,
 } from 'react-native';
-import { colors, borderRadius, shadows, spacing, typography } from './theme';
+import { colors, spacing, borderRadius, shadows, typography } from './theme';
 
 interface CardProps {
   children: ReactNode;
@@ -26,50 +28,47 @@ export const Card = ({
   style,
   variant = 'elevated',
 }: CardProps) => {
-  // Apply styles based on variant
-  const getVariantStyle = () => {
+  const getCardStyle = () => {
     switch (variant) {
       case 'elevated':
-        return styles.elevated;
+        return [
+          styles.card,
+          styles.elevatedCard,
+          style,
+        ];
       case 'outlined':
-        return styles.outlined;
+        return [
+          styles.card,
+          styles.outlinedCard,
+          style,
+        ];
       case 'filled':
-        return styles.filled;
+        return [
+          styles.card,
+          styles.filledCard,
+          style,
+        ];
       default:
-        return styles.elevated;
+        return [styles.card, styles.elevatedCard, style];
     }
   };
 
-  // Base component with styles
-  const cardContent = (
-    <View 
-      style={[
-        styles.container,
-        getVariantStyle(),
-        style,
-      ]}
-    >
-      {children}
-    </View>
-  );
-
-  // If onPress is defined, wrap with TouchableOpacity
   if (onPress || onLongPress) {
     return (
       <TouchableOpacity
-        activeOpacity={0.7}
+        style={getCardStyle()}
         onPress={onPress}
         onLongPress={onLongPress}
+        activeOpacity={0.7}
       >
-        {cardContent}
+        {children}
       </TouchableOpacity>
     );
   }
 
-  return cardContent;
+  return <View style={getCardStyle()}>{children}</View>;
 };
 
-// Card header component
 interface CardHeaderProps {
   children?: ReactNode;
   title?: string;
@@ -87,31 +86,26 @@ export const CardHeader = ({
   rightAccessory,
   style,
 }: CardHeaderProps) => {
-  if (children) {
-    return <View style={[styles.header, style]}>{children}</View>;
-  }
-
   return (
     <View style={[styles.header, style]}>
-      {leftAccessory && (
-        <View style={styles.leftAccessory}>{leftAccessory}</View>
-      )}
-      
-      {(title || subtitle) && (
-        <View style={styles.titleContainer}>
-          {title && <Text style={styles.title}>{title}</Text>}
-          {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
-        </View>
-      )}
-      
-      {rightAccessory && (
-        <View style={styles.rightAccessory}>{rightAccessory}</View>
+      {children ? (
+        children
+      ) : (
+        <>
+          <View style={styles.headerLeftContainer}>
+            {leftAccessory && <View style={styles.leftAccessory}>{leftAccessory}</View>}
+            <View style={styles.headerTextContainer}>
+              {title && <Text style={styles.headerTitle}>{title}</Text>}
+              {subtitle && <Text style={styles.headerSubtitle}>{subtitle}</Text>}
+            </View>
+          </View>
+          {rightAccessory && <View>{rightAccessory}</View>}
+        </>
       )}
     </View>
   );
 };
 
-// Card image component
 interface CardImageProps {
   source: { uri: string } | number;
   height?: number;
@@ -124,15 +118,15 @@ export const CardImage = ({
   resizeMode = 'cover',
 }: CardImageProps) => {
   return (
-    <Image
-      source={source}
-      style={[styles.image, { height }]}
-      resizeMode={resizeMode}
-    />
+    <View style={styles.imageContainer}>
+      <Image
+        source={source}
+        style={[styles.image, { height, resizeMode }]}
+      />
+    </View>
   );
 };
 
-// Card content component
 interface CardContentProps {
   children: ReactNode;
   style?: StyleProp<ViewStyle>;
@@ -142,7 +136,6 @@ export const CardContent = ({ children, style }: CardContentProps) => {
   return <View style={[styles.content, style]}>{children}</View>;
 };
 
-// Card footer component
 interface CardFooterProps {
   children: ReactNode;
   style?: StyleProp<ViewStyle>;
@@ -153,52 +146,66 @@ export const CardFooter = ({ children, style }: CardFooterProps) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
+  card: {
     borderRadius: borderRadius.lg,
     overflow: 'hidden',
     marginVertical: spacing.sm,
   },
-  elevated: {
-    backgroundColor: '#fff',
-    ...shadows.md,
+  elevatedCard: {
+    backgroundColor: 'white',
+    ...Platform.select({
+      ios: {
+        shadowColor: colors.gray[900],
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
   },
-  outlined: {
-    backgroundColor: '#fff',
+  outlinedCard: {
+    backgroundColor: 'white',
     borderWidth: 1,
     borderColor: colors.gray[200],
   },
-  filled: {
+  filledCard: {
     backgroundColor: colors.gray[100],
   },
   header: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     padding: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.gray[200],
+  },
+  headerLeftContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   leftAccessory: {
     marginRight: spacing.sm,
   },
-  rightAccessory: {
-    marginLeft: spacing.sm,
-  },
-  titleContainer: {
+  headerTextContainer: {
     flex: 1,
   },
-  title: {
+  headerTitle: {
     fontSize: typography.fontSizes.lg,
     fontWeight: typography.fontWeights.semibold as any,
     color: colors.gray[900],
   },
-  subtitle: {
+  headerSubtitle: {
     fontSize: typography.fontSizes.sm,
     color: colors.gray[500],
     marginTop: spacing.xs / 2,
   },
+  imageContainer: {
+    width: '100%',
+  },
   image: {
     width: '100%',
-    // Top corners are rounded if image is first element
-    borderTopLeftRadius: borderRadius.lg,
-    borderTopRightRadius: borderRadius.lg,
   },
   content: {
     padding: spacing.md,
@@ -206,6 +213,7 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'flex-end',
     padding: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.gray[200],

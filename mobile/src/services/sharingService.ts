@@ -1,4 +1,4 @@
-import { Share, Linking, Platform } from 'react-native';
+import { Share, Platform, Alert, Linking } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 
 /**
@@ -16,16 +16,17 @@ interface ShareOptions {
  */
 export const shareContent = async ({ title, message, url }: ShareOptions): Promise<boolean> => {
   try {
-    // Construct share content
-    const shareOptions = {
-      title: title || 'Check out this content',
-      message: message || 'I found this interesting content in LinkOrbit',
-      url: url
-    };
+    const result = await Share.share(
+      {
+        title: title || 'Check out this content',
+        message: message || `Check out this awesome content I found: ${url}`,
+        url: Platform.OS === 'ios' ? url : undefined,
+      },
+      {
+        dialogTitle: title || 'Share this content',
+      }
+    );
 
-    // Use native share API
-    const result = await Share.share(shareOptions);
-    
     if (result.action === Share.sharedAction) {
       return true;
     } else if (result.action === Share.dismissedAction) {
@@ -34,8 +35,7 @@ export const shareContent = async ({ title, message, url }: ShareOptions): Promi
     return false;
   } catch (error) {
     console.error('Error sharing content:', error);
-    // Fall back to clipboard copy
-    return await copyToClipboard(url);
+    return false;
   }
 };
 
@@ -57,18 +57,13 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
  */
 export const openInBrowser = async (url: string): Promise<boolean> => {
   try {
-    // Validate the URL
-    const isValidUrl = url.startsWith('http://') || url.startsWith('https://');
-    const urlToOpen = isValidUrl ? url : `https://${url}`;
+    const supported = await Linking.canOpenURL(url);
     
-    // Check if can open URL
-    const canOpen = await Linking.canOpenURL(urlToOpen);
-    
-    if (canOpen) {
-      await Linking.openURL(urlToOpen);
+    if (supported) {
+      await Linking.openURL(url);
       return true;
     } else {
-      console.warn('Cannot open URL:', urlToOpen);
+      Alert.alert('Error', `Cannot open URL: ${url}`);
       return false;
     }
   } catch (error) {
@@ -81,28 +76,17 @@ export const openInBrowser = async (url: string): Promise<boolean> => {
  * Share app invite with friends
  */
 export const shareAppInvite = async (referralCode?: string): Promise<boolean> => {
-  try {
-    // Build the invite message with optional referral code
-    const appName = 'LinkOrbit';
-    const appStoreUrl = Platform.OS === 'ios' 
-      ? 'https://apps.apple.com/app/linkorbit/id1234567890'
-      : 'https://play.google.com/store/apps/details?id=com.linkorbit.app';
+  const appUrl = Platform.OS === 'ios'
+    ? 'https://apps.apple.com/app/linkorbit/id123456789'
+    : 'https://play.google.com/store/apps/details?id=com.linkorbit.app';
     
-    let inviteMessage = `Check out ${appName}, an app to organize links to your favorite short-form content!`;
+  const message = referralCode
+    ? `Join me on LinkOrbit to organize your content universe! Use my referral code: ${referralCode}. Download here: ${appUrl}`
+    : `Join me on LinkOrbit to organize your content universe! Download here: ${appUrl}`;
     
-    if (referralCode) {
-      inviteMessage += ` Use my referral code: ${referralCode}`;
-    }
-    
-    // Share the invite
-    const result = await Share.share({
-      title: `Join me on ${appName}!`,
-      message: `${inviteMessage} ${appStoreUrl}`
-    });
-    
-    return result.action === Share.sharedAction;
-  } catch (error) {
-    console.error('Error sharing app invite:', error);
-    return false;
-  }
+  return shareContent({
+    title: 'Join LinkOrbit',
+    message,
+    url: appUrl
+  });
 };

@@ -36,3 +36,12 @@ export type CustomTab = {
   created_at: string;
   links: Link[];
 };
+
+export type ColorScheme = 'light' | 'dark' | 'system';
+
+export type NotificationPreferences = {
+  emailNotifications: boolean;
+  newContentAlerts: boolean;
+  weeklyDigest: boolean;
+  platformUpdates: boolean;
+};

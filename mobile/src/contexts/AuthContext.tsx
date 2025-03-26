@@ -1,9 +1,8 @@
-import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-import { Alert } from 'react-native';
+import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
+import { Platform, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useQuery, useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { api } from '../services/api';
 import { User } from '../types';
+import { api } from '../services/api';
 
 type AuthContextType = {
   user: User | null;
@@ -22,71 +21,92 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export default function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
 
-  // Check if user is already logged in
+  // Check for existing user session
   useEffect(() => {
-    const checkLoginStatus = async () => {
-      setIsLoading(true);
+    const loadUser = async () => {
       try {
-        const user = await api.auth.getCurrentUser();
-        setUser(user);
-      } catch (error) {
-        // User is not logged in or there was an error
-        setUser(null);
+        setIsLoading(true);
+
+        // Try to get user from API
+        const currentUser = await api.getCurrentUser();
+        
+        if (currentUser) {
+          setUser(currentUser);
+        }
+      } catch (err) {
+        console.error('Error loading user', err);
+        if (err instanceof Error) {
+          setError(err);
+        } else {
+          setError(new Error('Failed to load user'));
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
-    checkLoginStatus();
+    loadUser();
   }, []);
 
-  // Login function
   const login = async (email: string, password: string): Promise<User> => {
-    setIsLoading(true);
-    setError(null);
-    
     try {
-      const user = await api.auth.login(email, password);
-      setUser(user);
-      return user;
-    } catch (error) {
-      setError(error instanceof Error ? error : new Error('Login failed'));
+      setIsLoading(true);
+      const loggedInUser = await api.login(email, password);
+      setUser(loggedInUser);
+      setError(null);
+      return loggedInUser;
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err);
+        throw err;
+      }
+      const error = new Error('Failed to log in');
+      setError(error);
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Register function
   const register = async (username: string, email: string, password: string): Promise<User> => {
-    setIsLoading(true);
-    setError(null);
-    
     try {
-      const user = await api.auth.register(username, email, password);
-      setUser(user);
-      return user;
-    } catch (error) {
-      setError(error instanceof Error ? error : new Error('Registration failed'));
+      setIsLoading(true);
+      const newUser = await api.register(username, email, password);
+      setUser(newUser);
+      setError(null);
+      return newUser;
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err);
+        throw err;
+      }
+      const error = new Error('Failed to register');
+      setError(error);
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Logout function
   const logout = async (): Promise<void> => {
-    setIsLoading(true);
-    setError(null);
-    
     try {
-      await api.auth.logout();
+      setIsLoading(true);
+      await api.logout();
       setUser(null);
-    } catch (error) {
-      setError(error instanceof Error ? error : new Error('Logout failed'));
+      setError(null);
+    } catch (err) {
+      // Even if logout API fails, we clear the user locally
+      setUser(null);
+      
+      if (err instanceof Error) {
+        setError(err);
+        throw err;
+      }
+      const error = new Error('Failed to log out');
+      setError(error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -99,7 +119,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     error,
     login,
     register,
-    logout
+    logout,
   };
 
   return (
@@ -109,17 +129,6 @@ export default function AuthProvider({ children }: AuthProviderProps) {
   );
 }
 
-// React Query wrapper for Auth Provider
-export function AuthProviderWithReactQuery({ children }: AuthProviderProps) {
-  // Use the existing query client from App.tsx or create a new one if needed
-  return (
-    <AuthProvider>
-      {children}
-    </AuthProvider>
-  );
-}
-
-// Hook to use auth context
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
@@ -127,3 +136,5 @@ export function useAuth() {
   }
   return context;
 }
+
+export { AuthProvider };
