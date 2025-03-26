@@ -1,21 +1,21 @@
-// A comprehensive theme definition for the mobile app
+/**
+ * Shared theme configuration for the LinkOrbit mobile app
+ * This provides consistent styling across the application
+ */
 
 export const colors = {
-  // Primary color palette
   primary: {
-    50: '#EBF4FF',
-    100: '#D3E4FF',
-    200: '#A6C8FF',
-    300: '#78ADFF',
-    400: '#5090FF',
-    500: '#3373FF',
-    600: '#1259FF',
-    700: '#0041E6',
-    800: '#0035BF',
-    900: '#002A94',
+    50: '#EEF2FF',
+    100: '#E0E7FF',
+    200: '#C7D2FE',
+    300: '#A5B4FC',
+    400: '#818CF8',
+    500: '#6366F1',
+    600: '#4F46E5',
+    700: '#4338CA',
+    800: '#3730A3',
+    900: '#312E81',
   },
-  
-  // Gray scale
   gray: {
     50: '#F9FAFB',
     100: '#F3F4F6',
@@ -28,106 +28,94 @@ export const colors = {
     800: '#1F2937',
     900: '#111827',
   },
-  
-  // Success colors
   success: {
     50: '#ECFDF5',
-    100: '#D1FAE5',
     500: '#10B981',
-    700: '#047857',
+    600: '#059669',
   },
-  
-  // Warning colors
   warning: {
     50: '#FFFBEB',
-    100: '#FEF3C7',
     500: '#F59E0B',
-    700: '#B45309',
+    600: '#D97706',
   },
-  
-  // Error colors
   error: {
     50: '#FEF2F2',
-    100: '#FEE2E2',
     500: '#EF4444',
-    700: '#B91C1C',
+    600: '#DC2626',
   },
-  
-  // Info colors
   info: {
     50: '#EFF6FF',
-    100: '#DBEAFE',
     500: '#3B82F6',
-    700: '#1D4ED8',
+    600: '#2563EB',
   },
-  
-  // Secondary color palette
-  secondary: {
-    50: '#F5F3FF',
-    100: '#EDE9FE',
-    200: '#DDD6FE',
-    300: '#C4B5FD',
-    400: '#A78BFA',
-    500: '#8B5CF6',
-    600: '#7C3AED',
-    700: '#6D28D9',
-    800: '#5B21B6',
-    900: '#4C1D95',
-  },
-  
-  // Common colors
   white: '#FFFFFF',
   black: '#000000',
   transparent: 'transparent',
 };
 
 export const typography = {
-  fontSizes: {
-    xs: 12,
-    sm: 14,
-    md: 16,
-    lg: 18,
-    xl: 20,
-    '2xl': 24,
-    '3xl': 30,
-  },
   fontWeights: {
-    light: '300',
     normal: '400',
     medium: '500',
     semibold: '600',
     bold: '700',
   },
-  lineHeights: {
+  fontFamily: {
+    sans: 'System',
+  },
+  get fontSize() {
+    return {
+      xs: 12,
+      sm: 14,
+      base: 16,
+      lg: 18,
+      xl: 20,
+      '2xl': 24,
+      '3xl': 30,
+      '4xl': 36,
+      '5xl': 48,
+    };
+  },
+  letterSpacing: {
+    tighter: -0.8,
+    tight: -0.4,
+    normal: 0,
+    wide: 0.4,
+    wider: 0.8,
+    widest: 1.6,
+  },
+  lineHeight: {
     none: 1,
     tight: 1.25,
+    snug: 1.375,
     normal: 1.5,
-    relaxed: 1.75,
+    relaxed: 1.625,
     loose: 2,
   },
-  // For accessibility
-  get fontSize() {
-    return this.fontSizes;
-  }
 };
 
 export const spacing = {
+  none: 0,
   xs: 4,
   sm: 8,
   md: 16,
   lg: 24,
   xl: 32,
-  '2xl': 48,
-  '3xl': 64,
+  '2xl': 40,
+  '3xl': 48,
+  '4xl': 56,
+  '5xl': 64,
+  '6xl': 72,
 };
 
 export const borderRadius = {
   none: 0,
-  sm: 4,
-  md: 8,
-  lg: 12,
-  xl: 16,
-  '2xl': 24,
+  sm: 2,
+  md: 4,
+  lg: 8,
+  xl: 12,
+  '2xl': 16,
+  '3xl': 24,
   full: 9999,
 };
 
@@ -142,37 +130,46 @@ export const shadows = {
   sm: {
     shadowColor: colors.black,
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.18,
-    shadowRadius: 1,
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
     elevation: 1,
   },
   md: {
     shadowColor: colors.black,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 3,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   lg: {
     shadowColor: colors.black,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.22,
-    shadowRadius: 5.46,
-    elevation: 6,
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 4,
   },
   xl: {
     shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8.46,
-    elevation: 9,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 8,
   },
 };
 
-// Platform-specific values
 export const platformSpecific = {
-  // Add any platform-specific styles or values here
-  statusBarHeight: 20,
-  bottomTabBarHeight: 55,
-  headerHeight: 56,
+  statusBarHeight: 20, // This will be dynamically adjusted
+  bottomTabHeight: 49, // Standard iOS tab bar height
+  topNavBarHeight: 44, // Standard iOS nav bar height
+  blurIntensity: 10,
+  animationConfig: {
+    spring: {
+      damping: 20,
+      stiffness: 90,
+      mass: 1,
+    },
+    timing: {
+      duration: 250,
+    },
+  },
 };

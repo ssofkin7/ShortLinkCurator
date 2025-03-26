@@ -1,17 +1,25 @@
+/**
+ * Card Component
+ * 
+ * A flexible card component that can be used for displaying content in a
+ * contained, visually distinct container. Supports various card elements like
+ * headers, images, content areas, and footers.
+ */
+
 import React, { ReactNode } from 'react';
-import {
-  StyleSheet,
-  TouchableOpacity,
-  View,
-  Text,
-  Image,
-  Platform,
-  StyleProp,
+import { 
+  StyleSheet, 
+  View, 
+  Text, 
+  Image, 
+  TouchableOpacity, 
+  StyleProp, 
   ViewStyle,
-  ImageSourcePropType,
-  ImageResizeMode,
+  TextStyle,
+  ImageStyle,
+  ImageSourcePropType 
 } from 'react-native';
-import { colors, typography, spacing, borderRadius, shadows } from './theme';
+import { colors, spacing, borderRadius, shadows, typography } from './theme';
 
 interface CardProps {
   children: ReactNode;
@@ -32,8 +40,8 @@ export const Card = ({
     switch (variant) {
       case 'elevated':
         return {
-          backgroundColor: colors.white,
           ...shadows.md,
+          backgroundColor: colors.white,
         };
       case 'outlined':
         return {
@@ -46,24 +54,26 @@ export const Card = ({
           backgroundColor: colors.gray[50],
         };
       default:
-        return {
-          backgroundColor: colors.white,
-          ...shadows.md,
-        };
+        return {};
     }
   };
 
-  const Container = onPress || onLongPress ? TouchableOpacity : View;
+  const CardComponent = onPress || onLongPress ? TouchableOpacity : View;
+  const cardProps = onPress || onLongPress
+    ? {
+        onPress,
+        onLongPress,
+        activeOpacity: 0.7,
+      }
+    : {};
 
   return (
-    <Container
+    <CardComponent
       style={[styles.card, getCardStyles(), style]}
-      onPress={onPress}
-      onLongPress={onLongPress}
-      activeOpacity={onPress ? 0.7 : 1}
+      {...cardProps}
     >
       {children}
-    </Container>
+    </CardComponent>
   );
 };
 
@@ -88,12 +98,16 @@ export const CardHeader = ({
     <View style={[styles.header, style]}>
       {children || (
         <>
-          {leftAccessory && <View style={styles.leftAccessory}>{leftAccessory}</View>}
+          {leftAccessory && (
+            <View style={styles.leftAccessory}>{leftAccessory}</View>
+          )}
           <View style={styles.headerTextContainer}>
             {title && <Text style={styles.title}>{title}</Text>}
             {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
           </View>
-          {rightAccessory && <View style={styles.rightAccessory}>{rightAccessory}</View>}
+          {rightAccessory && (
+            <View style={styles.rightAccessory}>{rightAccessory}</View>
+          )}
         </>
       )}
     </View>
@@ -148,8 +162,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gray[100],
   },
   headerTextContainer: {
     flex: 1,
@@ -161,13 +173,13 @@ const styles = StyleSheet.create({
     marginLeft: spacing.sm,
   },
   title: {
-    fontSize: typography.fontSizes.lg,
-    fontWeight: '600',
-    color: colors.gray[900],
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeights.semibold,
+    color: colors.gray[800],
   },
   subtitle: {
-    fontSize: typography.fontSizes.sm,
-    color: colors.gray[500],
+    fontSize: typography.fontSize.sm,
+    color: colors.gray[600],
     marginTop: spacing.xs / 2,
   },
   image: {
@@ -178,8 +190,6 @@ const styles = StyleSheet.create({
   },
   footer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
     padding: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.gray[100],

@@ -1,15 +1,22 @@
+/**
+ * Button Component
+ * 
+ * A versatile button component that supports various styles and states.
+ * Can be configured with different sizes, variants, loading states, and icons.
+ */
+
 import React from 'react';
-import {
-  StyleSheet,
-  TouchableOpacity,
-  Text,
+import { 
+  StyleSheet, 
+  Text, 
+  TouchableOpacity, 
   ActivityIndicator,
   View,
   StyleProp,
   ViewStyle,
-  TextStyle,
+  TextStyle
 } from 'react-native';
-import { colors, typography, spacing, borderRadius } from './theme';
+import { colors, spacing, borderRadius, typography } from './theme';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
 export type ButtonSize = 'sm' | 'md' | 'lg';
@@ -45,19 +52,19 @@ export const Button = ({
     switch (variant) {
       case 'primary':
         return {
-          backgroundColor: colors.primary[600],
+          backgroundColor: disabled ? colors.gray[300] : colors.primary[600],
           borderWidth: 0,
         };
       case 'secondary':
         return {
-          backgroundColor: colors.secondary[100],
+          backgroundColor: disabled ? colors.gray[100] : colors.primary[100],
           borderWidth: 0,
         };
       case 'outline':
         return {
           backgroundColor: 'transparent',
           borderWidth: 1,
-          borderColor: colors.primary[600],
+          borderColor: disabled ? colors.gray[300] : colors.primary[600],
         };
       case 'ghost':
         return {
@@ -66,31 +73,11 @@ export const Button = ({
         };
       case 'danger':
         return {
-          backgroundColor: colors.error[500],
+          backgroundColor: disabled ? colors.gray[300] : colors.error[500],
           borderWidth: 0,
         };
       default:
-        return {
-          backgroundColor: colors.primary[600],
-          borderWidth: 0,
-        };
-    }
-  };
-
-  const getTextColor = (): string => {
-    switch (variant) {
-      case 'primary':
-        return colors.white;
-      case 'secondary':
-        return colors.gray[800];
-      case 'outline':
-        return colors.primary[600];
-      case 'ghost':
-        return colors.primary[600];
-      case 'danger':
-        return colors.white;
-      default:
-        return colors.white;
+        return {};
     }
   };
 
@@ -100,25 +87,20 @@ export const Button = ({
         return {
           paddingVertical: spacing.xs,
           paddingHorizontal: spacing.sm,
-          borderRadius: borderRadius.sm,
-        };
-      case 'md':
-        return {
-          paddingVertical: spacing.sm,
-          paddingHorizontal: spacing.md,
-          borderRadius: borderRadius.md,
+          minHeight: 32,
         };
       case 'lg':
         return {
           paddingVertical: spacing.md,
           paddingHorizontal: spacing.lg,
-          borderRadius: borderRadius.md,
+          minHeight: 48,
         };
+      case 'md':
       default:
         return {
           paddingVertical: spacing.sm,
           paddingHorizontal: spacing.md,
-          borderRadius: borderRadius.md,
+          minHeight: 40,
         };
     }
   };
@@ -127,20 +109,37 @@ export const Button = ({
     switch (size) {
       case 'sm':
         return {
-          fontSize: typography.fontSizes.sm,
-        };
-      case 'md':
-        return {
-          fontSize: typography.fontSizes.md,
+          fontSize: typography.fontSize.sm,
         };
       case 'lg':
         return {
-          fontSize: typography.fontSizes.lg,
+          fontSize: typography.fontSize.lg,
         };
+      case 'md':
       default:
         return {
-          fontSize: typography.fontSizes.md,
+          fontSize: typography.fontSize.base,
         };
+    }
+  };
+
+  const getTextColor = (): TextStyle => {
+    if (disabled) {
+      return { color: colors.gray[500] };
+    }
+
+    switch (variant) {
+      case 'primary':
+        return { color: colors.white };
+      case 'secondary':
+        return { color: colors.primary[700] };
+      case 'outline':
+      case 'ghost':
+        return { color: colors.primary[600] };
+      case 'danger':
+        return { color: colors.white };
+      default:
+        return { color: colors.white };
     }
   };
 
@@ -153,45 +152,34 @@ export const Button = ({
         getVariantStyles(),
         getSizeStyles(),
         fullWidth && styles.fullWidth,
-        disabled && styles.disabled,
         style,
       ]}
-      activeOpacity={0.8}
+      activeOpacity={0.7}
     >
-      <View style={styles.contentContainer}>
-        {leftIcon && !loading && <View style={styles.leftIcon}>{leftIcon}</View>}
-        
-        {loading ? (
-          <ActivityIndicator
-            size="small"
-            color={getTextColor()}
-            style={styles.spinner}
-          />
-        ) : (
-          <Text
-            style={[
-              styles.text,
-              getTextSize(),
-              { color: getTextColor() },
-              disabled && styles.disabledText,
-              textStyle,
-            ]}
-          >
+      {loading ? (
+        <ActivityIndicator
+          size="small"
+          color={variant === 'primary' || variant === 'danger' ? colors.white : colors.primary[600]}
+        />
+      ) : (
+        <View style={styles.contentContainer}>
+          {leftIcon && <View style={styles.leftIcon}>{leftIcon}</View>}
+          <Text style={[styles.text, getTextSize(), getTextColor(), textStyle]}>
             {title}
           </Text>
-        )}
-        
-        {rightIcon && !loading && <View style={styles.rightIcon}>{rightIcon}</View>}
-      </View>
+          {rightIcon && <View style={styles.rightIcon}>{rightIcon}</View>}
+        </View>
+      )}
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   button: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    flexDirection: 'row',
+    borderRadius: borderRadius.md,
   },
   contentContainer: {
     flexDirection: 'row',
@@ -199,25 +187,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   text: {
-    fontWeight: '600',
+    fontWeight: typography.fontWeights.medium,
     textAlign: 'center',
   },
   fullWidth: {
     width: '100%',
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-  disabledText: {
-    opacity: 0.7,
   },
   leftIcon: {
     marginRight: spacing.xs,
   },
   rightIcon: {
     marginLeft: spacing.xs,
-  },
-  spinner: {
-    marginHorizontal: spacing.xs,
   },
 });

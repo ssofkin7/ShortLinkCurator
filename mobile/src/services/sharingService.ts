@@ -1,4 +1,4 @@
-import { Linking, Share, Platform } from 'react-native';
+import { Share, Platform, Linking } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 
 /**
@@ -18,8 +18,8 @@ export const shareContent = async ({ title, message, url }: ShareOptions): Promi
   try {
     const result = await Share.share({
       title: title || 'Check out this content from LinkOrbit',
-      message: message || `Check out this link I found: ${url}`,
-      url, // iOS only
+      message: message || `I found this interesting content: ${url}`,
+      url: url, // iOS only
     });
 
     if (result.action === Share.sharedAction) {
@@ -71,22 +71,19 @@ export const openInBrowser = async (url: string): Promise<boolean> => {
  * Share app invite with friends
  */
 export const shareAppInvite = async (referralCode?: string): Promise<boolean> => {
-  const message = referralCode
-    ? `Join me on LinkOrbit, the best way to organize your online content! Use my referral code: ${referralCode}`
-    : 'Join me on LinkOrbit, the best way to organize your online content!';
-    
-  const url = 'https://linkorbit.app'; // Replace with actual app website/store link
-  
-  try {
-    const result = await Share.share({
-      title: 'Invite friends to LinkOrbit',
-      message,
-      url, // iOS only
-    });
-    
-    return result.action === Share.sharedAction;
-  } catch (error) {
-    console.error('Error sharing app invite:', error);
-    return false;
-  }
+  const appURL = Platform.select({
+    ios: 'https://apps.apple.com/app/linkorbit/id1234567890',
+    android: 'https://play.google.com/store/apps/details?id=com.linkorbit',
+    default: 'https://linkorbit.com',
+  });
+
+  const message = referralCode 
+    ? `Join me on LinkOrbit! Use my referral code ${referralCode} when you sign up. ${appURL}`
+    : `Check out LinkOrbit - the best way to organize and discover content! ${appURL}`;
+
+  return shareContent({
+    title: 'Join me on LinkOrbit',
+    message,
+    url: appURL,
+  });
 };
