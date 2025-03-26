@@ -1,17 +1,17 @@
 import React, { ReactNode } from 'react';
 import {
-  View,
-  Text,
   StyleSheet,
   TouchableOpacity,
+  View,
+  Text,
   Image,
   Platform,
   StyleProp,
   ViewStyle,
-  TextStyle,
-  ImageStyle,
+  ImageSourcePropType,
+  ImageResizeMode,
 } from 'react-native';
-import { colors, spacing, borderRadius, shadows, typography } from './theme';
+import { colors, typography, spacing, borderRadius, shadows } from './theme';
 
 interface CardProps {
   children: ReactNode;
@@ -28,45 +28,43 @@ export const Card = ({
   style,
   variant = 'elevated',
 }: CardProps) => {
-  const getCardStyle = () => {
+  const getCardStyles = (): ViewStyle => {
     switch (variant) {
       case 'elevated':
-        return [
-          styles.card,
-          styles.elevatedCard,
-          style,
-        ];
+        return {
+          backgroundColor: colors.white,
+          ...shadows.md,
+        };
       case 'outlined':
-        return [
-          styles.card,
-          styles.outlinedCard,
-          style,
-        ];
+        return {
+          backgroundColor: colors.white,
+          borderWidth: 1,
+          borderColor: colors.gray[200],
+        };
       case 'filled':
-        return [
-          styles.card,
-          styles.filledCard,
-          style,
-        ];
+        return {
+          backgroundColor: colors.gray[50],
+        };
       default:
-        return [styles.card, styles.elevatedCard, style];
+        return {
+          backgroundColor: colors.white,
+          ...shadows.md,
+        };
     }
   };
 
-  if (onPress || onLongPress) {
-    return (
-      <TouchableOpacity
-        style={getCardStyle()}
-        onPress={onPress}
-        onLongPress={onLongPress}
-        activeOpacity={0.7}
-      >
-        {children}
-      </TouchableOpacity>
-    );
-  }
+  const Container = onPress || onLongPress ? TouchableOpacity : View;
 
-  return <View style={getCardStyle()}>{children}</View>;
+  return (
+    <Container
+      style={[styles.card, getCardStyles(), style]}
+      onPress={onPress}
+      onLongPress={onLongPress}
+      activeOpacity={onPress ? 0.7 : 1}
+    >
+      {children}
+    </Container>
+  );
 };
 
 interface CardHeaderProps {
@@ -88,18 +86,14 @@ export const CardHeader = ({
 }: CardHeaderProps) => {
   return (
     <View style={[styles.header, style]}>
-      {children ? (
-        children
-      ) : (
+      {children || (
         <>
-          <View style={styles.headerLeftContainer}>
-            {leftAccessory && <View style={styles.leftAccessory}>{leftAccessory}</View>}
-            <View style={styles.headerTextContainer}>
-              {title && <Text style={styles.headerTitle}>{title}</Text>}
-              {subtitle && <Text style={styles.headerSubtitle}>{subtitle}</Text>}
-            </View>
+          {leftAccessory && <View style={styles.leftAccessory}>{leftAccessory}</View>}
+          <View style={styles.headerTextContainer}>
+            {title && <Text style={styles.title}>{title}</Text>}
+            {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
           </View>
-          {rightAccessory && <View>{rightAccessory}</View>}
+          {rightAccessory && <View style={styles.rightAccessory}>{rightAccessory}</View>}
         </>
       )}
     </View>
@@ -118,12 +112,11 @@ export const CardImage = ({
   resizeMode = 'cover',
 }: CardImageProps) => {
   return (
-    <View style={styles.imageContainer}>
-      <Image
-        source={source}
-        style={[styles.image, { height, resizeMode }]}
-      />
-    </View>
+    <Image
+      source={source}
+      style={[styles.image, { height }]}
+      resizeMode={resizeMode}
+    />
   );
 };
 
@@ -149,60 +142,33 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: borderRadius.lg,
     overflow: 'hidden',
-    marginVertical: spacing.sm,
-  },
-  elevatedCard: {
-    backgroundColor: 'white',
-    ...Platform.select({
-      ios: {
-        shadowColor: colors.gray[900],
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
-  },
-  outlinedCard: {
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: colors.gray[200],
-  },
-  filledCard: {
-    backgroundColor: colors.gray[100],
+    marginVertical: spacing.xs,
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors.gray[200],
-  },
-  headerLeftContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  leftAccessory: {
-    marginRight: spacing.sm,
+    borderBottomColor: colors.gray[100],
   },
   headerTextContainer: {
     flex: 1,
   },
-  headerTitle: {
+  leftAccessory: {
+    marginRight: spacing.sm,
+  },
+  rightAccessory: {
+    marginLeft: spacing.sm,
+  },
+  title: {
     fontSize: typography.fontSizes.lg,
-    fontWeight: typography.fontWeights.semibold as any,
+    fontWeight: '600',
     color: colors.gray[900],
   },
-  headerSubtitle: {
+  subtitle: {
     fontSize: typography.fontSizes.sm,
     color: colors.gray[500],
     marginTop: spacing.xs / 2,
-  },
-  imageContainer: {
-    width: '100%',
   },
   image: {
     width: '100%',
@@ -216,6 +182,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     padding: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: colors.gray[200],
+    borderTopColor: colors.gray[100],
   },
 });

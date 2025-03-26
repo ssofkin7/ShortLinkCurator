@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
-import { View, Text } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
-
 import AuthNavigator from './AuthNavigator';
 import MainTabNavigator from './MainTabNavigator';
 import LoadingScreen from '../screens/LoadingScreen';
@@ -17,29 +16,31 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
   const { user, isLoading } = useAuth();
-  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Effect to handle initialization
-  useEffect(() => {
-    if (!isLoading) {
-      setIsInitialized(true);
-    }
-  }, [isLoading]);
-
-  // Show loading screen while auth state is being determined
-  if (!isInitialized) {
+  // Show loading screen while checking authentication status
+  if (isLoading) {
     return <LoadingScreen />;
   }
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
         {user ? (
-          // User is signed in
+          // User is signed in - show main app
           <Stack.Screen name="Main" component={MainTabNavigator} />
         ) : (
-          // User is not signed in
-          <Stack.Screen name="Auth" component={AuthNavigator} />
+          // User is not signed in - show auth flow
+          <Stack.Screen
+            name="Auth"
+            component={AuthNavigator}
+            options={{
+              animationTypeForReplace: 'pop',
+            }}
+          />
         )}
       </Stack.Navigator>
     </NavigationContainer>

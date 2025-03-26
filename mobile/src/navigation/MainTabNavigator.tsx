@@ -1,6 +1,13 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { HomeIcon, FolderIcon, PlusCircleIcon, UserIcon } from 'react-native-heroicons/outline';
+import {
+  HomeIcon,
+  BookOpenIcon,
+  PlusCircleIcon,
+  UserIcon
+} from 'react-native-heroicons/outline';
+import { BlurView } from 'expo-blur';
+import { Platform, StyleSheet, View } from 'react-native';
 import { colors } from '../components/ui/theme';
 
 import HomeScreen from '../screens/HomeScreen';
@@ -20,18 +27,16 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 export default function MainTabNavigator() {
   return (
     <Tab.Navigator
-      initialRouteName="Home"
       screenOptions={{
         tabBarActiveTintColor: colors.primary[600],
         tabBarInactiveTintColor: colors.gray[400],
-        tabBarStyle: {
-          borderTopWidth: 1,
-          borderTopColor: colors.gray[200],
-          paddingTop: 5,
-          paddingBottom: 5,
-          height: 60,
-        },
         headerShown: false,
+        tabBarStyle: {
+          backgroundColor: colors.white,
+          borderTopColor: colors.gray[100],
+          height: Platform.OS === 'ios' ? 90 : 70,
+          paddingBottom: Platform.OS === 'ios' ? 20 : 10,
+        },
       }}
     >
       <Tab.Screen
@@ -41,7 +46,6 @@ export default function MainTabNavigator() {
           tabBarIcon: ({ color, size }) => (
             <HomeIcon color={color} size={size} />
           ),
-          tabBarLabel: 'Home',
         }}
       />
       <Tab.Screen
@@ -49,9 +53,8 @@ export default function MainTabNavigator() {
         component={LibraryScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <FolderIcon color={color} size={size} />
+            <BookOpenIcon color={color} size={size} />
           ),
-          tabBarLabel: 'Library',
         }}
       />
       <Tab.Screen
@@ -61,7 +64,7 @@ export default function MainTabNavigator() {
           tabBarIcon: ({ color, size }) => (
             <PlusCircleIcon color={color} size={size + 4} />
           ),
-          tabBarLabel: 'Add',
+          tabBarLabel: 'Add Link',
         }}
       />
       <Tab.Screen
@@ -71,7 +74,6 @@ export default function MainTabNavigator() {
           tabBarIcon: ({ color, size }) => (
             <UserIcon color={color} size={size} />
           ),
-          tabBarLabel: 'Profile',
         }}
       />
     </Tab.Navigator>
