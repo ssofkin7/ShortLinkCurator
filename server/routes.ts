@@ -5,23 +5,11 @@ import { analyzeVideoContent, generateRecommendations, type LinkMetadata } from 
 import { detectPlatform } from "./utils/platformUtils";
 import { insertUserSchema, insertLinkSchema, insertTagSchema, insertCustomTabSchema } from "../shared/schema";
 import { z } from "zod";
-import bcrypt from "bcryptjs";
-import session from "express-session";
-import MemoryStore from "memorystore";
+import { setupAuth } from "./auth";
 
-// Extend Express Session
-declare module 'express-session' {
-  interface SessionData {
-    userId: number;
-  }
-}
-
-// Create session store
-const SessionStore = MemoryStore(session);
-
-// Authentication middleware
+// Authentication middleware that uses Passport.js
 const authenticate = (req: Request, res: Response, next: NextFunction) => {
-  if (!req.session || req.session.userId === undefined) {
+  if (!req.isAuthenticated()) {
     return res.status(401).json({ message: "Unauthorized" });
   }
   next();
@@ -48,21 +36,8 @@ const validate = (schema: z.ZodType<any, any>) => (req: Request, res: Response, 
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Setup session middleware
-  app.use(session({
-    store: new SessionStore({
-      checkPeriod: 86400000 // prune expired entries every 24h
-    }),
-    resave: false,
-    saveUninitialized: false,
-    secret: process.env.SESSION_SECRET || "linkOrbit-secret-key",
-    cookie: { 
-      maxAge: 86400000, // 1 day
-      secure: process.env.NODE_ENV === 'production',
-      httpOnly: true,
-      sameSite: 'lax' // Changed to 'lax' to allow cross-site navigation
-    }
-  }));
+  // Setup authentication middleware with Passport.js
+  setupAuth(app);
 
   // User routes
   app.post("/api/register", validate(insertUserSchema), async (req: Request, res: Response) => {

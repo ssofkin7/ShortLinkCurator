@@ -1,7 +1,4 @@
-import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
+import { Switch, Route, Redirect } from "wouter";
 import LandingPage from "@/pages/LandingPage";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/HomePage";
@@ -13,7 +10,7 @@ import AnalyticsPage from "@/pages/AnalyticsPage";
 import CustomTabPage from "@/pages/CustomTabPage";
 import ProfilePage from "@/pages/ProfilePage";
 import GetStartedWizard from "@/components/GetStartedWizard";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/components/AuthProvider";
 import { Loader2 } from "lucide-react";
 
 // Protected Route component to handle auth requirements
@@ -29,23 +26,13 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
   }
   
   if (!user) {
-    window.location.href = "/login";
-    return null;
+    return <Redirect to="/login" />;
   }
   
   return <Component />;
 }
 
 function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <AppContent />
-      <Toaster />
-    </QueryClientProvider>
-  );
-}
-
-function AppContent() {
   const { user, isLoading } = useAuth();
   
   if (isLoading) {
