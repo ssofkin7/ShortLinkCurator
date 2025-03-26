@@ -222,11 +222,11 @@ const styles = StyleSheet.create({
     borderColor: colors.gray[200],
   },
   inputError: {
-    borderColor: colors.red[400],
+    borderColor: '#f87171', // tailwind red-400
   },
   errorText: {
     fontSize: typography.fontSizes.xs,
-    color: colors.red[500],
+    color: '#ef4444', // tailwind red-500
     marginTop: spacing.xs / 2,
   },
   loginButton: {
