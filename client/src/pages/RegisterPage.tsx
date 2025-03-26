@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -19,9 +18,15 @@ const registerSchema = z.object({
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
   const [_, setLocation] = useLocation();
+  const { user, registerMutation } = useAuth();
+  
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      setLocation("/");
+    }
+  }, [user, setLocation]);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -33,26 +38,11 @@ export default function RegisterPage() {
   });
 
   async function onSubmit(data: RegisterFormValues) {
-    try {
-      setIsLoading(true);
-      await apiRequest("POST", "/api/register", data);
-      
-      toast({
-        title: "Registration successful", 
-        description: "Welcome to LinkOrbit!",
-      });
-      
-      // For now, let's go back to using window.location.href to ensure a full reload
-      // which will properly refresh the auth state
-      window.location.href = "/";
-    } catch (error) {
-      toast({
-        title: "Registration failed",
-        description: error instanceof Error ? error.message : "Could not create account",
-        variant: "destructive",
-      });
-      setIsLoading(false);
-    }
+    registerMutation.mutate(data, {
+      onSuccess: () => {
+        setLocation("/");
+      }
+    });
   }
 
   return (

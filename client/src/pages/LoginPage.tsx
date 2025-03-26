@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -18,9 +17,15 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
   const [_, setLocation] = useLocation();
+  const { user, loginMutation } = useAuth();
+  
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      setLocation("/");
+    }
+  }, [user, setLocation]);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -31,26 +36,11 @@ export default function LoginPage() {
   });
 
   async function onSubmit(data: LoginFormValues) {
-    try {
-      setIsLoading(true);
-      await apiRequest("POST", "/api/login", data);
-      
-      toast({
-        title: "Login successful",
-        description: "Welcome back to LinkOrbit!",
-      });
-      
-      // For now, let's go back to using window.location.href to ensure a full reload
-      // which will properly refresh the auth state
-      window.location.href = "/";
-    } catch (error) {
-      toast({
-        title: "Login failed",
-        description: error instanceof Error ? error.message : "Invalid credentials",
-        variant: "destructive",
-      });
-      setIsLoading(false);
-    }
+    loginMutation.mutate(data, {
+      onSuccess: () => {
+        setLocation("/");
+      }
+    });
   }
 
   return (
@@ -102,8 +92,8 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Log in"}
+              <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
+                {loginMutation.isPending ? "Logging in..." : "Log in"}
               </Button>
             </form>
           </Form>
