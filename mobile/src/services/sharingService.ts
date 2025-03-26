@@ -1,4 +1,4 @@
-import { Share, Platform, Alert, Linking } from 'react-native';
+import { Linking, Share, Platform } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 
 /**
@@ -16,16 +16,11 @@ interface ShareOptions {
  */
 export const shareContent = async ({ title, message, url }: ShareOptions): Promise<boolean> => {
   try {
-    const result = await Share.share(
-      {
-        title: title || 'Check out this content',
-        message: message || `Check out this awesome content I found: ${url}`,
-        url: Platform.OS === 'ios' ? url : undefined,
-      },
-      {
-        dialogTitle: title || 'Share this content',
-      }
-    );
+    const result = await Share.share({
+      title: title || 'Check out this content from LinkOrbit',
+      message: message || `Check out this link I found: ${url}`,
+      url, // iOS only
+    });
 
     if (result.action === Share.sharedAction) {
       return true;
@@ -63,7 +58,7 @@ export const openInBrowser = async (url: string): Promise<boolean> => {
       await Linking.openURL(url);
       return true;
     } else {
-      Alert.alert('Error', `Cannot open URL: ${url}`);
+      console.error(`Cannot open URL: ${url}`);
       return false;
     }
   } catch (error) {
@@ -76,17 +71,22 @@ export const openInBrowser = async (url: string): Promise<boolean> => {
  * Share app invite with friends
  */
 export const shareAppInvite = async (referralCode?: string): Promise<boolean> => {
-  const appUrl = Platform.OS === 'ios'
-    ? 'https://apps.apple.com/app/linkorbit/id123456789'
-    : 'https://play.google.com/store/apps/details?id=com.linkorbit.app';
-    
   const message = referralCode
-    ? `Join me on LinkOrbit to organize your content universe! Use my referral code: ${referralCode}. Download here: ${appUrl}`
-    : `Join me on LinkOrbit to organize your content universe! Download here: ${appUrl}`;
+    ? `Join me on LinkOrbit, the best way to organize your online content! Use my referral code: ${referralCode}`
+    : 'Join me on LinkOrbit, the best way to organize your online content!';
     
-  return shareContent({
-    title: 'Join LinkOrbit',
-    message,
-    url: appUrl
-  });
+  const url = 'https://linkorbit.app'; // Replace with actual app website/store link
+  
+  try {
+    const result = await Share.share({
+      title: 'Invite friends to LinkOrbit',
+      message,
+      url, // iOS only
+    });
+    
+    return result.action === Share.sharedAction;
+  } catch (error) {
+    console.error('Error sharing app invite:', error);
+    return false;
+  }
 };

@@ -2,7 +2,7 @@ import React from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { AuthProvider } from './src/contexts/AuthContext';
+import AuthProvider from './src/contexts/AuthContext';
 import { View, StyleSheet, Text } from 'react-native';
 import RootNavigator from './src/navigation/RootNavigator';
 import { colors } from './src/components/ui/theme';
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: colors.error[700],
+    color: '#ef4444', // tailwind red-500
     marginBottom: 10,
   },
   errorMessage: {

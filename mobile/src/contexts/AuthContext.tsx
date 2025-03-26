@@ -1,8 +1,8 @@
-import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
-import { Platform, Alert } from 'react-native';
+import React, { createContext, useState, useEffect, ReactNode, useContext } from 'react';
+import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { User } from '../types';
 import { api } from '../services/api';
+import { User } from '../types';
 
 type AuthContextType = {
   user: User | null;
@@ -24,25 +24,16 @@ export default function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // Check for existing user session
+  // Check if user is already logged in on app start
   useEffect(() => {
     const loadUser = async () => {
       try {
         setIsLoading(true);
-
-        // Try to get user from API
         const currentUser = await api.getCurrentUser();
-        
-        if (currentUser) {
-          setUser(currentUser);
-        }
+        setUser(currentUser);
       } catch (err) {
-        console.error('Error loading user', err);
-        if (err instanceof Error) {
-          setError(err);
-        } else {
-          setError(new Error('Failed to load user'));
-        }
+        console.error('Error loading user:', err);
+        // Don't set error here as this is just initial load
       } finally {
         setIsLoading(false);
       }
@@ -54,16 +45,12 @@ export default function AuthProvider({ children }: AuthProviderProps) {
   const login = async (email: string, password: string): Promise<User> => {
     try {
       setIsLoading(true);
-      const loggedInUser = await api.login(email, password);
-      setUser(loggedInUser);
       setError(null);
-      return loggedInUser;
+      const user = await api.login(email, password);
+      setUser(user);
+      return user;
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err);
-        throw err;
-      }
-      const error = new Error('Failed to log in');
+      const error = err instanceof Error ? err : new Error('Failed to login');
       setError(error);
       throw error;
     } finally {
@@ -74,16 +61,12 @@ export default function AuthProvider({ children }: AuthProviderProps) {
   const register = async (username: string, email: string, password: string): Promise<User> => {
     try {
       setIsLoading(true);
-      const newUser = await api.register(username, email, password);
-      setUser(newUser);
       setError(null);
-      return newUser;
+      const user = await api.register(username, email, password);
+      setUser(user);
+      return user;
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err);
-        throw err;
-      }
-      const error = new Error('Failed to register');
+      const error = err instanceof Error ? err : new Error('Failed to register');
       setError(error);
       throw error;
     } finally {
@@ -94,20 +77,15 @@ export default function AuthProvider({ children }: AuthProviderProps) {
   const logout = async (): Promise<void> => {
     try {
       setIsLoading(true);
+      setError(null);
       await api.logout();
       setUser(null);
-      setError(null);
+      // Clear any stored tokens
+      await AsyncStorage.removeItem('auth_token');
     } catch (err) {
-      // Even if logout API fails, we clear the user locally
-      setUser(null);
-      
-      if (err instanceof Error) {
-        setError(err);
-        throw err;
-      }
-      const error = new Error('Failed to log out');
+      const error = err instanceof Error ? err : new Error('Failed to logout');
       setError(error);
-      throw error;
+      Alert.alert('Logout Error', error.message);
     } finally {
       setIsLoading(false);
     }
@@ -136,5 +114,3 @@ export function useAuth() {
   }
   return context;
 }
-
-export { AuthProvider };

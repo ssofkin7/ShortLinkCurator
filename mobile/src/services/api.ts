@@ -1,238 +1,218 @@
-import { Platform, Alert } from 'react-native';
+import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Link, User, Tag, CustomTab } from '../types';
+import { User, Link, Tag, CustomTab } from '../types';
 import * as SecureStore from 'expo-secure-store';
 
-// Base URL for the API
-const API_URL = 'https://api.linkorbit.app';  // Replace with actual API URL or use environment variable
+// API base URL - adjust based on environment
+const API_URL = 'https://f40e5ffd-daf7-4603-a3fa-a0d205fd7ab9-00-vcpnqsbpcg7t.spock.replit.dev';
 
-// Token storage keys
-const AUTH_TOKEN_KEY = 'auth_token';
-const USER_DATA_KEY = 'user_data';
-
-// Function to securely store the auth token
-const storeAuthToken = async (token: string): Promise<void> => {
+// Helper function to set and get the auth token
+async function getAuthToken(): Promise<string | null> {
   try {
-    if (Platform.OS === 'web') {
-      await AsyncStorage.setItem(AUTH_TOKEN_KEY, token);
-    } else {
-      await SecureStore.setItemAsync(AUTH_TOKEN_KEY, token);
-    }
-  } catch (error) {
-    console.error('Error storing auth token:', error);
-  }
-};
-
-// Function to securely get the auth token
-const getAuthToken = async (): Promise<string | null> => {
-  try {
-    if (Platform.OS === 'web') {
-      return await AsyncStorage.getItem(AUTH_TOKEN_KEY);
-    } else {
-      return await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
-    }
+    return await AsyncStorage.getItem('auth_token');
   } catch (error) {
     console.error('Error getting auth token:', error);
     return null;
   }
-};
+}
 
-// Function to remove the auth token (for logout)
-const removeAuthToken = async (): Promise<void> => {
+async function setAuthToken(token: string): Promise<void> {
   try {
-    if (Platform.OS === 'web') {
-      await AsyncStorage.removeItem(AUTH_TOKEN_KEY);
-      await AsyncStorage.removeItem(USER_DATA_KEY);
-    } else {
-      await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
-      await SecureStore.deleteItemAsync(USER_DATA_KEY);
-    }
+    await AsyncStorage.setItem('auth_token', token);
   } catch (error) {
-    console.error('Error removing auth token:', error);
+    console.error('Error setting auth token:', error);
   }
-};
+}
 
-// Generic request function with authentication
-const request = async <T>(
+async function request<T>(
   endpoint: string,
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' = 'GET',
-  body?: any,
-  skipAuth = false
-): Promise<T> => {
-  try {
-    // Build request headers
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
+  method: string = 'GET',
+  data?: any,
+  skipAuth: boolean = false
+): Promise<T> {
+  const url = `${API_URL}${endpoint}`;
+  
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
 
-    // Add auth token if available and required
-    if (!skipAuth) {
-      const token = await getAuthToken();
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
+  // Add auth token to headers if we're not skipping auth
+  if (!skipAuth) {
+    const token = await getAuthToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
     }
-
-    // Prepare request options
-    const requestOptions: RequestInit = {
-      method,
-      headers,
-    };
-
-    // Add body for non-GET requests
-    if (method !== 'GET' && body) {
-      requestOptions.body = JSON.stringify(body);
-    }
-
-    // Make the API call
-    const response = await fetch(`${API_URL}${endpoint}`, requestOptions);
-
-    // Handle API errors
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      const errorMessage = errorData.message || response.statusText || 'Unknown error';
-      
-      // Handle specific error status codes
-      if (response.status === 401) {
-        // Unauthorized, clear token
-        await removeAuthToken();
-        throw new Error('Session expired. Please log in again.');
-      }
-      
-      throw new Error(`API Error (${response.status}): ${errorMessage}`);
-    }
-
-    // Parse and return the response data
-    const data = await response.json();
-    return data as T;
-  } catch (error) {
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error('Unknown error occurred while making API request');
   }
-};
 
-// API functions for authentication
+  const requestOptions: RequestInit = {
+    method,
+    headers,
+    credentials: 'include', // Include cookies for session-based auth
+    body: data ? JSON.stringify(data) : undefined,
+  };
+
+  try {
+    const response = await fetch(url, requestOptions);
+
+    // Handle unauthorized responses
+    if (response.status === 401 && !skipAuth) {
+      // Clear token on 401 responses
+      await AsyncStorage.removeItem('auth_token');
+      throw new Error('You are not authorized. Please log in again.');
+    }
+
+    // Handle other error responses
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage;
+      
+      try {
+        // Try to parse error as JSON
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.message || errorJson.error || 'An error occurred';
+      } catch {
+        // If not JSON, use the raw text
+        errorMessage = errorText || `Error: ${response.status} ${response.statusText}`;
+      }
+      
+      throw new Error(errorMessage);
+    }
+
+    // Handle empty responses
+    if (response.status === 204) {
+      return {} as T;
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error(`API Error (${method} ${endpoint}):`, error);
+    throw error;
+  }
+}
+
 export const api = {
-  // Auth
   async login(email: string, password: string): Promise<User> {
     try {
       const response = await request<{ token: string; user: User }>('/api/login', 'POST', { email, password }, true);
-      await storeAuthToken(response.token);
+      
+      if (response.token) {
+        await setAuthToken(response.token);
+      }
+      
       return response.user;
     } catch (error) {
-      throw error;
+      throw new Error(error instanceof Error ? error.message : 'Login failed');
     }
   },
 
   async register(username: string, email: string, password: string): Promise<User> {
     try {
       const response = await request<{ token: string; user: User }>('/api/register', 'POST', { username, email, password }, true);
-      await storeAuthToken(response.token);
+      
+      if (response.token) {
+        await setAuthToken(response.token);
+      }
+      
       return response.user;
     } catch (error) {
-      throw error;
+      throw new Error(error instanceof Error ? error.message : 'Registration failed');
     }
   },
 
   async logout(): Promise<void> {
     try {
-      await request('/api/logout', 'POST');
-      await removeAuthToken();
+      await request<void>('/api/logout', 'POST');
+      await AsyncStorage.removeItem('auth_token');
     } catch (error) {
-      // Force token removal even if API call fails
-      await removeAuthToken();
+      console.error('Logout error:', error);
+      // Still remove the token even if the API call fails
+      await AsyncStorage.removeItem('auth_token');
       throw error;
     }
   },
 
   async getCurrentUser(): Promise<User | null> {
     try {
-      return await request<User>('/api/user', 'GET');
+      return await request<User>('/api/user');
     } catch (error) {
-      console.log('Error fetching current user:', error);
-      return null;
+      console.log('Get current user error:', error);
+      return null; // Return null instead of throwing on auth check
     }
   },
 
-  // Links
   async getLinks(): Promise<Link[]> {
-    return request<Link[]>('/api/links');
+    return await request<Link[]>('/api/links');
   },
 
   async getLinksByPlatform(platform: string): Promise<Link[]> {
-    return request<Link[]>(`/api/links?platform=${platform}`);
+    return await request<Link[]>(`/api/links?platform=${platform}`);
   },
 
   async getLink(id: number): Promise<Link> {
-    return request<Link>(`/api/links/${id}`);
+    return await request<Link>(`/api/links/${id}`);
   },
 
   async addLink(url: string): Promise<Link> {
-    return request<Link>('/api/links', 'POST', { url });
+    return await request<Link>('/api/links', 'POST', { url });
   },
 
   async deleteLink(id: number): Promise<void> {
-    await request(`/api/links/${id}`, 'DELETE');
+    return await request<void>(`/api/links/${id}`, 'DELETE');
   },
 
   async markLinkViewed(id: number): Promise<void> {
-    await request(`/api/links/${id}/view`, 'POST');
+    return await request<void>(`/api/links/${id}/view`, 'POST');
   },
 
   async updateLinkCategory(id: number, category: string): Promise<void> {
-    await request(`/api/links/${id}/category`, 'PATCH', { category });
+    return await request<void>(`/api/links/${id}/category`, 'PATCH', { category });
   },
 
   async updateLinkTitle(id: number, title: string): Promise<void> {
-    await request(`/api/links/${id}/title`, 'PATCH', { title });
+    return await request<void>(`/api/links/${id}/title`, 'PATCH', { title });
   },
 
-  // Tags
   async createTag(name: string, linkId: number): Promise<Tag> {
-    return request<Tag>('/api/tags', 'POST', { name, link_id: linkId });
+    return await request<Tag>('/api/tags', 'POST', { name, link_id: linkId });
   },
 
   async deleteTag(id: number): Promise<void> {
-    await request(`/api/tags/${id}`, 'DELETE');
+    return await request<void>(`/api/tags/${id}`, 'DELETE');
   },
 
-  // Custom Tabs
   async getCustomTabs(): Promise<CustomTab[]> {
-    return request<CustomTab[]>('/api/custom-tabs');
+    return await request<CustomTab[]>('/api/custom-tabs');
   },
 
   async getCustomTabById(id: number): Promise<CustomTab> {
-    return request<CustomTab>(`/api/custom-tabs/${id}`);
+    return await request<CustomTab>(`/api/custom-tabs/${id}`);
   },
 
   async createCustomTab(name: string): Promise<CustomTab> {
-    return request<CustomTab>('/api/custom-tabs', 'POST', { name });
+    return await request<CustomTab>('/api/custom-tabs', 'POST', { name });
   },
 
   async deleteCustomTab(id: number): Promise<void> {
-    await request(`/api/custom-tabs/${id}`, 'DELETE');
+    return await request<void>(`/api/custom-tabs/${id}`, 'DELETE');
   },
 
   async addLinkToTab(linkId: number, tabId: number): Promise<void> {
-    await request(`/api/custom-tabs/${tabId}/links/${linkId}`, 'POST');
+    return await request<void>(`/api/custom-tabs/${tabId}/links/${linkId}`, 'POST');
   },
 
   async removeLinkFromTab(linkId: number, tabId: number): Promise<void> {
-    await request(`/api/custom-tabs/${tabId}/links/${linkId}`, 'DELETE');
+    return await request<void>(`/api/custom-tabs/${tabId}/links/${linkId}`, 'DELETE');
   },
 
   async getLinksByTabId(tabId: number): Promise<Link[]> {
-    return request<Link[]>(`/api/custom-tabs/${tabId}/links`);
+    return await request<Link[]>(`/api/custom-tabs/${tabId}/links`);
   },
 
-  // Recommendations
   async getRecommendations(): Promise<Link[]> {
-    return request<Link[]>('/api/recommendations');
+    return await request<Link[]>('/api/recommendations');
   },
 
   async getNotViewedRecommendations(): Promise<Link[]> {
-    return request<Link[]>('/api/recommendations/not-viewed');
-  },
+    return await request<Link[]>('/api/recommendations/not-viewed');
+  }
 };
