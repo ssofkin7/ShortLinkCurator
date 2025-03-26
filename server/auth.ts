@@ -4,6 +4,7 @@ import { Express, Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
+import { pgSessionStore } from "./sessionStore";
 import { storage } from "./storage";
 import { User as SchemaUser } from "@shared/schema";
 import connectPg from "connect-pg-simple";
@@ -51,7 +52,7 @@ export function setupAuth(app: Express) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax"
     },
-    store: storage.sessionStore
+    store: pgSessionStore
   };
 
   app.set("trust proxy", 1);

@@ -10,6 +10,9 @@ import {
 import { db } from "./db";
 import { eq, and, desc, inArray } from "drizzle-orm";
 import session from "express-session";
+import pg from "pg";
+import createMemoryStore from "memorystore";
+import connectPg from "connect-pg-simple";
 // Interface for storage operations
 export interface IStorage {
   // Session store
@@ -64,10 +67,6 @@ export interface IStorage {
   // AI Cache operations
   getLinkByUrl(url: string): Promise<Link | undefined>;
 }
-
-import createMemoryStore from "memorystore";
-import pg from "pg";
-import connectPg from "connect-pg-simple";
 
 const MemoryStore = createMemoryStore(session);
 const PgSessionStore = connectPg(session);
@@ -453,20 +452,9 @@ export class DatabaseStorage implements IStorage {
   sessionStore: session.Store;
   
   constructor() {
-    // Import and setup PostgreSQL session store
-    const connectPg = require('connect-pg-simple');
-    const PostgresStore = connectPg(session);
-    
-    // Create a PostgreSQL pool for session storage
-    const pool = new pg.Pool({
-      connectionString: process.env.DATABASE_URL
-    });
-    
-    // Create PostgreSQL session store
-    this.sessionStore = new PostgresStore({
-      pool: pool, 
-      createTableIfMissing: true,
-      tableName: 'session' // Default table name
+    // Use a memory store as a fallback
+    this.sessionStore = new MemoryStore({
+      checkPeriod: 86400000 // prune expired entries every 24h
     });
   }
   async getUser(id: number): Promise<User | undefined> {

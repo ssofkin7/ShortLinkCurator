@@ -10,7 +10,7 @@ import AnalyticsPage from "@/pages/AnalyticsPage";
 import CustomTabPage from "@/pages/CustomTabPage";
 import ProfilePage from "@/pages/ProfilePage";
 import GetStartedWizard from "@/components/GetStartedWizard";
-import { useAuth } from "@/components/AuthProvider";
+import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 
 // Protected Route component to handle auth requirements
