@@ -4,141 +4,105 @@ import {
   Text,
   TextInput,
   StyleSheet,
+  TouchableOpacity,
+  SafeAreaView,
+  Image,
+  Alert,
   KeyboardAvoidingView,
   Platform,
-  TouchableOpacity,
   ScrollView,
-  SafeAreaView,
-  Alert,
-  Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useAuth } from '../contexts/AuthContext';
-import { Button } from '../components/ui/Button';
 import { colors, typography, spacing } from '../components/ui/theme';
+import { Button } from '../components/ui/Button';
+import { useAuth } from '../contexts/AuthContext';
 import { AuthStackParamList } from '../navigation/AuthNavigator';
 
-// Define the navigation prop type for this screen
 type LoginScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>;
 
 export default function LoginScreen() {
-  // Get navigation and auth context
-  const navigation = useNavigation<LoginScreenNavigationProp>();
-  const { login, isLoading } = useAuth();
-
-  // Form state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState({
-    email: '',
-    password: '',
-  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { login } = useAuth();
+  const navigation = useNavigation<LoginScreenNavigationProp>();
 
-  // Validate form
-  const validateForm = () => {
-    let isValid = true;
-    const newErrors = { email: '', password: '' };
-
-    // Validate email
-    if (!email.trim()) {
-      newErrors.email = 'Email is required';
-      isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Email is invalid';
-      isValid = false;
-    }
-
-    // Validate password
-    if (!password) {
-      newErrors.password = 'Password is required';
-      isValid = false;
-    } else if (password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
-  };
-
-  // Handle login
   const handleLogin = async () => {
-    if (!validateForm()) return;
+    if (!email.trim() || !password.trim()) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
 
     try {
-      await login(email, password);
-      // Navigation is handled automatically by the RootNavigator
+      setIsSubmitting(true);
+      await login(email.trim(), password.trim());
+      // Navigation is handled automatically by RootNavigator
     } catch (error) {
       Alert.alert(
         'Login Failed',
-        error instanceof Error ? error.message : 'An error occurred during login. Please try again.'
+        error instanceof Error ? error.message : 'Please check your credentials and try again'
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
-        style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        style={styles.keyboardAvoidingView}
       >
-        <ScrollView 
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.header}>
-            <Text style={styles.logo}>LinkOrbit</Text>
-            <Text style={styles.subtitle}>Organize your content across the web</Text>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View style={styles.logoContainer}>
+            <View style={styles.logoCircle}>
+              <Text style={styles.logoText}>LO</Text>
+            </View>
+            <Text style={styles.appName}>LinkOrbit</Text>
+            <Text style={styles.tagline}>Organize your content universe</Text>
           </View>
 
           <View style={styles.formContainer}>
-            <Text style={styles.formTitle}>Welcome Back</Text>
-            
+            <Text style={styles.title}>Sign In</Text>
+            <Text style={styles.subtitle}>Welcome back! Please sign in to your account</Text>
+
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Email</Text>
               <TextInput
-                style={[styles.input, errors.email ? styles.inputError : null]}
+                style={styles.input}
+                value={email}
+                onChangeText={setEmail}
                 placeholder="Enter your email"
                 keyboardType="email-address"
                 autoCapitalize="none"
-                value={email}
-                onChangeText={setEmail}
+                autoCorrect={false}
               />
-              {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
             </View>
 
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Password</Text>
               <TextInput
-                style={[styles.input, errors.password ? styles.inputError : null]}
-                placeholder="Enter your password"
-                secureTextEntry
+                style={styles.input}
                 value={password}
                 onChangeText={setPassword}
+                placeholder="Enter your password"
+                secureTextEntry
               />
-              {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
             </View>
 
             <Button
               title="Sign In"
               onPress={handleLogin}
-              variant="primary"
-              size="lg"
-              loading={isLoading}
-              disabled={isLoading}
-              fullWidth
-              style={styles.loginButton}
+              loading={isSubmitting}
+              disabled={isSubmitting}
+              style={styles.button}
             />
 
-            <View style={styles.signupContainer}>
-              <Text style={styles.signupText}>Don't have an account?</Text>
-              <TouchableOpacity
-                onPress={() => navigation.navigate('Register')}
-                disabled={isLoading}
-              >
-                <Text style={styles.signupLink}>Sign Up</Text>
+            <View style={styles.registerPrompt}>
+              <Text style={styles.registerText}>Don't have an account? </Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+                <Text style={styles.registerLink}>Create one</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -149,49 +113,62 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
   container: {
+    flex: 1,
+    backgroundColor: colors.gray[50],
+  },
+  keyboardAvoidingView: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    padding: spacing.lg,
+    padding: spacing.xl,
+    justifyContent: 'center',
   },
-  header: {
+  logoContainer: {
     alignItems: 'center',
-    marginTop: spacing['2xl'],
-    marginBottom: spacing.xl,
+    marginBottom: spacing.xxl,
   },
-  logo: {
+  logoCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: colors.primary[500],
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  logoText: {
     fontSize: typography.fontSizes['3xl'],
     fontWeight: typography.fontWeights.bold as any,
-    color: colors.primary[600],
-    letterSpacing: -1,
+    color: 'white',
+  },
+  appName: {
+    fontSize: typography.fontSizes['2xl'],
+    fontWeight: typography.fontWeights.bold as any,
+    color: colors.gray[900],
+    marginBottom: spacing.xs,
+  },
+  tagline: {
+    fontSize: typography.fontSizes.md,
+    color: colors.gray[500],
+  },
+  formContainer: {
+    width: '100%',
+  },
+  title: {
+    fontSize: typography.fontSizes['2xl'],
+    fontWeight: typography.fontWeights.bold as any,
+    color: colors.gray[900],
+    marginBottom: spacing.xs,
   },
   subtitle: {
     fontSize: typography.fontSizes.md,
     color: colors.gray[500],
-    marginTop: spacing.xs,
-    textAlign: 'center',
-  },
-  formContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: spacing.lg,
     marginBottom: spacing.xl,
   },
-  formTitle: {
-    fontSize: typography.fontSizes.xl,
-    fontWeight: typography.fontWeights.bold as any,
-    color: colors.gray[900],
-    marginBottom: spacing.lg,
-    textAlign: 'center',
-  },
   inputContainer: {
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
   },
   label: {
     fontSize: typography.fontSizes.sm,
@@ -200,39 +177,29 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   input: {
+    backgroundColor: 'white',
     borderWidth: 1,
     borderColor: colors.gray[300],
     borderRadius: 8,
-    padding: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
     fontSize: typography.fontSizes.md,
-    color: colors.gray[800],
-    backgroundColor: colors.gray[50],
   },
-  inputError: {
-    borderColor: colors.error,
-  },
-  errorText: {
-    fontSize: typography.fontSizes.sm,
-    color: colors.error,
-    marginTop: spacing.xs,
-  },
-  loginButton: {
+  button: {
     marginTop: spacing.md,
   },
-  signupContainer: {
+  registerPrompt: {
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: spacing.lg,
+    marginTop: spacing.xl,
   },
-  signupText: {
-    fontSize: typography.fontSizes.sm,
+  registerText: {
+    fontSize: typography.fontSizes.md,
     color: colors.gray[600],
   },
-  signupLink: {
-    fontSize: typography.fontSizes.sm,
+  registerLink: {
+    fontSize: typography.fontSizes.md,
     fontWeight: typography.fontWeights.semibold as any,
     color: colors.primary[600],
-    marginLeft: spacing.xs,
   },
 });

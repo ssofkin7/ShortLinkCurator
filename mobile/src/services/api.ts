@@ -2,51 +2,12 @@ import { Platform, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import * as SecureStore from 'expo-secure-store';
+import { User, Link, Tag, CustomTab } from '../types';
 
 // Define the base URL for API requests
-const API_URL = __DEV__ 
+const API_URL = Platform.OS === 'web' && process.env.NODE_ENV === 'development'
   ? 'http://localhost:5000' 
   : 'https://api.linkorbit.com';
-
-// Type definitions
-type User = {
-  id: number;
-  username: string;
-  email: string;
-  displayName?: string;
-  bio?: string;
-  avatar_url?: string;
-  is_premium: boolean;
-  created_at: string;
-};
-
-type Link = {
-  id: number;
-  url: string;
-  title: string;
-  platform: string;
-  category: string;
-  created_at: string;
-  last_viewed?: string;
-  view_count: number;
-  thumbnail_url?: string;
-  tags: Tag[];
-};
-
-type Tag = {
-  id: number;
-  name: string;
-  created_at: string;
-  link_id: number;
-};
-
-type CustomTab = {
-  id: number;
-  name: string;
-  user_id: number;
-  created_at: string;
-  links: Link[];
-};
 
 // Token management
 const storeToken = async (token: string) => {

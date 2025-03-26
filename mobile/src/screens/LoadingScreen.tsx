@@ -1,15 +1,15 @@
 import React from 'react';
-import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';
-import { colors, typography } from '../components/ui/theme';
+import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { colors, typography, spacing } from '../components/ui/theme';
 
 export default function LoadingScreen() {
   return (
     <View style={styles.container}>
-      <View style={styles.logoContainer}>
-        <Text style={styles.logoText}>LinkOrbit</Text>
+      <View style={styles.content}>
+        <ActivityIndicator size="large" color={colors.primary[500]} style={styles.spinner} />
+        <Text style={styles.loadingText}>Loading...</Text>
+        <Text style={styles.subText}>Preparing your content library</Text>
       </View>
-      <ActivityIndicator size="large" color={colors.primary[500]} />
-      <Text style={styles.loadingText}>Loading...</Text>
     </View>
   );
 }
@@ -17,23 +17,26 @@ export default function LoadingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: colors.gray[50],
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 20,
+    padding: spacing.xl,
   },
-  logoContainer: {
-    marginBottom: 40,
+  content: {
+    alignItems: 'center',
   },
-  logoText: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: colors.primary[600],
-    letterSpacing: -1,
+  spinner: {
+    marginBottom: spacing.lg,
   },
   loadingText: {
-    marginTop: 16,
+    fontSize: typography.fontSizes.xl,
+    fontWeight: typography.fontWeights.bold as any,
+    color: colors.gray[900],
+    marginBottom: spacing.sm,
+  },
+  subText: {
     fontSize: typography.fontSizes.md,
     color: colors.gray[500],
+    textAlign: 'center',
   },
 });

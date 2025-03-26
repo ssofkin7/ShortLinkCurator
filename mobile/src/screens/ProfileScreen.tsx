@@ -4,475 +4,278 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  SafeAreaView,
-  Switch,
   TouchableOpacity,
+  Switch,
   Alert,
-  TextInput,
-  Modal,
+  SafeAreaView,
+  Image,
+  Share,
+  ActivityIndicator,
 } from 'react-native';
-import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuth } from '../contexts/AuthContext';
-import { api } from '../services/api';
-import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
 import { colors, typography, spacing } from '../components/ui/theme';
+import { Button } from '../components/ui/Button';
 import { shareAppInvite } from '../services/sharingService';
 
 export default function ProfileScreen() {
-  const { user, logout, isLoading: authLoading } = useAuth();
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const { user, logout } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   
-  // State for profile editing
-  const [displayName, setDisplayName] = useState(user?.displayName || '');
-  const [bio, setBio] = useState(user?.bio || '');
-  
-  // State for password change
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  
-  // State for notification preferences
-  const [emailNotifications, setEmailNotifications] = useState(false);
+  // Notification settings states
+  const [emailNotifications, setEmailNotifications] = useState(true);
   const [newContentAlerts, setNewContentAlerts] = useState(true);
-  const [weeklyDigest, setWeeklyDigest] = useState(true);
-  const [platformUpdates, setPlatformUpdates] = useState(false);
+  const [weeklyDigest, setWeeklyDigest] = useState(false);
+  const [platformUpdates, setPlatformUpdates] = useState(true);
 
-  // Profile update mutation
-  const updateProfileMutation = useMutation({
-    mutationFn: async (profileData: { displayName?: string; bio?: string }) => {
-      return await api.auth.updateProfile(profileData);
-    },
-    onSuccess: (data) => {
-      Alert.alert('Success', 'Profile updated successfully');
-      setIsEditingProfile(false);
-    },
-    onError: (error) => {
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      await logout();
+      // Navigation is handled by RootNavigator
+    } catch (error) {
       Alert.alert(
-        'Update Failed',
-        error instanceof Error ? error.message : 'Failed to update profile'
+        'Logout Failed',
+        error instanceof Error ? error.message : 'Unable to log out. Please try again.'
       );
-    },
-  });
-
-  // Password update mutation
-  const updatePasswordMutation = useMutation({
-    mutationFn: async ({ currentPassword, newPassword }: { currentPassword: string; newPassword: string }) => {
-      return await api.auth.updatePassword(currentPassword, newPassword);
-    },
-    onSuccess: () => {
-      Alert.alert('Success', 'Password updated successfully');
-      setIsChangingPassword(false);
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-    },
-    onError: (error) => {
-      Alert.alert(
-        'Update Failed',
-        error instanceof Error ? error.message : 'Failed to update password'
-      );
-    },
-  });
-
-  // Notification preferences mutation
-  const updateNotificationsMutation = useMutation({
-    mutationFn: async (preferences: {
-      emailNotifications: boolean;
-      newContentAlerts: boolean;
-      weeklyDigest: boolean;
-      platformUpdates: boolean;
-    }) => {
-      // In a real app, this would connect to an API
-      // Here we're just simulating success
-      return new Promise<void>((resolve) => {
-        setTimeout(() => resolve(), 500);
-      });
-    },
-    onSuccess: () => {
-      Alert.alert('Success', 'Notification preferences updated');
-    },
-    onError: (error) => {
-      Alert.alert(
-        'Update Failed',
-        error instanceof Error ? error.message : 'Failed to update notification preferences'
-      );
-    },
-  });
-
-  // Handle profile save
-  const handleSaveProfile = () => {
-    if (!displayName.trim()) {
-      Alert.alert('Error', 'Display name is required');
-      return;
+    } finally {
+      setIsLoggingOut(false);
     }
-
-    updateProfileMutation.mutate({
-      displayName: displayName.trim(),
-      bio: bio.trim(),
-    });
   };
 
-  // Handle password save
-  const handleSavePassword = () => {
-    if (!currentPassword) {
-      Alert.alert('Error', 'Current password is required');
-      return;
-    }
-
-    if (!newPassword || newPassword.length < 6) {
-      Alert.alert('Error', 'New password must be at least 6 characters');
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
-      return;
-    }
-
-    updatePasswordMutation.mutate({
-      currentPassword,
-      newPassword,
-    });
-  };
-
-  // Handle notification preferences save
-  const handleSaveNotifications = () => {
-    updateNotificationsMutation.mutate({
-      emailNotifications,
-      newContentAlerts,
-      weeklyDigest,
-      platformUpdates,
-    });
-  };
-
-  // Handle invite friends
-  const handleInviteFriends = async () => {
+  const handleShare = async () => {
     try {
       await shareAppInvite();
     } catch (error) {
-      Alert.alert('Error', 'Failed to share app invitation');
+      Alert.alert('Error', 'Could not share the app at this time.');
     }
   };
 
-  // Handle logout
-  const handleLogout = async () => {
-    Alert.alert(
-      'Confirm Logout',
-      'Are you sure you want to log out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await logout();
-            } catch (error) {
-              Alert.alert('Error', 'Failed to log out. Please try again.');
-            }
-          },
-        },
-      ]
-    );
-  };
-
+  // Display loading state while user data is loading
   if (!user) {
     return (
       <View style={styles.loadingContainer}>
-        <Text>Loading profile...</Text>
+        <ActivityIndicator size="large" color={colors.primary[500]} />
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.scrollView}>
         <View style={styles.header}>
           <Text style={styles.screenTitle}>Profile</Text>
-          <Text style={styles.subtitle}>
-            Manage your account and preferences
-          </Text>
         </View>
 
-        {/* Profile section */}
-        <Card style={styles.section}>
-          <View style={styles.profileHeader}>
-            <View style={styles.profileAvatar}>
+        {/* User Info Section */}
+        <View style={styles.userInfoSection}>
+          <View style={styles.avatarContainer}>
+            <View style={styles.avatar}>
               <Text style={styles.avatarText}>
-                {user.displayName ? user.displayName[0].toUpperCase() : user.username[0].toUpperCase()}
+                {user.displayName 
+                  ? user.displayName.substring(0, 2).toUpperCase() 
+                  : user.username.substring(0, 2).toUpperCase()}
               </Text>
             </View>
-            <View style={styles.profileInfo}>
-              <Text style={styles.displayName}>{user.displayName || user.username}</Text>
-              <Text style={styles.username}>@{user.username}</Text>
-              <Text style={styles.email}>{user.email}</Text>
+          </View>
+          <Text style={styles.userName}>{user.displayName || user.username}</Text>
+          <Text style={styles.userEmail}>{user.email}</Text>
+          <Text style={styles.joinDate}>Member since {new Date(user.created_at).toLocaleDateString()}</Text>
+        </View>
+
+        {/* Account Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Account</Text>
+          
+          <View style={styles.card}>
+            <TouchableOpacity style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Edit Profile</Text>
+              <Text style={styles.menuItemArrow}>›</Text>
+            </TouchableOpacity>
+            
+            <View style={styles.divider} />
+            
+            <TouchableOpacity style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Change Password</Text>
+              <Text style={styles.menuItemArrow}>›</Text>
+            </TouchableOpacity>
+            
+            <View style={styles.divider} />
+            
+            <TouchableOpacity style={styles.menuItem}>
+              <View style={styles.menuItemLeft}>
+                <Text style={styles.menuItemText}>Premium Membership</Text>
+                {user.is_premium ? (
+                  <View style={styles.premiumBadge}>
+                    <Text style={styles.premiumText}>PRO</Text>
+                  </View>
+                ) : null}
+              </View>
+              <Text style={styles.menuItemArrow}>›</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Notifications Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Notifications</Text>
+          
+          <View style={styles.card}>
+            <View style={styles.switchItem}>
+              <Text style={styles.menuItemText}>Email Notifications</Text>
+              <Switch
+                value={emailNotifications}
+                onValueChange={setEmailNotifications}
+                trackColor={{ false: colors.gray[300], true: colors.primary[400] }}
+                thumbColor={emailNotifications ? colors.primary[600] : colors.gray[100]}
+              />
+            </View>
+            
+            <View style={styles.divider} />
+            
+            <View style={styles.switchItem}>
+              <Text style={styles.menuItemText}>New Content Alerts</Text>
+              <Switch
+                value={newContentAlerts}
+                onValueChange={setNewContentAlerts}
+                trackColor={{ false: colors.gray[300], true: colors.primary[400] }}
+                thumbColor={newContentAlerts ? colors.primary[600] : colors.gray[100]}
+              />
+            </View>
+            
+            <View style={styles.divider} />
+            
+            <View style={styles.switchItem}>
+              <Text style={styles.menuItemText}>Weekly Digest</Text>
+              <Switch
+                value={weeklyDigest}
+                onValueChange={setWeeklyDigest}
+                trackColor={{ false: colors.gray[300], true: colors.primary[400] }}
+                thumbColor={weeklyDigest ? colors.primary[600] : colors.gray[100]}
+              />
+            </View>
+            
+            <View style={styles.divider} />
+            
+            <View style={styles.switchItem}>
+              <Text style={styles.menuItemText}>Platform Updates</Text>
+              <Switch
+                value={platformUpdates}
+                onValueChange={setPlatformUpdates}
+                trackColor={{ false: colors.gray[300], true: colors.primary[400] }}
+                thumbColor={platformUpdates ? colors.primary[600] : colors.gray[100]}
+              />
             </View>
           </View>
-          <Button
-            title="Edit Profile"
-            variant="outline"
-            onPress={() => setIsEditingProfile(true)}
-            style={styles.actionButton}
-          />
-        </Card>
+        </View>
 
-        {/* Account settings section */}
-        <Card style={styles.section}>
-          <Text style={styles.sectionTitle}>Account Settings</Text>
+        {/* Share & Support Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Share & Support</Text>
           
-          <TouchableOpacity 
-            style={styles.settingItem} 
-            onPress={() => setIsChangingPassword(true)}
-          >
-            <Text style={styles.settingLabel}>Change Password</Text>
-            <Text style={styles.settingAction}>{'>'}</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.settingItem} onPress={handleInviteFriends}>
-            <Text style={styles.settingLabel}>Invite Friends</Text>
-            <Text style={styles.settingAction}>{'>'}</Text>
-          </TouchableOpacity>
-        </Card>
+          <View style={styles.card}>
+            <TouchableOpacity style={styles.menuItem} onPress={handleShare}>
+              <Text style={styles.menuItemText}>Invite Friends</Text>
+              <Text style={styles.menuItemArrow}>›</Text>
+            </TouchableOpacity>
+            
+            <View style={styles.divider} />
+            
+            <TouchableOpacity style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Help & Support</Text>
+              <Text style={styles.menuItemArrow}>›</Text>
+            </TouchableOpacity>
+            
+            <View style={styles.divider} />
+            
+            <TouchableOpacity style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Privacy Policy</Text>
+              <Text style={styles.menuItemArrow}>›</Text>
+            </TouchableOpacity>
+            
+            <View style={styles.divider} />
+            
+            <TouchableOpacity style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Terms of Service</Text>
+              <Text style={styles.menuItemArrow}>›</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
 
-        {/* Notification preferences section */}
-        <Card style={styles.section}>
-          <Text style={styles.sectionTitle}>Notification Preferences</Text>
-          
-          <View style={styles.settingItem}>
-            <Text style={styles.settingLabel}>Email Notifications</Text>
-            <Switch
-              value={emailNotifications}
-              onValueChange={setEmailNotifications}
-              trackColor={{ false: colors.gray[300], true: colors.primary[500] }}
-              thumbColor="#fff"
-            />
-          </View>
-          
-          <View style={styles.settingItem}>
-            <Text style={styles.settingLabel}>New Content Alerts</Text>
-            <Switch
-              value={newContentAlerts}
-              onValueChange={setNewContentAlerts}
-              trackColor={{ false: colors.gray[300], true: colors.primary[500] }}
-              thumbColor="#fff"
-            />
-          </View>
-          
-          <View style={styles.settingItem}>
-            <Text style={styles.settingLabel}>Weekly Digest</Text>
-            <Switch
-              value={weeklyDigest}
-              onValueChange={setWeeklyDigest}
-              trackColor={{ false: colors.gray[300], true: colors.primary[500] }}
-              thumbColor="#fff"
-            />
-          </View>
-          
-          <View style={styles.settingItem}>
-            <Text style={styles.settingLabel}>Platform Updates</Text>
-            <Switch
-              value={platformUpdates}
-              onValueChange={setPlatformUpdates}
-              trackColor={{ false: colors.gray[300], true: colors.primary[500] }}
-              thumbColor="#fff"
-            />
-          </View>
-          
-          <Button
-            title="Save Notification Settings"
-            variant="outline"
-            onPress={handleSaveNotifications}
-            style={styles.actionButton}
-            loading={updateNotificationsMutation.isPending}
-            disabled={updateNotificationsMutation.isPending}
-          />
-        </Card>
-
-        {/* App info section */}
-        <Card style={styles.section}>
-          <Text style={styles.sectionTitle}>App Information</Text>
-          
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>Version</Text>
-            <Text style={styles.infoValue}>1.0.0</Text>
-          </View>
-          
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>Build</Text>
-            <Text style={styles.infoValue}>100</Text>
-          </View>
-        </Card>
-
-        {/* Logout button */}
+        {/* Logout Button */}
         <Button
-          title="Logout"
-          variant="outline"
+          title={isLoggingOut ? "Logging out..." : "Log Out"}
           onPress={handleLogout}
+          variant="outline"
+          disabled={isLoggingOut}
+          loading={isLoggingOut}
           style={styles.logoutButton}
-          loading={authLoading}
-          disabled={authLoading}
         />
-
-        {/* Edit profile modal */}
-        <Modal
-          visible={isEditingProfile}
-          animationType="slide"
-          transparent={true}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Edit Profile</Text>
-              
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Display Name</Text>
-                <TextInput
-                  style={styles.input}
-                  value={displayName}
-                  onChangeText={setDisplayName}
-                  placeholder="Enter display name"
-                />
-              </View>
-              
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Bio</Text>
-                <TextInput
-                  style={[styles.input, styles.textArea]}
-                  value={bio}
-                  onChangeText={setBio}
-                  placeholder="Tell us about yourself"
-                  multiline
-                  numberOfLines={4}
-                />
-              </View>
-              
-              <View style={styles.modalButtons}>
-                <Button
-                  title="Cancel"
-                  variant="outline"
-                  onPress={() => {
-                    setDisplayName(user.displayName || '');
-                    setBio(user.bio || '');
-                    setIsEditingProfile(false);
-                  }}
-                  style={styles.modalButton}
-                />
-                <Button
-                  title="Save"
-                  variant="primary"
-                  onPress={handleSaveProfile}
-                  style={styles.modalButton}
-                  loading={updateProfileMutation.isPending}
-                  disabled={updateProfileMutation.isPending}
-                />
-              </View>
-            </View>
-          </View>
-        </Modal>
-
-        {/* Change password modal */}
-        <Modal
-          visible={isChangingPassword}
-          animationType="slide"
-          transparent={true}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Change Password</Text>
-              
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Current Password</Text>
-                <TextInput
-                  style={styles.input}
-                  value={currentPassword}
-                  onChangeText={setCurrentPassword}
-                  placeholder="Enter current password"
-                  secureTextEntry
-                />
-              </View>
-              
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>New Password</Text>
-                <TextInput
-                  style={styles.input}
-                  value={newPassword}
-                  onChangeText={setNewPassword}
-                  placeholder="Enter new password"
-                  secureTextEntry
-                />
-              </View>
-              
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Confirm New Password</Text>
-                <TextInput
-                  style={styles.input}
-                  value={confirmPassword}
-                  onChangeText={setConfirmPassword}
-                  placeholder="Confirm new password"
-                  secureTextEntry
-                />
-              </View>
-              
-              <View style={styles.modalButtons}>
-                <Button
-                  title="Cancel"
-                  variant="outline"
-                  onPress={() => {
-                    setCurrentPassword('');
-                    setNewPassword('');
-                    setConfirmPassword('');
-                    setIsChangingPassword(false);
-                  }}
-                  style={styles.modalButton}
-                />
-                <Button
-                  title="Save"
-                  variant="primary"
-                  onPress={handleSavePassword}
-                  style={styles.modalButton}
-                  loading={updatePasswordMutation.isPending}
-                  disabled={updatePasswordMutation.isPending}
-                />
-              </View>
-            </View>
-          </View>
-        </Modal>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  container: {
     flex: 1,
     backgroundColor: colors.gray[50],
-  },
-  scrollContent: {
-    padding: spacing.lg,
-    paddingBottom: 100, // Extra padding at bottom for scroll
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: colors.gray[50],
+  },
+  scrollView: {
+    flex: 1,
+    paddingHorizontal: spacing.lg,
   },
   header: {
-    marginBottom: spacing.xl,
+    paddingVertical: spacing.lg,
+    marginTop: spacing.sm,
   },
   screenTitle: {
     fontSize: typography.fontSizes['2xl'],
     fontWeight: typography.fontWeights.bold as any,
     color: colors.gray[900],
   },
-  subtitle: {
+  userInfoSection: {
+    alignItems: 'center',
+    paddingVertical: spacing.xl,
+  },
+  avatarContainer: {
+    marginBottom: spacing.md,
+  },
+  avatar: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: colors.primary[500],
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarText: {
+    fontSize: typography.fontSizes['2xl'],
+    fontWeight: typography.fontWeights.bold as any,
+    color: 'white',
+  },
+  userName: {
+    fontSize: typography.fontSizes.xl,
+    fontWeight: typography.fontWeights.bold as any,
+    color: colors.gray[900],
+    marginBottom: spacing.xs,
+  },
+  userEmail: {
     fontSize: typography.fontSizes.md,
     color: colors.gray[500],
-    marginTop: spacing.xs,
+    marginBottom: spacing.xs,
+  },
+  joinDate: {
+    fontSize: typography.fontSizes.sm,
+    color: colors.gray[400],
   },
   section: {
-    marginBottom: spacing.lg,
-    padding: spacing.lg,
+    marginBottom: spacing.xl,
   },
   sectionTitle: {
     fontSize: typography.fontSizes.lg,
@@ -480,133 +283,66 @@ const styles = StyleSheet.create({
     color: colors.gray[900],
     marginBottom: spacing.md,
   },
-  profileHeader: {
+  card: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    ...Platform.select({
+      ios: {
+        shadowColor: colors.gray[900],
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
+  },
+  menuItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+  },
+  menuItemLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: spacing.lg,
   },
-  profileAvatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: colors.primary[500],
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: spacing.md,
+  menuItemText: {
+    fontSize: typography.fontSizes.md,
+    color: colors.gray[800],
   },
-  avatarText: {
-    fontSize: typography.fontSizes['2xl'],
-    fontWeight: typography.fontWeights.bold as any,
-    color: '#fff',
-  },
-  profileInfo: {
-    flex: 1,
-  },
-  displayName: {
+  menuItemArrow: {
     fontSize: typography.fontSizes.lg,
-    fontWeight: typography.fontWeights.semibold as any,
-    color: colors.gray[900],
+    color: colors.gray[400],
+    fontWeight: typography.fontWeights.light as any,
   },
-  username: {
-    fontSize: typography.fontSizes.md,
-    color: colors.gray[600],
-  },
-  email: {
-    fontSize: typography.fontSizes.sm,
-    color: colors.gray[500],
-    marginTop: spacing.xs,
-  },
-  actionButton: {
-    width: '100%',
-  },
-  settingItem: {
+  switchItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gray[200],
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
   },
-  settingLabel: {
-    fontSize: typography.fontSizes.md,
-    color: colors.gray[800],
-  },
-  settingAction: {
-    fontSize: typography.fontSizes.md,
-    color: colors.gray[500],
-  },
-  infoItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gray[200],
-  },
-  infoLabel: {
-    fontSize: typography.fontSizes.md,
-    color: colors.gray[800],
-  },
-  infoValue: {
-    fontSize: typography.fontSizes.md,
-    color: colors.gray[500],
+  divider: {
+    height: 1,
+    backgroundColor: colors.gray[200],
+    marginHorizontal: spacing.lg,
   },
   logoutButton: {
-    marginTop: spacing.md,
-    marginBottom: spacing.xl,
+    marginVertical: spacing.xl,
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  premiumBadge: {
+    backgroundColor: colors.primary[100],
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs / 2,
+    borderRadius: 4,
+    marginLeft: spacing.md,
   },
-  modalContent: {
-    width: '85%',
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: spacing.xl,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  modalTitle: {
-    fontSize: typography.fontSizes.xl,
+  premiumText: {
+    fontSize: typography.fontSizes.xs,
     fontWeight: typography.fontWeights.bold as any,
-    color: colors.gray[900],
-    marginBottom: spacing.lg,
-    textAlign: 'center',
-  },
-  inputContainer: {
-    marginBottom: spacing.md,
-  },
-  inputLabel: {
-    fontSize: typography.fontSizes.sm,
-    fontWeight: typography.fontWeights.medium as any,
-    color: colors.gray[700],
-    marginBottom: spacing.xs,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.gray[300],
-    borderRadius: 8,
-    padding: spacing.md,
-    fontSize: typography.fontSizes.md,
-    color: colors.gray[800],
-    backgroundColor: '#fff',
-  },
-  textArea: {
-    minHeight: 100,
-    textAlignVertical: 'top',
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: spacing.lg,
-  },
-  modalButton: {
-    flex: 1,
-    marginHorizontal: spacing.xs,
+    color: colors.primary[700],
   },
 });

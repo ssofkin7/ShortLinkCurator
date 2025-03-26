@@ -1,13 +1,13 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { HomeIcon, FolderIcon, PlusIcon, UserIcon } from 'react-native-heroicons/outline';
+import { HomeIcon, FolderIcon, PlusCircleIcon, UserIcon } from 'react-native-heroicons/outline';
+import { colors } from '../components/ui/theme';
+
 import HomeScreen from '../screens/HomeScreen';
 import LibraryScreen from '../screens/LibraryScreen';
 import AddLinkScreen from '../screens/AddLinkScreen';
 import ProfileScreen from '../screens/ProfileScreen';
-import { colors } from '../components/ui/theme';
 
-// Main tab parameter list
 export type MainTabParamList = {
   Home: undefined;
   Library: undefined;
@@ -15,74 +15,63 @@ export type MainTabParamList = {
   Profile: undefined;
 };
 
-// Create the bottom tab navigator
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 export default function MainTabNavigator() {
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          // Add icons based on route name
-          switch (route.name) {
-            case 'Home':
-              return <HomeIcon size={size} color={color} />;
-            case 'Library':
-              return <FolderIcon size={size} color={color} />;
-            case 'AddLink':
-              return <PlusIcon size={size} color={color} />;
-            case 'Profile':
-              return <UserIcon size={size} color={color} />;
-            default:
-              return null;
-          }
-        },
+      initialRouteName="Home"
+      screenOptions={{
         tabBarActiveTintColor: colors.primary[600],
         tabBarInactiveTintColor: colors.gray[400],
-        headerShown: false,
         tabBarStyle: {
           borderTopWidth: 1,
           borderTopColor: colors.gray[200],
+          paddingTop: 5,
+          paddingBottom: 5,
           height: 60,
-          paddingBottom: 8,
-          paddingTop: 8,
         },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '500',
-        },
-      })}
+        headerShown: false,
+      }}
     >
-      <Tab.Screen 
-        name="Home" 
+      <Tab.Screen
+        name="Home"
         component={HomeScreen}
         options={{
-          title: "Home",
+          tabBarIcon: ({ color, size }) => (
+            <HomeIcon color={color} size={size} />
+          ),
+          tabBarLabel: 'Home',
         }}
       />
-      <Tab.Screen 
-        name="Library" 
+      <Tab.Screen
+        name="Library"
         component={LibraryScreen}
         options={{
-          title: "Library",
+          tabBarIcon: ({ color, size }) => (
+            <FolderIcon color={color} size={size} />
+          ),
+          tabBarLabel: 'Library',
         }}
       />
-      <Tab.Screen 
-        name="AddLink" 
+      <Tab.Screen
+        name="AddLink"
         component={AddLinkScreen}
         options={{
-          title: "Add",
-          tabBarLabelStyle: {
-            fontSize: 14,
-            fontWeight: '600',
-          },
+          tabBarIcon: ({ color, size }) => (
+            <PlusCircleIcon color={color} size={size + 4} />
+          ),
+          tabBarLabel: 'Add',
         }}
       />
-      <Tab.Screen 
-        name="Profile" 
+      <Tab.Screen
+        name="Profile"
         component={ProfileScreen}
         options={{
-          title: "Profile",
+          tabBarIcon: ({ color, size }) => (
+            <UserIcon color={color} size={size} />
+          ),
+          tabBarLabel: 'Profile',
         }}
       />
     </Tab.Navigator>

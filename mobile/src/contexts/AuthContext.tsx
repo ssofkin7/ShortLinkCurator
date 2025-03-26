@@ -1,24 +1,16 @@
-import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
-import { useQuery, useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { api, type User } from '../services/api';
-
-// Create a client for React Query
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
+import { useQuery, useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { api } from '../services/api';
+import { User } from '../types';
 
 type AuthContextType = {
   user: User | null;
   isLoading: boolean;
   error: Error | null;
-  login: (email: string, password: string) => Promise<void>;
-  register: (username: string, email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
+  register: (username: string, email: string, password: string) => Promise<User>;
   logout: () => Promise<void>;
 };
 
@@ -26,104 +18,88 @@ type AuthProviderProps = {
   children: ReactNode;
 };
 
-// Create the auth context
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | null>(null);
 
-// Authentication provider component
 export default function AuthProvider({ children }: AuthProviderProps) {
-  const [initializing, setInitializing] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
+  const [error, setError] = useState<Error | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Fetch current user
-  const {
-    data: user,
-    error,
-    isLoading: isUserLoading,
-    refetch: refetchUser,
-  } = useQuery({
-    queryKey: ['user'],
-    queryFn: async () => {
-      try {
-        return await api.auth.getCurrentUser();
-      } catch (error) {
-        // Clear any invalid session
-        await AsyncStorage.removeItem('auth_token');
-        return null;
-      }
-    },
-    // Don't automatically fetch on mount - we'll handle this ourselves
-    enabled: false,
-  });
-
-  // Login mutation
-  const loginMutation = useMutation({
-    mutationFn: async ({ email, password }: { email: string; password: string }) => {
-      return await api.auth.login(email, password);
-    },
-    onSuccess: (data) => {
-      // Update user in cache
-      queryClient.setQueryData(['user'], data);
-    },
-  });
-
-  // Register mutation
-  const registerMutation = useMutation({
-    mutationFn: async ({ username, email, password }: { username: string; email: string; password: string }) => {
-      return await api.auth.register(username, email, password);
-    },
-    onSuccess: (data) => {
-      // Update user in cache
-      queryClient.setQueryData(['user'], data);
-    },
-  });
-
-  // Logout mutation
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      await api.auth.logout();
-    },
-    onSuccess: () => {
-      // Clear user from cache
-      queryClient.setQueryData(['user'], null);
-      // Invalidate all queries
-      queryClient.invalidateQueries();
-    },
-  });
-
-  // Check authentication status on mount
+  // Check if user is already logged in
   useEffect(() => {
-    const checkAuthStatus = async () => {
-      await refetchUser();
-      setInitializing(false);
+    const checkLoginStatus = async () => {
+      setIsLoading(true);
+      try {
+        const user = await api.auth.getCurrentUser();
+        setUser(user);
+      } catch (error) {
+        // User is not logged in or there was an error
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    checkAuthStatus();
-  }, [refetchUser]);
+    checkLoginStatus();
+  }, []);
 
-  // Wrapper functions for mutations
-  const login = async (email: string, password: string) => {
-    return loginMutation.mutateAsync({ email, password });
+  // Login function
+  const login = async (email: string, password: string): Promise<User> => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const user = await api.auth.login(email, password);
+      setUser(user);
+      return user;
+    } catch (error) {
+      setError(error instanceof Error ? error : new Error('Login failed'));
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const register = async (username: string, email: string, password: string) => {
-    return registerMutation.mutateAsync({ username, email, password });
+  // Register function
+  const register = async (username: string, email: string, password: string): Promise<User> => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const user = await api.auth.register(username, email, password);
+      setUser(user);
+      return user;
+    } catch (error) {
+      setError(error instanceof Error ? error : new Error('Registration failed'));
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const logout = async () => {
-    return logoutMutation.mutateAsync();
+  // Logout function
+  const logout = async (): Promise<void> => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      await api.auth.logout();
+      setUser(null);
+    } catch (error) {
+      setError(error instanceof Error ? error : new Error('Logout failed'));
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // Calculate loading state
-  const isLoading = initializing || isUserLoading || 
-    loginMutation.isPending || registerMutation.isPending || logoutMutation.isPending;
-
-  // Context value
   const contextValue: AuthContextType = {
-    user: user || null,
+    user,
     isLoading,
-    error: error instanceof Error ? error : null,
+    error,
     login,
     register,
-    logout,
+    logout
   };
 
   return (
@@ -133,19 +109,20 @@ export default function AuthProvider({ children }: AuthProviderProps) {
   );
 }
 
-// Auth context provider with QueryClient
+// React Query wrapper for Auth Provider
 export function AuthProviderWithReactQuery({ children }: AuthProviderProps) {
+  // Use the existing query client from App.tsx or create a new one if needed
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>{children}</AuthProvider>
-    </QueryClientProvider>
+    <AuthProvider>
+      {children}
+    </AuthProvider>
   );
 }
 
-// Custom hook to use auth context
+// Hook to use auth context
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

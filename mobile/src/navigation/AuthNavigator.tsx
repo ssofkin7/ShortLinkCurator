@@ -3,22 +3,21 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 
-// Auth stack parameter list
 export type AuthStackParamList = {
   Login: undefined;
   Register: undefined;
 };
 
-// Create the auth stack navigator
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 export default function AuthNavigator() {
   return (
-    <Stack.Navigator 
+    <Stack.Navigator
       initialRouteName="Login"
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: '#fff' },
+        contentStyle: { backgroundColor: 'white' },
+        animation: 'slide_from_right',
       }}
     >
       <Stack.Screen name="Login" component={LoginScreen} />

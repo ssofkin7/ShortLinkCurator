@@ -4,189 +4,150 @@ import {
   Text,
   TextInput,
   StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
   TouchableOpacity,
-  ScrollView,
   SafeAreaView,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useAuth } from '../contexts/AuthContext';
-import { Button } from '../components/ui/Button';
 import { colors, typography, spacing } from '../components/ui/theme';
+import { Button } from '../components/ui/Button';
+import { useAuth } from '../contexts/AuthContext';
 import { AuthStackParamList } from '../navigation/AuthNavigator';
 
-// Define the navigation prop type for this screen
 type RegisterScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Register'>;
 
 export default function RegisterScreen() {
-  // Get navigation and auth context
-  const navigation = useNavigation<RegisterScreenNavigationProp>();
-  const { register, isLoading } = useAuth();
-
-  // Form state
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [errors, setErrors] = useState({
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { register } = useAuth();
+  const navigation = useNavigation<RegisterScreenNavigationProp>();
 
-  // Validate form
-  const validateForm = () => {
-    let isValid = true;
-    const newErrors = {
-      username: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-    };
-
-    // Validate username
-    if (!username.trim()) {
-      newErrors.username = 'Username is required';
-      isValid = false;
-    } else if (username.length < 3) {
-      newErrors.username = 'Username must be at least 3 characters';
-      isValid = false;
-    }
-
-    // Validate email
-    if (!email.trim()) {
-      newErrors.email = 'Email is required';
-      isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Email is invalid';
-      isValid = false;
-    }
-
-    // Validate password
-    if (!password) {
-      newErrors.password = 'Password is required';
-      isValid = false;
-    } else if (password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
-      isValid = false;
-    }
-
-    // Validate password confirmation
-    if (password !== confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   };
 
-  // Handle registration
   const handleRegister = async () => {
-    if (!validateForm()) return;
+    // Form validation
+    if (!username.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    if (!validateEmail(email.trim())) {
+      Alert.alert('Error', 'Please enter a valid email address');
+      return;
+    }
+
+    if (password.trim() !== confirmPassword.trim()) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
+
+    if (password.trim().length < 6) {
+      Alert.alert('Error', 'Password must be at least 6 characters long');
+      return;
+    }
 
     try {
-      await register(username, email, password);
-      // Navigation is handled automatically by the RootNavigator
+      setIsSubmitting(true);
+      await register(username.trim(), email.trim(), password.trim());
+      // Navigation is handled automatically by RootNavigator
     } catch (error) {
       Alert.alert(
         'Registration Failed',
-        error instanceof Error 
-          ? error.message 
-          : 'An error occurred during registration. Please try again.'
+        error instanceof Error ? error.message : 'Please try again with different credentials'
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
-        style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        style={styles.keyboardAvoidingView}
       >
-        <ScrollView 
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.header}>
-            <Text style={styles.logo}>LinkOrbit</Text>
-            <Text style={styles.subtitle}>Create an account to get started</Text>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View style={styles.headerContainer}>
+            <TouchableOpacity 
+              style={styles.backButton}
+              onPress={() => navigation.goBack()}
+            >
+              <Text style={styles.backButtonText}>← Back</Text>
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Create Account</Text>
           </View>
 
           <View style={styles.formContainer}>
-            <Text style={styles.formTitle}>Sign Up</Text>
-            
+            <Text style={styles.subtitle}>Join LinkOrbit to organize your content collection</Text>
+
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Username</Text>
               <TextInput
-                style={[styles.input, errors.username ? styles.inputError : null]}
-                placeholder="Choose a username"
-                autoCapitalize="none"
+                style={styles.input}
                 value={username}
                 onChangeText={setUsername}
+                placeholder="Choose a username"
+                autoCapitalize="none"
+                autoCorrect={false}
               />
-              {errors.username ? <Text style={styles.errorText}>{errors.username}</Text> : null}
             </View>
 
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Email</Text>
               <TextInput
-                style={[styles.input, errors.email ? styles.inputError : null]}
+                style={styles.input}
+                value={email}
+                onChangeText={setEmail}
                 placeholder="Enter your email"
                 keyboardType="email-address"
                 autoCapitalize="none"
-                value={email}
-                onChangeText={setEmail}
+                autoCorrect={false}
               />
-              {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
             </View>
 
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Password</Text>
               <TextInput
-                style={[styles.input, errors.password ? styles.inputError : null]}
-                placeholder="Create a password"
-                secureTextEntry
+                style={styles.input}
                 value={password}
                 onChangeText={setPassword}
+                placeholder="Create a password"
+                secureTextEntry
               />
-              {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
             </View>
 
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Confirm Password</Text>
               <TextInput
-                style={[styles.input, errors.confirmPassword ? styles.inputError : null]}
-                placeholder="Confirm your password"
-                secureTextEntry
+                style={styles.input}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
+                placeholder="Confirm your password"
+                secureTextEntry
               />
-              {errors.confirmPassword ? <Text style={styles.errorText}>{errors.confirmPassword}</Text> : null}
             </View>
 
             <Button
               title="Create Account"
               onPress={handleRegister}
-              variant="primary"
-              size="lg"
-              loading={isLoading}
-              disabled={isLoading}
-              fullWidth
-              style={styles.registerButton}
+              loading={isSubmitting}
+              disabled={isSubmitting}
+              style={styles.button}
             />
 
-            <View style={styles.loginContainer}>
-              <Text style={styles.loginText}>Already have an account?</Text>
-              <TouchableOpacity
-                onPress={() => navigation.navigate('Login')}
-                disabled={isLoading}
-              >
+            <View style={styles.loginPrompt}>
+              <Text style={styles.loginText}>Already have an account? </Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Login')}>
                 <Text style={styles.loginLink}>Sign In</Text>
               </TouchableOpacity>
             </View>
@@ -198,49 +159,44 @@ export default function RegisterScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
   container: {
+    flex: 1,
+    backgroundColor: colors.gray[50],
+  },
+  keyboardAvoidingView: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    padding: spacing.lg,
+    padding: spacing.xl,
   },
-  header: {
-    alignItems: 'center',
-    marginTop: spacing.xl,
+  headerContainer: {
+    marginTop: spacing.lg,
+    marginBottom: spacing.xl,
+  },
+  backButton: {
     marginBottom: spacing.lg,
   },
-  logo: {
-    fontSize: typography.fontSizes['3xl'],
-    fontWeight: typography.fontWeights.bold as any,
+  backButtonText: {
+    fontSize: typography.fontSizes.md,
     color: colors.primary[600],
-    letterSpacing: -1,
+    fontWeight: typography.fontWeights.medium as any,
+  },
+  headerTitle: {
+    fontSize: typography.fontSizes['2xl'],
+    fontWeight: typography.fontWeights.bold as any,
+    color: colors.gray[900],
+  },
+  formContainer: {
+    width: '100%',
   },
   subtitle: {
     fontSize: typography.fontSizes.md,
     color: colors.gray[500],
-    marginTop: spacing.xs,
-    textAlign: 'center',
-  },
-  formContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: spacing.lg,
     marginBottom: spacing.xl,
   },
-  formTitle: {
-    fontSize: typography.fontSizes.xl,
-    fontWeight: typography.fontWeights.bold as any,
-    color: colors.gray[900],
-    marginBottom: spacing.lg,
-    textAlign: 'center',
-  },
   inputContainer: {
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
   },
   label: {
     fontSize: typography.fontSizes.sm,
@@ -249,39 +205,29 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   input: {
+    backgroundColor: 'white',
     borderWidth: 1,
     borderColor: colors.gray[300],
     borderRadius: 8,
-    padding: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
     fontSize: typography.fontSizes.md,
-    color: colors.gray[800],
-    backgroundColor: colors.gray[50],
   },
-  inputError: {
-    borderColor: colors.error,
-  },
-  errorText: {
-    fontSize: typography.fontSizes.sm,
-    color: colors.error,
-    marginTop: spacing.xs,
-  },
-  registerButton: {
+  button: {
     marginTop: spacing.md,
   },
-  loginContainer: {
+  loginPrompt: {
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: spacing.lg,
+    marginTop: spacing.xl,
   },
   loginText: {
-    fontSize: typography.fontSizes.sm,
+    fontSize: typography.fontSizes.md,
     color: colors.gray[600],
   },
   loginLink: {
-    fontSize: typography.fontSizes.sm,
+    fontSize: typography.fontSizes.md,
     fontWeight: typography.fontWeights.semibold as any,
     color: colors.primary[600],
-    marginLeft: spacing.xs,
   },
 });
