@@ -9,15 +9,9 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, inArray } from "drizzle-orm";
-import session from "express-session";
-import pg from "pg";
-import createMemoryStore from "memorystore";
-import connectPg from "connect-pg-simple";
+
 // Interface for storage operations
 export interface IStorage {
-  // Session store
-  sessionStore: session.Store;
-  
   // User operations
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -68,14 +62,6 @@ export interface IStorage {
   getLinkByUrl(url: string): Promise<Link | undefined>;
 }
 
-const MemoryStore = createMemoryStore(session);
-const PgSessionStore = connectPg(session);
-
-// Create a PostgreSQL pool for session storage
-const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL
-});
-
 // In-memory implementation for development/testing
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
@@ -88,7 +74,6 @@ export class MemStorage implements IStorage {
   currentTagId: number;
   currentTabId: number;
   currentLinkTabId: number;
-  sessionStore: session.Store;
 
   constructor() {
     this.users = new Map();
@@ -101,10 +86,6 @@ export class MemStorage implements IStorage {
     this.currentTagId = 1;
     this.currentTabId = 1;
     this.currentLinkTabId = 1;
-    // Create in-memory session store for development
-    this.sessionStore = new MemoryStore({
-      checkPeriod: 86400000, // prune expired entries every 24h
-    });
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -449,14 +430,6 @@ export class MemStorage implements IStorage {
 
 // Database implementation using Supabase
 export class DatabaseStorage implements IStorage {
-  sessionStore: session.Store;
-  
-  constructor() {
-    // Use a memory store as a fallback
-    this.sessionStore = new MemoryStore({
-      checkPeriod: 86400000 // prune expired entries every 24h
-    });
-  }
   async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;

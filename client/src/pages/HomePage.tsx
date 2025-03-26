@@ -16,13 +16,12 @@ const HomePage = () => {
   const [processingLink, setProcessingLink] = useState<string | null>(null);
   const [selectedLink, setSelectedLink] = useState<LinkWithTags | null>(null);
   const [showTagModal, setShowTagModal] = useState(false);
-  const [showLinkSubmitter, setShowLinkSubmitter] = useState(false);
 
   // Fetch current user
   const { data: user, isLoading: userLoading } = useQuery<User>({
     queryKey: ["/api/user"],
   });
-
+  
   // Fetch recent links (limited to latest 5)
   const { data: recentLinks = [], isLoading: linksLoading } = useQuery<LinkWithTags[]>({
     queryKey: ["/api/links", { type: "recent" }],
@@ -50,23 +49,21 @@ const HomePage = () => {
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Sidebar (Desktop) */}
       <Sidebar user={user} isLoading={userLoading} />
-
+      
       <main className="flex-1 min-h-screen">
         {/* Top Bar */}
         <TopBar user={user} />
-
+        
         <div className="container mx-auto px-4 py-6">
-          {/* Link Submitter */}
+          {/* Welcome and Link Submitter */}
           <div className="mb-8">
-            {/* Always show on desktop, only show on mobile when showLinkSubmitter is true */}
-            <div className={`${!showLinkSubmitter ? 'hidden md:block' : 'block'}`}>
-              <LinkSubmitter onSubmit={(url) => {
-                handleSubmitLink(url);
-                setShowLinkSubmitter(false); // Hide after submission
-              }} />
-            </div>
+            <h1 className="text-2xl font-bold mb-2">Welcome to LinkSnap</h1>
+            <p className="text-gray-600 mb-4">Save links from all your favorite platforms in one place</p>
+            
+            {/* Link Submitter */}
+            <LinkSubmitter onSubmit={handleSubmitLink} />
           </div>
-
+          
           {/* AI Processing Dashboard */}
           {processingLink && (
             <AIProcessingDashboard 
@@ -74,7 +71,7 @@ const HomePage = () => {
               onComplete={handleProcessingComplete} 
             />
           )}
-
+          
           {/* Recently Added Links */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-4">
@@ -85,7 +82,7 @@ const HomePage = () => {
                 </a>
               )}
             </div>
-
+            
             {linksLoading ? (
               <p>Loading recent links...</p>
             ) : recentLinks.length === 0 ? (
@@ -119,12 +116,12 @@ const HomePage = () => {
               </div>
             )}
           </div>
-
+          
           {/* "Revisit These Links" Section */}
           <NotViewedRecommendations />
         </div>
       </main>
-
+      
       {/* Tag Correction Modal */}
       {showTagModal && selectedLink && (
         <TagCorrectionModal
@@ -136,9 +133,9 @@ const HomePage = () => {
           }}
         />
       )}
-
+      
       {/* Mobile Navigation */}
-      <MobileNavigation onAddLinkClick={() => setShowLinkSubmitter(true)} />
+      <MobileNavigation onAddLinkClick={() => window.scrollTo(0, 0)} />
     </div>
   );
 };

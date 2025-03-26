@@ -15,7 +15,8 @@ if (!process.env.OPENAI_API_KEY) {
   throw new Error('OpenAI API key must be configured in environment variables');
 }
 
-const MODEL = process.env.OPENAI_MODEL || "gpt-3.5-turbo";
+// Switched to GPT-3.5-turbo for cost optimization as requested by the user
+const MODEL = "gpt-3.5-turbo";
 
 export interface LinkMetadata {
   title: string;

@@ -51,7 +51,7 @@ const ContentItem = ({
   const [editTitleDialogOpen, setEditTitleDialogOpen] = useState(false);
   const [isCreateTabDialogOpen, setIsCreateTabDialogOpen] = useState(false);
   const [showTags, setShowTags] = useState(false);
-
+  
   // Fetch custom tabs
   const { data: customTabs = [], isLoading: isLoadingTabs } = useQuery<CustomTabWithLinks[]>({
     queryKey: ['/api/custom-tabs'],
@@ -83,7 +83,7 @@ const ContentItem = ({
       });
     }
   });
-
+  
   // Add link to tab mutation
   const { mutate: addLinkToTab, isPending: isAddingToTab } = useMutation({
     mutationFn: async (tabId: number) => {
@@ -113,7 +113,7 @@ const ContentItem = ({
       });
     }
   });
-
+  
   // Remove link from tab mutation
   const { mutate: removeLinkFromTab, isPending: isRemovingFromTab } = useMutation({
     mutationFn: async () => {
@@ -154,7 +154,7 @@ const ContentItem = ({
     bgColor: string;
     icon: React.ReactNode;
   }
-
+  
   const getPlatformBadge = (): PlatformBadge => {
     switch (link.platform) {
       // Video platforms
@@ -203,7 +203,7 @@ const ContentItem = ({
             </svg>
           )
         };
-
+        
       // Social Media Platforms
       case 'twitter':
         return {
@@ -232,7 +232,7 @@ const ContentItem = ({
             </svg>
           )
         };
-
+        
       // Content Platforms
       case 'medium':
         return {
@@ -257,11 +257,11 @@ const ContentItem = ({
           bgColor: 'bg-[#161614]',
           icon: (
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 496 512" fill="currentColor">
-              <path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.77-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/>
+              <path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/>
             </svg>
           )
         };
-
+        
       // Generic Types
       case 'article':
         return {
@@ -289,7 +289,7 @@ const ContentItem = ({
             </svg>
           )
         };
-      default:
+      case 'webpage':
         return {
           bgColor: 'bg-[#3498DB]',
           icon: (
@@ -300,302 +300,91 @@ const ContentItem = ({
             </svg>
           )
         };
+        
+      // Default fallback
+      default:
+        return {
+          bgColor: 'bg-gray-700',
+          icon: (
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 512 512" fill="currentColor">
+              <path d="M320 0H64C28.7 0 0 28.7 0 64v288c0 35.3 28.7 64 64 64h47.5 4.5c16.6 0 32.5-6.6 44.2-18.3l76.2-76.2c13.7-13.7 32.2-21.5 51.5-21.5h76.8c19.3 0 37.8 7.7 51.5 21.5l76.2 76.2c11.8 11.8 27.6 18.3 44.2 18.3h4.5H384c35.3 0 64-28.7 64-64V160c0-35.3-28.7-64-64-64h-8.2c-25.3 0-49.5-10.1-67.3-27.9L274.8 34.3C257 16.5 232.8 6.4 207.5 6.4H192C174.3 6.4 160 20.7 160 38.4V96c0 17.7 14.3 32 32 32h64c17.7 0 32 14.3 32 32s-14.3 32-32 32H128c-17.7 0-32-14.3-32-32V38.4C96 20.7 81.7 6.4 64 6.4H32C14.3 6.4 0 20.7 0 38.4V416c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V384c0-17.7-14.3-32-32-32s-32 14.3-32 32v32c0 17.7-14.3 32-32 32H64c-17.7 0-32-14.3-32-32V64c0-17.7 14.3-32 32-32H320c17.7 0 32 14.3 32 32v32c0 17.7 14.3 32 32 32s32-14.3 32-32V64c0-35.3-28.7-64-64-64z"/>
+            </svg>
+          )
+        };
     }
   };
 
   const platformBadge = getPlatformBadge();
 
+  // Get thumbnail for the link
   const getThumbnailImage = () => {
+    // Default placeholder based on platform
+    const generatePlaceholder = (text: string) => {
+      return `https://placehold.co/800x450?text=${encodeURIComponent(text)}`;
+    };
+    
     if (link.thumbnail_url) {
       return link.thumbnail_url;
     }
     
-    // Default thumbnails based on platform
+    // Fallback to platform-specific placeholder
     switch (link.platform) {
-      case 'youtube':
-        return "https://placehold.co/600x400/4285F4/FFFFFF?text=YouTube";
       case 'tiktok':
-        return "https://placehold.co/600x400/000000/FFFFFF?text=TikTok";
+        return generatePlaceholder('TikTok');
+      case 'youtube':
+        return generatePlaceholder('YouTube');
       case 'instagram':
-        return "https://placehold.co/600x400/E1306C/FFFFFF?text=Instagram";
+        return generatePlaceholder('Instagram');
       case 'facebook':
-        return "https://placehold.co/600x400/1877F2/FFFFFF?text=Facebook";
+        return generatePlaceholder('Facebook');
+      case 'vimeo':
+        return generatePlaceholder('Vimeo');
       case 'twitter':
-        return "https://placehold.co/600x400/1DA1F2/FFFFFF?text=Twitter";
+        return generatePlaceholder('Twitter');
+      case 'linkedin':
+        return generatePlaceholder('LinkedIn');
+      case 'reddit':
+        return generatePlaceholder('Reddit');
+      case 'medium':
+        return generatePlaceholder('Medium');
+      case 'substack':
+        return generatePlaceholder('Substack');
+      case 'github':
+        return generatePlaceholder('GitHub');
       case 'article':
-        return "https://placehold.co/600x400/6C5CE7/FFFFFF?text=Article";
+        return generatePlaceholder('Article');
+      case 'document':
+        return generatePlaceholder('Document');
+      case 'webpage':
+        return generatePlaceholder('Web Page');
       default:
-        return "https://placehold.co/600x400/3498DB/FFFFFF?text=Content";
+        return generatePlaceholder('Content');
     }
   };
 
-  // Render view modes
-  const renderListView = () => {
-    return (
-      <Card className="hover:shadow-md transition-shadow duration-300">
-        <div className="flex p-3">
-          <div 
-            className="relative flex-shrink-0 mr-3 aspect-square w-16 h-16 cursor-pointer"
-            onClick={() => window.open(link.url, "_blank")}
-          >
-            <img
-              src={getThumbnailImage()}
-              alt={link.title}
-              className="h-full w-full object-cover rounded"
-            />
-            <div className="absolute top-1 left-1">
-              <div className={`${platformBadge.bgColor} rounded-full p-1 flex items-center justify-center text-white`}>
-                {platformBadge.icon}
-              </div>
-            </div>
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between">
-              <h3 
-                className="font-medium text-gray-900 truncate cursor-pointer hover:text-indigo-600"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setEditTitleDialogOpen(true);
-                }}
-              >
-                {link.title}
-              </h3>
-              <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="1"></circle>
-                      <circle cx="19" cy="12" r="1"></circle>
-                      <circle cx="5" cy="12" r="1"></circle>
-                    </svg>
-                    <span className="sr-only">Open menu</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => window.open(link.url, "_blank")}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                      <polyline points="15 3 21 3 21 9"></polyline>
-                      <line x1="10" y1="14" x2="21" y2="3"></line>
-                    </svg>
-                    Open Link
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={(e) => {
-                    e.stopPropagation();
-                    setEditTitleDialogOpen(true);
-                  }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                    </svg>
-                    Edit Title
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={(e) => {
-                    e.stopPropagation();
-                    setShowTags(!showTags);
-                  }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
-                      <line x1="7" y1="7" x2="7.01" y2="7"></line>
-                    </svg>
-                    {showTags ? 'Hide Tags' : 'Show Tags'}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={(e) => {
-                    e.stopPropagation();
-                    onEditTags(e);
-                  }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                      <path d="M12 20h9"></path>
-                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                    </svg>
-                    Edit Tags
-                  </DropdownMenuItem>
-
-                  <DropdownMenuSeparator />
-
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                      </svg>
-                      Move to Tab
-                    </DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent className="max-h-80 overflow-y-auto">
-                      {isLoadingTabs ? (
-                        <DropdownMenuItem disabled>
-                          Loading tabs...
-                        </DropdownMenuItem>
-                      ) : customTabs.length > 0 ? (
-                        <>
-                          {customTabs.map((tab) => (
-                            <DropdownMenuItem
-                              key={tab.id}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                // Check if link is already in this tab
-                                // Ensure tab.links exists and is an array
-                                if (!tab || !tab.id) {
-                                  console.error("Tab is undefined or missing ID");
-                                  toast({
-                                    title: "Error",
-                                    description: "Could not add to tab - invalid tab data",
-                                    variant: "destructive"
-                                  });
-                                  return;
-                                }
-
-                                const isInTab = tab.links && Array.isArray(tab.links) && tab.links.some(l => l && l.id === link.id);
-                                console.log(`Checking if link ${link.id} is in tab ${tab.id} (${tab.name}): ${isInTab}`);
-
-                                if (isInTab) {
-                                  toast({
-                                    title: "Already in tab",
-                                    description: `This link is already in the "${tab.name}" tab`,
-                                  });
-                                  return;
-                                }
-
-                                // Add link to tab
-                                console.log(`Adding link ${link.id} to tab ${tab.id} (${tab.name})`);
-                                addLinkToTab(tab.id);
-                              }}
-                            >
-                              {tab.name}
-                            </DropdownMenuItem>
-                          ))}
-                        </>
-                      ) : (
-                        <DropdownMenuItem disabled>
-                          No custom tabs available
-                        </DropdownMenuItem>
-                      )}
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsCreateTabDialogOpen(true);
-                        }}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                          <path d="M12 5v14M5 12h14" />
-                        </svg>
-                        Create New Tab
-                      </DropdownMenuItem>
-                    </DropdownMenuSubContent>
-                  </DropdownMenuSub>
-
-                  <DropdownMenuSeparator />
-
-                  {customTabId && onRemoveFromTab && (
-                    <DropdownMenuItem 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if(confirm("Are you sure you want to remove this link from the current tab? The link will still be available in your library.")) {
-                          removeLinkFromTab();
-                        }
-                      }}
-                      className="text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50"
-                      disabled={isRemovingFromTab}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                        <path d="M10 11V6l-4 4 4 4v-5H20"></path>
-                        <path d="M4 16v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1"></path>
-                      </svg>
-                      {isRemovingFromTab ? "Removing..." : "Remove from Tab"}
-                    </DropdownMenuItem>
-                  )}
-
-                  <DropdownMenuItem 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (confirm("Are you sure you want to delete this link?")) {
-                        deleteLink();
-                      }
-                    }}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    disabled={isDeleting}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                      <path d="M3 6h18"></path>
-                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                    </svg>
-                    {isDeleting ? "Deleting..." : "Delete"}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-            <div className="flex items-center text-xs text-gray-500 mt-1">
-              {link.last_viewed ? (
-                <span>Viewed {formatDate(new Date(link.last_viewed))}</span>
-              ) : (
-                <span>Added {formatDate(new Date(link.created_at))}</span>
-              )}
-            </div>
-            <div className="mt-2 flex flex-wrap gap-1">
-              {link.category && (
-                <Badge variant="outline" className="bg-gray-100 text-gray-800 text-xs">
-                  {link.category}
-                </Badge>
-              )}
-              {showTags && link.tags && link.tags.slice(0, 2).map((tag) => (
-                <Badge
-                  key={tag.id}
-                  variant="secondary"
-                  className="cursor-pointer text-xs"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (onTagClick) onTagClick(tag.name, e);
-                  }}
-                >
-                  {tag.name}
-                </Badge>
-              ))}
-              {showTags && link.tags && link.tags.length > 2 && (
-                <Badge
-                  variant="outline"
-                  className="cursor-pointer text-xs"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setViewTagsModalOpen(true);
-                  }}
-                >
-                  +{link.tags.length - 2} more
-                </Badge>
-              )}
-            </div>
-          </div>
-        </div>
-      </Card>
-    );
-  };
-
-  const renderGridView = () => {
-    return (
-      <Card className="overflow-hidden hover:shadow-md transition-shadow duration-300">
+  const renderListView = () => (
+    <Card className="hover:shadow-md transition-shadow duration-300">
+      <div className="flex p-3">
         <div 
-          className="relative aspect-video cursor-pointer"
+          className="relative w-24 min-w-24 h-16 mr-3 overflow-hidden cursor-pointer"
           onClick={() => window.open(link.url, "_blank")}
         >
           <img
             src={getThumbnailImage()}
             alt={link.title}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover rounded-sm"
           />
-          <div className="absolute top-2 left-2">
-            <div className={`${platformBadge.bgColor} rounded-full p-1.5 flex items-center justify-center text-white`}>
+          <div className="absolute top-1 left-1">
+            <div className={`${platformBadge.bgColor} rounded-full p-1 flex items-center justify-center text-white`}>
               {platformBadge.icon}
             </div>
           </div>
         </div>
-        <div className="p-3">
+        <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between">
             <h3 
-              className="font-medium text-gray-900 truncate cursor-pointer hover:text-indigo-600 text-sm"
-              onClick={(e) => {
-                e.preventDefault();
-                setEditTitleDialogOpen(true);
-              }}
+              className="font-medium text-gray-900 truncate cursor-pointer hover:text-indigo-600"
+              onClick={() => window.open(link.url, "_blank")}
             >
               {link.title}
             </h3>
@@ -649,9 +438,9 @@ const ContentItem = ({
                   </svg>
                   Edit Tags
                 </DropdownMenuItem>
-
+                
                 <DropdownMenuSeparator />
-
+                
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
@@ -672,20 +461,7 @@ const ContentItem = ({
                             onClick={(e) => {
                               e.stopPropagation();
                               // Check if link is already in this tab
-                              // Ensure tab.links exists and is an array
-                              if (!tab || !tab.id) {
-                                console.error("Tab is undefined or missing ID");
-                                toast({
-                                  title: "Error",
-                                  description: "Could not add to tab - invalid tab data",
-                                  variant: "destructive"
-                                });
-                                return;
-                              }
-
-                              const isInTab = tab.links && Array.isArray(tab.links) && tab.links.some(l => l && l.id === link.id);
-                              console.log(`Checking if link ${link.id} is in tab ${tab.id} (${tab.name}): ${isInTab}`);
-
+                              const isInTab = tab.links && tab.links.some(l => l.id === link.id);
                               if (isInTab) {
                                 toast({
                                   title: "Already in tab",
@@ -693,9 +469,8 @@ const ContentItem = ({
                                 });
                                 return;
                               }
-
+                              
                               // Add link to tab
-                              console.log(`Adding link ${link.id} to tab ${tab.id} (${tab.name})`);
                               addLinkToTab(tab.id);
                             }}
                           >
@@ -722,9 +497,9 @@ const ContentItem = ({
                     </DropdownMenuItem>
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
-
+                
                 <DropdownMenuSeparator />
-
+                
                 {customTabId && onRemoveFromTab && (
                   <DropdownMenuItem 
                     onClick={(e) => {
@@ -743,7 +518,7 @@ const ContentItem = ({
                     {isRemovingFromTab ? "Removing..." : "Remove from Tab"}
                   </DropdownMenuItem>
                 )}
-
+                
                 <DropdownMenuItem 
                   onClick={(e) => {
                     e.stopPropagation();
@@ -773,15 +548,15 @@ const ContentItem = ({
           </div>
           <div className="mt-2 flex flex-wrap gap-1">
             {link.category && (
-              <Badge variant="outline" className="bg-gray-100 text-gray-800 text-xs">
+              <Badge variant="outline" className="bg-gray-100 text-gray-800">
                 {link.category}
               </Badge>
             )}
-            {showTags && link.tags && link.tags.slice(0, 2).map((tag) => (
+            {showTags && link.tags && link.tags.slice(0, 3).map((tag) => (
               <Badge
                 key={tag.id}
                 variant="secondary"
-                className="cursor-pointer text-xs"
+                className="cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
                   if (onTagClick) onTagClick(tag.name, e);
@@ -790,23 +565,256 @@ const ContentItem = ({
                 {tag.name}
               </Badge>
             ))}
-            {showTags && link.tags && link.tags.length > 2 && (
+            {showTags && link.tags && link.tags.length > 3 && (
               <Badge
                 variant="outline"
-                className="cursor-pointer text-xs"
+                className="cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
                   setViewTagsModalOpen(true);
                 }}
               >
-                +{link.tags.length - 2} more
+                +{link.tags.length - 3} more
               </Badge>
             )}
           </div>
         </div>
-      </Card>
-    );
-  };
+      </div>
+    </Card>
+  );
+
+  const renderGridView = () => (
+    <Card className="overflow-hidden hover:shadow-md transition-shadow duration-300">
+      <div 
+        className="relative aspect-video cursor-pointer"
+        onClick={() => window.open(link.url, "_blank")}
+      >
+        <img
+          src={getThumbnailImage()}
+          alt={link.title}
+          className="h-full w-full object-cover"
+        />
+        <div className="absolute top-2 left-2">
+          <div className={`${platformBadge.bgColor} rounded-full p-1.5 flex items-center justify-center text-white`}>
+            {platformBadge.icon}
+          </div>
+        </div>
+      </div>
+      <div className="p-3">
+        <div className="flex items-center justify-between">
+          <h3 
+            className="font-medium text-gray-900 truncate cursor-pointer hover:text-indigo-600 text-sm"
+            onClick={() => window.open(link.url, "_blank")}
+          >
+            {link.title}
+          </h3>
+          <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="1"></circle>
+                  <circle cx="19" cy="12" r="1"></circle>
+                  <circle cx="5" cy="12" r="1"></circle>
+                </svg>
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => window.open(link.url, "_blank")}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+                Open Link
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => {
+                e.stopPropagation();
+                setEditTitleDialogOpen(true);
+              }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                Edit Title
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => {
+                e.stopPropagation();
+                setShowTags(!showTags);
+              }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                  <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                </svg>
+                {showTags ? 'Hide Tags' : 'Show Tags'}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => {
+                e.stopPropagation();
+                onEditTags(e);
+              }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                  <path d="M12 20h9"></path>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                </svg>
+                Edit Tags
+              </DropdownMenuItem>
+              
+              <DropdownMenuSeparator />
+              
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                  </svg>
+                  Move to Tab
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent className="max-h-80 overflow-y-auto">
+                  {isLoadingTabs ? (
+                    <DropdownMenuItem disabled>
+                      Loading tabs...
+                    </DropdownMenuItem>
+                  ) : customTabs.length > 0 ? (
+                    <>
+                      {customTabs.map((tab) => (
+                        <DropdownMenuItem
+                          key={tab.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Check if link is already in this tab
+                            // Ensure tab.links exists and is an array
+                            if (!tab || !tab.id) {
+                              console.error("Tab is undefined or missing ID");
+                              toast({
+                                title: "Error",
+                                description: "Could not add to tab - invalid tab data",
+                                variant: "destructive"
+                              });
+                              return;
+                            }
+                            
+                            const isInTab = tab.links && Array.isArray(tab.links) && tab.links.some(l => l && l.id === link.id);
+                            console.log(`Checking if link ${link.id} is in tab ${tab.id} (${tab.name}): ${isInTab}`);
+                            
+                            if (isInTab) {
+                              toast({
+                                title: "Already in tab",
+                                description: `This link is already in the "${tab.name}" tab`,
+                              });
+                              return;
+                            }
+                            
+                            // Add link to tab
+                            console.log(`Adding link ${link.id} to tab ${tab.id} (${tab.name})`);
+                            addLinkToTab(tab.id);
+                          }}
+                        >
+                          {tab.name}
+                        </DropdownMenuItem>
+                      ))}
+                    </>
+                  ) : (
+                    <DropdownMenuItem disabled>
+                      No custom tabs available
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsCreateTabDialogOpen(true);
+                    }}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                      <path d="M12 5v14M5 12h14" />
+                    </svg>
+                    Create New Tab
+                  </DropdownMenuItem>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+              
+              <DropdownMenuSeparator />
+              
+              {customTabId && onRemoveFromTab && (
+                <DropdownMenuItem 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if(confirm("Are you sure you want to remove this link from the current tab? The link will still be available in your library.")) {
+                      removeLinkFromTab();
+                    }
+                  }}
+                  className="text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50"
+                  disabled={isRemovingFromTab}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                    <path d="M10 11V6l-4 4 4 4v-5H20"></path>
+                    <path d="M4 16v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1"></path>
+                  </svg>
+                  {isRemovingFromTab ? "Removing..." : "Remove from Tab"}
+                </DropdownMenuItem>
+              )}
+              
+              <DropdownMenuItem 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (confirm("Are you sure you want to delete this link?")) {
+                    deleteLink();
+                  }
+                }}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                disabled={isDeleting}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                  <path d="M3 6h18"></path>
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                </svg>
+                {isDeleting ? "Deleting..." : "Delete"}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <div className="flex items-center text-xs text-gray-500 mt-1">
+          {link.last_viewed ? (
+            <span>Viewed {formatDate(new Date(link.last_viewed))}</span>
+          ) : (
+            <span>Added {formatDate(new Date(link.created_at))}</span>
+          )}
+        </div>
+        <div className="mt-2 flex flex-wrap gap-1">
+          {link.category && (
+            <Badge variant="outline" className="bg-gray-100 text-gray-800 text-xs">
+              {link.category}
+            </Badge>
+          )}
+          {showTags && link.tags && link.tags.slice(0, 2).map((tag) => (
+            <Badge
+              key={tag.id}
+              variant="secondary"
+              className="cursor-pointer text-xs"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onTagClick) onTagClick(tag.name, e);
+              }}
+            >
+              {tag.name}
+            </Badge>
+          ))}
+          {showTags && link.tags && link.tags.length > 2 && (
+            <Badge
+              variant="outline"
+              className="cursor-pointer text-xs"
+              onClick={(e) => {
+                e.stopPropagation();
+                setViewTagsModalOpen(true);
+              }}
+            >
+              +{link.tags.length - 2} more
+            </Badge>
+          )}
+        </div>
+      </div>
+    </Card>
+  );
 
   return (
     <>
@@ -870,7 +878,7 @@ const ContentItem = ({
           }}
         />
       )}
-
+      
       {/* Create Custom Tab Dialog */}
       {isCreateTabDialogOpen && (
         <CreateCustomTabDialog

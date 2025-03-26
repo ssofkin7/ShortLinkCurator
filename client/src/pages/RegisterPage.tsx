@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuth } from "@/hooks/useAuth";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -18,15 +19,9 @@ const registerSchema = z.object({
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
   const [_, setLocation] = useLocation();
-  const { user, registerMutation } = useAuth();
-  
-  // Redirect if already logged in
-  useEffect(() => {
-    if (user) {
-      setLocation("/");
-    }
-  }, [user, setLocation]);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -38,11 +33,26 @@ export default function RegisterPage() {
   });
 
   async function onSubmit(data: RegisterFormValues) {
-    registerMutation.mutate(data, {
-      onSuccess: () => {
-        setLocation("/");
-      }
-    });
+    try {
+      setIsLoading(true);
+      await apiRequest("POST", "/api/register", data);
+      
+      toast({
+        title: "Registration successful", 
+        description: "Welcome to LinkOrbit!",
+      });
+      
+      // For now, let's go back to using window.location.href to ensure a full reload
+      // which will properly refresh the auth state
+      window.location.href = "/";
+    } catch (error) {
+      toast({
+        title: "Registration failed",
+        description: error instanceof Error ? error.message : "Could not create account",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -107,8 +117,8 @@ export default function RegisterPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full" disabled={registerMutation.isPending}>
-                {registerMutation.isPending ? "Creating account..." : "Sign up"}
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Creating account..." : "Sign up"}
               </Button>
             </form>
           </Form>
@@ -116,7 +126,7 @@ export default function RegisterPage() {
         <CardFooter className="flex justify-center">
           <p className="text-sm text-gray-600">
             Already have an account?{" "}
-            <Link href="/login">
+            <Link href="/">
               <span className="text-indigo-600 hover:text-indigo-800 font-medium cursor-pointer">Log in</span>
             </Link>
           </p>

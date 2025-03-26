@@ -76,28 +76,52 @@ const CustomTabPage = () => {
       const dateB = new Date(b.created_at).getTime();
       return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
     });
-
+    
     setFilteredLinks(result);
   }, [tabLinks, searchQuery, sortOrder]);
 
   // Handle link submission
-  const handleSubmitLink = async (link: LinkWithTags) => {
-    if (!customTab) return;
-
+  const handleSubmitLink = async (url: string) => {
     try {
-      await apiRequest("POST", `/api/custom-tabs/${customTab.id}/links/${link.id}`);
-      setShowLinkSubmitter(false);
+      // Check if the link already exists first
+      const checkResponse = await apiRequest('GET', '/api/links');
+      const existingLinks = await checkResponse.json();
+      const existingLink = existingLinks.find((link: LinkWithTags) => link.url === url);
+      
+      let linkId: number;
+      
+      if (existingLink) {
+        console.log("Using existing link with ID:", existingLink.id);
+        linkId = existingLink.id;
+      } else {
+        // Create a new link if it doesn't exist
+        console.log("Creating new link for URL:", url);
+        const createResponse = await apiRequest('POST', '/api/links', { url });
+        const newLink = await createResponse.json();
+        linkId = newLink.id;
+      }
+      
+      console.log(`Adding link ID ${linkId} to tab ID ${tabId}`);
+      
+      // Add the link to the tab
+      await apiRequest('POST', `/api/custom-tabs/${tabId}/links/${linkId}`);
+      
+      // Refetch the tab and its links
       refetchLinks();
+      
+      // Close the submitter
+      setShowLinkSubmitter(false);
+      
       toast({
         title: "Link added",
-        description: "Link has been added to the tab successfully"
+        description: "Link was successfully added to the tab",
       });
     } catch (error) {
       console.error("Error adding link to tab:", error);
       toast({
         title: "Error",
-        description: "Failed to add link to tab",
-        variant: "destructive"
+        description: "Failed to add link to the tab",
+        variant: "destructive",
       });
     }
   };
@@ -113,14 +137,14 @@ const CustomTabPage = () => {
     // Toggle between newest and oldest
     const newSortOrder = sortOrder === "newest" ? "oldest" : "newest";
     setSortOrder(newSortOrder);
-
+    
     // Toast notification
     toast({
       title: "Sorting applied",
       description: `Sorted by ${newSortOrder === "newest" ? "newest" : "oldest"}`,
     });
   };
-
+  
   // If tab is not found or loading
   if (isTabLoading) {
     return (
@@ -185,7 +209,7 @@ const CustomTabPage = () => {
                 {customTab?.description || 'Organize your content in this custom tab'}
               </p>
             </div>
-
+            
             <div className="flex items-center gap-2 flex-wrap">
               {/* View Mode Toggle */}
               <div className="flex bg-gray-100 p-0.5 rounded-lg">
@@ -220,7 +244,7 @@ const CustomTabPage = () => {
                   List
                 </Button>
               </div>
-
+              
               {/* Sort Controls */}
               <Button
                 variant="outline"
@@ -233,7 +257,7 @@ const CustomTabPage = () => {
                 </svg>
                 <span>{sortOrder === "newest" ? "Newest" : "Oldest"}</span>
               </Button>
-
+              
               {/* Add Link Button */}
               <Button 
                 variant="default" 
@@ -249,7 +273,7 @@ const CustomTabPage = () => {
               </Button>
             </div>
           </div>
-
+          
           {/* Search Bar */}
           <div className="mb-4 relative">
             <div className="relative">
@@ -279,7 +303,7 @@ const CustomTabPage = () => {
               )}
             </div>
           </div>
-
+          
           {/* Content Grid/List */}
           {isLinksLoading ? (
             <div className="flex justify-center py-12">
@@ -336,9 +360,9 @@ const CustomTabPage = () => {
           )}
         </main>
       </div>
-
+      
       {/* Mobile Navigation */}
-      <MobileNavigation onAddLinkClick={() => setShowLinkSubmitter(true)} />
+      {isMobile && <MobileNavigation onAddLinkClick={() => setShowLinkSubmitter(true)} />}
 
       {/* Link Submitter Dialog */}
       {showLinkSubmitter && (
@@ -360,7 +384,7 @@ const CustomTabPage = () => {
           </div>
         </div>
       )}
-
+      
       {/* Tag Correction Modal */}
       {showTagModal && selectedLink && (
         <TagCorrectionModal 
