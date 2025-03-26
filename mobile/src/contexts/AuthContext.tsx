@@ -1,18 +1,17 @@
-import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { useMutation, useQuery } from 'react-query';
-import api from '../services/api';
+import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
+import { useQuery, useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { api, type User } from '../services/api';
 
-// Define types
-type User = {
-  id: number;
-  username: string;
-  email: string;
-  displayName?: string;
-  bio?: string;
-  avatar_url?: string;
-  is_premium: boolean;
-  created_at: string;
-};
+// Create a client for React Query
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 type AuthContextType = {
   user: User | null;
@@ -23,113 +22,130 @@ type AuthContextType = {
   logout: () => Promise<void>;
 };
 
-// Create the context
-const AuthContext = createContext<AuthContextType | null>(null);
-
-// AuthProvider component
 type AuthProviderProps = {
   children: ReactNode;
 };
 
-export default function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<User | null>(null);
+// Create the auth context
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-  // Get current user
-  const { isLoading, error } = useQuery(
-    'user',
-    async () => {
+// Authentication provider component
+export default function AuthProvider({ children }: AuthProviderProps) {
+  const [initializing, setInitializing] = useState(true);
+
+  // Fetch current user
+  const {
+    data: user,
+    error,
+    isLoading: isUserLoading,
+    refetch: refetchUser,
+  } = useQuery({
+    queryKey: ['user'],
+    queryFn: async () => {
       try {
-        const response = await api.get('/api/user');
-        setUser(response.data);
-        return response.data;
+        return await api.auth.getCurrentUser();
       } catch (error) {
-        // If the user is not logged in, we don't want to show an error
-        if ((error as any)?.response?.status === 401) {
-          setUser(null);
-          return null;
-        }
-        throw error;
+        // Clear any invalid session
+        await AsyncStorage.removeItem('auth_token');
+        return null;
       }
     },
-    {
-      retry: false,
-      refetchOnWindowFocus: false,
-    }
-  );
+    // Don't automatically fetch on mount - we'll handle this ourselves
+    enabled: false,
+  });
 
   // Login mutation
-  const loginMutation = useMutation(
-    async (credentials: { email: string; password: string }) => {
-      const response = await api.post('/api/login', credentials);
-      return response.data;
+  const loginMutation = useMutation({
+    mutationFn: async ({ email, password }: { email: string; password: string }) => {
+      return await api.auth.login(email, password);
     },
-    {
-      onSuccess: (data) => {
-        setUser(data);
-      },
-    }
-  );
+    onSuccess: (data) => {
+      // Update user in cache
+      queryClient.setQueryData(['user'], data);
+    },
+  });
 
   // Register mutation
-  const registerMutation = useMutation(
-    async (userData: { username: string; email: string; password: string }) => {
-      const response = await api.post('/api/register', userData);
-      return response.data;
+  const registerMutation = useMutation({
+    mutationFn: async ({ username, email, password }: { username: string; email: string; password: string }) => {
+      return await api.auth.register(username, email, password);
     },
-    {
-      onSuccess: (data) => {
-        setUser(data);
-      },
-    }
-  );
+    onSuccess: (data) => {
+      // Update user in cache
+      queryClient.setQueryData(['user'], data);
+    },
+  });
 
   // Logout mutation
-  const logoutMutation = useMutation(
-    async () => {
-      await api.post('/api/logout');
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      await api.auth.logout();
     },
-    {
-      onSuccess: () => {
-        setUser(null);
-      },
-    }
-  );
+    onSuccess: () => {
+      // Clear user from cache
+      queryClient.setQueryData(['user'], null);
+      // Invalidate all queries
+      queryClient.invalidateQueries();
+    },
+  });
 
-  // Login function
+  // Check authentication status on mount
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      await refetchUser();
+      setInitializing(false);
+    };
+
+    checkAuthStatus();
+  }, [refetchUser]);
+
+  // Wrapper functions for mutations
   const login = async (email: string, password: string) => {
-    await loginMutation.mutateAsync({ email, password });
+    return loginMutation.mutateAsync({ email, password });
   };
 
-  // Register function
   const register = async (username: string, email: string, password: string) => {
-    await registerMutation.mutateAsync({ username, email, password });
+    return registerMutation.mutateAsync({ username, email, password });
   };
 
-  // Logout function
   const logout = async () => {
-    await logoutMutation.mutateAsync();
+    return logoutMutation.mutateAsync();
+  };
+
+  // Calculate loading state
+  const isLoading = initializing || isUserLoading || 
+    loginMutation.isPending || registerMutation.isPending || logoutMutation.isPending;
+
+  // Context value
+  const contextValue: AuthContextType = {
+    user: user || null,
+    isLoading,
+    error: error instanceof Error ? error : null,
+    login,
+    register,
+    logout,
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isLoading,
-        error,
-        login,
-        register,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-// Hook to use the auth context
+// Auth context provider with QueryClient
+export function AuthProviderWithReactQuery({ children }: AuthProviderProps) {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>{children}</AuthProvider>
+    </QueryClientProvider>
+  );
+}
+
+// Custom hook to use auth context
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
