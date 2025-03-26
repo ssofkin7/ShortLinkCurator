@@ -1,4 +1,4 @@
-import { Switch, Route, useLocation } from "wouter";
+import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -14,30 +14,26 @@ import CustomTabPage from "@/pages/CustomTabPage";
 import ProfilePage from "@/pages/ProfilePage";
 import GetStartedWizard from "@/components/GetStartedWizard";
 import { useAuth } from "@/hooks/useAuth";
+import { Loader2 } from "lucide-react";
 
-function Router() {
-  const { isAuthenticated } = useAuth();
-
-  return (
-    <Switch>
-      {isAuthenticated ? (
-        <>
-          <Route path="/" component={HomePage} />
-          <Route path="/library" component={LibraryPage} />
-          <Route path="/tabs/:id" component={CustomTabPage} />
-          <Route path="/tags" component={TagsPage} />
-          <Route path="/analytics" component={AnalyticsPage} />
-          <Route path="/profile" component={ProfilePage} />
-        </>
-      ) : (
-        <>
-          <Route path="/" component={LoginPage} />
-          <Route path="/register" component={RegisterPage} />
-        </>
-      )}
-      <Route component={NotFound} />
-    </Switch>
-  );
+// Protected Route component to handle auth requirements
+function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
+  const { user, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-border" />
+      </div>
+    );
+  }
+  
+  if (!user) {
+    window.location.href = "/login";
+    return null;
+  }
+  
+  return <Component />;
 }
 
 function App() {
@@ -50,27 +46,46 @@ function App() {
 }
 
 function AppContent() {
-  const { isAuthenticated } = useAuth();
-  const [location] = useLocation();
-
-  // Show LandingPage only on root path when not authenticated
-  const showLandingPage = !isAuthenticated && location === "/";
+  const { user, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-border" />
+      </div>
+    );
+  }
 
   return (
     <>
       <Switch>
-        {!isAuthenticated ? (
-          <>
-            <Route path="/" component={LandingPage} />
-            <Route path="/login" component={LoginPage} />
-            <Route path="/register" component={RegisterPage} />
-            <Route path="/auth" component={LoginPage} />
-          </>
-        ) : (
-          <Router />
-        )}
+        <Route path="/login" component={LoginPage} />
+        <Route path="/register" component={RegisterPage} />
+        <Route path="/auth" component={LoginPage} />
+        
+        {/* LandingPage when not logged in at root */}
+        <Route path="/" component={!user ? LandingPage : HomePage} />
+        
+        {/* Protected routes */}
+        <Route path="/library">
+          <ProtectedRoute component={LibraryPage} />
+        </Route>
+        <Route path="/tabs/:id">
+          <ProtectedRoute component={CustomTabPage} />
+        </Route>
+        <Route path="/tags">
+          <ProtectedRoute component={TagsPage} />
+        </Route>
+        <Route path="/analytics">
+          <ProtectedRoute component={AnalyticsPage} />
+        </Route>
+        <Route path="/profile">
+          <ProtectedRoute component={ProfilePage} />
+        </Route>
+        
+        <Route component={NotFound} />
       </Switch>
-      {isAuthenticated && <GetStartedWizard />}
+      {user && <GetStartedWizard />}
     </>
   );
 }

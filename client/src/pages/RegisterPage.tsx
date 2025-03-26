@@ -107,8 +107,8 @@ export default function RegisterPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Creating account..." : "Sign up"}
+              <Button type="submit" className="w-full" disabled={registerMutation.isPending}>
+                {registerMutation.isPending ? "Creating account..." : "Sign up"}
               </Button>
             </form>
           </Form>
@@ -116,7 +116,7 @@ export default function RegisterPage() {
         <CardFooter className="flex justify-center">
           <p className="text-sm text-gray-600">
             Already have an account?{" "}
-            <Link href="/">
+            <Link href="/login">
               <span className="text-indigo-600 hover:text-indigo-800 font-medium cursor-pointer">Log in</span>
             </Link>
           </p>
