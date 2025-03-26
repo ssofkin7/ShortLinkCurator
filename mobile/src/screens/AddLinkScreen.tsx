@@ -1,26 +1,28 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  StyleSheet, 
-  ActivityIndicator,
-  ScrollView,
-  Alert,
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  ScrollView,
+  SafeAreaView,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
-import { useMutation, useQueryClient } from 'react-query';
 import { useNavigation } from '@react-navigation/native';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { MainTabParamList } from '../navigation/MainTabNavigator';
-import api from '../services/api';
-import { Ionicons } from '@expo/vector-icons';
+import { Button } from '../components/ui/Button';
+import { api } from '../services/api';
+import { colors, typography, spacing } from '../components/ui/theme';
+import { Card } from '../components/ui/Card';
 
+// Define the navigation prop type for this screen
 type AddLinkScreenNavigationProp = BottomTabNavigationProp<MainTabParamList, 'AddLink'>;
 
-// Component to show after link is successfully added
 interface SuccessViewProps {
   onAddAnother: () => void;
   onViewLibrary: () => void;
@@ -28,328 +30,281 @@ interface SuccessViewProps {
 
 const SuccessView = ({ onAddAnother, onViewLibrary }: SuccessViewProps) => (
   <View style={styles.successContainer}>
-    <View style={styles.successIconContainer}>
-      <Ionicons name="checkmark-circle" size={80} color="#10b981" />
-    </View>
     <Text style={styles.successTitle}>Link Added Successfully!</Text>
-    <Text style={styles.successText}>
-      Your link has been added to your library and analyzed with AI
+    <Text style={styles.successDescription}>
+      Your link has been added to your content library and processed for categorization and tagging.
     </Text>
     
-    <View style={styles.buttonContainer}>
-      <TouchableOpacity style={styles.secondaryButton} onPress={onAddAnother}>
-        <Text style={styles.secondaryButtonText}>Add Another</Text>
-      </TouchableOpacity>
-      
-      <TouchableOpacity style={styles.primaryButton} onPress={onViewLibrary}>
-        <Text style={styles.primaryButtonText}>View Library</Text>
-      </TouchableOpacity>
+    <View style={styles.successButtonsContainer}>
+      <Button
+        title="Add Another Link"
+        onPress={onAddAnother}
+        variant="outline"
+        style={styles.successButton}
+      />
+      <Button
+        title="View Library"
+        onPress={onViewLibrary}
+        variant="primary"
+        style={styles.successButton}
+      />
     </View>
   </View>
 );
 
-// Main component
 export default function AddLinkScreen() {
   const navigation = useNavigation<AddLinkScreenNavigationProp>();
-  const queryClient = useQueryClient();
   const [url, setUrl] = useState('');
-  const [success, setSuccess] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
   // Add link mutation
-  const addLinkMutation = useMutation(
-    async (linkUrl: string) => {
-      const response = await api.post('/api/links', { url: linkUrl });
-      return response.data;
+  const { mutate, isPending, isSuccess, data } = useMutation({
+    mutationFn: async (linkUrl: string) => {
+      return await api.links.add(linkUrl);
     },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('links');
-        queryClient.invalidateQueries('recommendations');
-        setSuccess(true);
-      },
-      onError: (error) => {
-        console.error('Error adding link:', error);
-        Alert.alert(
-          'Error',
-          'Failed to add link. Please try again.',
-          [{ text: 'OK' }]
-        );
-      }
-    }
-  );
+    onSuccess: () => {
+      setIsSubmitted(true);
+    },
+    onError: (error) => {
+      setError(error instanceof Error 
+        ? error.message 
+        : 'Failed to add link. Please try again.'
+      );
+      Alert.alert('Error', error instanceof Error ? error.message : 'Unknown error');
+    },
+  });
 
+  // Handle form submission
   const handleSubmit = () => {
+    // Reset error state
+    setError('');
+    
+    // Validate URL
     if (!url.trim()) {
-      Alert.alert('Error', 'Please enter a valid URL');
+      setError('Please enter a valid URL');
       return;
     }
     
-    // Basic URL validation
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      // Add https:// prefix if missing
-      const formattedUrl = `https://${url}`;
-      addLinkMutation.mutate(formattedUrl);
-    } else {
-      addLinkMutation.mutate(url);
+    // Add http:// or https:// if not present
+    let formattedUrl = url.trim();
+    if (!/^https?:\/\//i.test(formattedUrl)) {
+      formattedUrl = `https://${formattedUrl}`;
     }
+    
+    // Submit the URL
+    mutate(formattedUrl);
   };
 
-  const handleAddAnother = () => {
+  // Reset the form
+  const resetForm = () => {
     setUrl('');
-    setSuccess(false);
+    setIsSubmitted(false);
+    setError('');
   };
 
-  const handleViewLibrary = () => {
+  // Navigate to library
+  const goToLibrary = () => {
     navigation.navigate('Library');
   };
 
-  // If we've just successfully added a link
-  if (success) {
-    return <SuccessView onAddAnother={handleAddAnother} onViewLibrary={handleViewLibrary} />;
-  }
-
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.keyboardContainer}
-    >
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.content}>
+    <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+      >
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.header}>
-            <Ionicons name="add-circle" size={50} color="#6366f1" />
-            <Text style={styles.title}>Add New Link</Text>
+            <Text style={styles.screenTitle}>Add Content</Text>
             <Text style={styles.subtitle}>
-              Paste a link from any supported platform to add it to your library
+              Save and organize links from your favorite platforms
             </Text>
           </View>
 
-          <View style={styles.formContainer}>
-            <Text style={styles.label}>Link URL</Text>
-            <TextInput
-              style={styles.input}
-              value={url}
-              onChangeText={setUrl}
-              placeholder="https://example.com"
-              autoCapitalize="none"
-              autoCorrect={false}
-              keyboardType="url"
-            />
-            
-            <TouchableOpacity
-              style={styles.submitButton}
-              onPress={handleSubmit}
-              disabled={addLinkMutation.isLoading}
-            >
-              {addLinkMutation.isLoading ? (
-                <ActivityIndicator color="#fff" size="small" />
-              ) : (
-                <Text style={styles.submitButtonText}>Add to Library</Text>
-              )}
-            </TouchableOpacity>
-          </View>
+          {isSuccess ? (
+            <SuccessView onAddAnother={resetForm} onViewLibrary={goToLibrary} />
+          ) : (
+            <Card style={styles.formContainer} variant="elevated">
+              <Text style={styles.formTitle}>Add New Link</Text>
+              <Text style={styles.formDescription}>
+                Paste a URL from YouTube, TikTok, Instagram, Twitter, or any other website to save it to your library.
+              </Text>
+              
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>URL</Text>
+                <TextInput
+                  style={[styles.input, error ? styles.inputError : null]}
+                  placeholder="Paste or type URL here"
+                  autoCapitalize="none"
+                  keyboardType="url"
+                  value={url}
+                  onChangeText={setUrl}
+                  autoCorrect={false}
+                  editable={!isPending}
+                />
+                {error ? <Text style={styles.errorText}>{error}</Text> : null}
+              </View>
 
-          <View style={styles.supportedPlatformsContainer}>
-            <Text style={styles.supportedPlatformsTitle}>Supported Platforms</Text>
-            
-            <View style={styles.platformTagsContainer}>
-              <View style={styles.platformTag}>
-                <Text style={styles.platformTagText}>YouTube</Text>
+              <Button
+                title={isPending ? 'Adding...' : 'Add to Library'}
+                onPress={handleSubmit}
+                variant="primary"
+                size="lg"
+                loading={isPending}
+                disabled={isPending || !url.trim()}
+                fullWidth
+                style={styles.submitButton}
+              />
+              
+              <View style={styles.supportedPlatforms}>
+                <Text style={styles.supportedTitle}>Supported Platforms</Text>
+                <View style={styles.platformList}>
+                  <Text style={styles.platformTag}>YouTube</Text>
+                  <Text style={styles.platformTag}>TikTok</Text>
+                  <Text style={styles.platformTag}>Instagram</Text>
+                  <Text style={styles.platformTag}>Twitter</Text>
+                  <Text style={styles.platformTag}>+ More</Text>
+                </View>
               </View>
-              <View style={styles.platformTag}>
-                <Text style={styles.platformTagText}>TikTok</Text>
-              </View>
-              <View style={styles.platformTag}>
-                <Text style={styles.platformTagText}>Instagram</Text>
-              </View>
-              <View style={styles.platformTag}>
-                <Text style={styles.platformTagText}>Twitter</Text>
-              </View>
-              <View style={styles.platformTag}>
-                <Text style={styles.platformTagText}>Facebook</Text>
-              </View>
-              <View style={styles.platformTag}>
-                <Text style={styles.platformTagText}>LinkedIn</Text>
-              </View>
-              <View style={styles.platformTag}>
-                <Text style={styles.platformTagText}>Reddit</Text>
-              </View>
-              <View style={styles.platformTag}>
-                <Text style={styles.platformTagText}>Medium</Text>
-              </View>
-              <View style={styles.platformTag}>
-                <Text style={styles.platformTagText}>Substack</Text>
-              </View>
-              <View style={styles.platformTag}>
-                <Text style={styles.platformTagText}>GitHub</Text>
-              </View>
-              <View style={styles.platformTag}>
-                <Text style={styles.platformTagText}>Articles</Text>
-              </View>
-              <View style={styles.platformTag}>
-                <Text style={styles.platformTagText}>Documents</Text>
-              </View>
-              <View style={styles.platformTag}>
-                <Text style={styles.platformTagText}>Webpages</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+            </Card>
+          )}
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  keyboardContainer: {
+  safeArea: {
     flex: 1,
+    backgroundColor: colors.gray[50],
   },
   container: {
-    flexGrow: 1,
-    backgroundColor: '#f5f5f5',
+    flex: 1,
   },
-  content: {
-    padding: 20,
+  scrollContent: {
+    flexGrow: 1,
+    padding: spacing.lg,
   },
   header: {
-    alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 30,
+    marginBottom: spacing.xl,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#111827',
-    marginTop: 10,
-    marginBottom: 8,
+  screenTitle: {
+    fontSize: typography.fontSizes['2xl'],
+    fontWeight: typography.fontWeights.bold as any,
+    color: colors.gray[900],
   },
   subtitle: {
-    fontSize: 16,
-    color: '#6b7280',
-    textAlign: 'center',
-    paddingHorizontal: 20,
+    fontSize: typography.fontSizes.md,
+    color: colors.gray[500],
+    marginTop: spacing.xs,
   },
   formContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
-    marginBottom: 20,
+    padding: spacing.lg,
+    marginBottom: spacing.xl,
+  },
+  formTitle: {
+    fontSize: typography.fontSizes.xl,
+    fontWeight: typography.fontWeights.bold as any,
+    color: colors.gray[900],
+    marginBottom: spacing.xs,
+  },
+  formDescription: {
+    fontSize: typography.fontSizes.md,
+    color: colors.gray[600],
+    marginBottom: spacing.lg,
+  },
+  inputContainer: {
+    marginBottom: spacing.lg,
   },
   label: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#374151',
-    marginBottom: 8,
+    fontSize: typography.fontSizes.sm,
+    fontWeight: typography.fontWeights.medium as any,
+    color: colors.gray[700],
+    marginBottom: spacing.xs,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 6,
-    padding: 12,
-    fontSize: 16,
-    marginBottom: 20,
+    borderColor: colors.gray[300],
+    borderRadius: 8,
+    padding: spacing.md,
+    fontSize: typography.fontSizes.md,
+    color: colors.gray[800],
+    backgroundColor: '#fff',
+  },
+  inputError: {
+    borderColor: colors.error,
+  },
+  errorText: {
+    fontSize: typography.fontSizes.sm,
+    color: colors.error,
+    marginTop: spacing.xs,
   },
   submitButton: {
-    backgroundColor: '#6366f1',
-    borderRadius: 6,
-    padding: 14,
-    alignItems: 'center',
+    marginBottom: spacing.lg,
   },
-  submitButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+  supportedPlatforms: {
+    marginTop: spacing.md,
   },
-  supportedPlatformsContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
+  supportedTitle: {
+    fontSize: typography.fontSizes.sm,
+    fontWeight: typography.fontWeights.medium as any,
+    color: colors.gray[600],
+    marginBottom: spacing.sm,
   },
-  supportedPlatformsTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 16,
-  },
-  platformTagsContainer: {
+  platformList: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    marginTop: spacing.xs,
   },
   platformTag: {
-    backgroundColor: '#eef2ff',
-    borderRadius: 4,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    marginRight: 8,
-    marginBottom: 8,
-  },
-  platformTagText: {
-    color: '#6366f1',
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: typography.fontSizes.sm,
+    backgroundColor: colors.gray[200],
+    color: colors.gray[700],
+    padding: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    borderRadius: 16,
+    marginRight: spacing.xs,
+    marginBottom: spacing.xs,
+    overflow: 'hidden',
   },
   successContainer: {
-    flex: 1,
-    justifyContent: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: spacing.xl,
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#f5f5f5',
-  },
-  successIconContainer: {
-    marginBottom: 20,
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   successTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#111827',
-    marginBottom: 12,
-  },
-  successText: {
-    fontSize: 16,
-    color: '#6b7280',
+    fontSize: typography.fontSizes.xl,
+    fontWeight: typography.fontWeights.bold as any,
+    color: colors.primary[600],
+    marginBottom: spacing.md,
     textAlign: 'center',
-    marginBottom: 30,
   },
-  buttonContainer: {
+  successDescription: {
+    fontSize: typography.fontSizes.md,
+    color: colors.gray[600],
+    textAlign: 'center',
+    marginBottom: spacing.xl,
+  },
+  successButtonsContainer: {
     flexDirection: 'row',
-    width: '100%',
     justifyContent: 'space-between',
+    width: '100%',
   },
-  primaryButton: {
-    backgroundColor: '#6366f1',
-    borderRadius: 6,
-    padding: 14,
+  successButton: {
     flex: 1,
-    marginLeft: 10,
-    alignItems: 'center',
-  },
-  primaryButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  secondaryButton: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#6366f1',
-    borderRadius: 6,
-    padding: 14,
-    flex: 1,
-    marginRight: 10,
-    alignItems: 'center',
-  },
-  secondaryButtonText: {
-    color: '#6366f1',
-    fontSize: 16,
-    fontWeight: '600',
+    margin: spacing.xs,
   },
 });

@@ -1,12 +1,13 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons } from '@expo/vector-icons';
+import { HomeIcon, FolderIcon, PlusIcon, UserIcon } from 'react-native-heroicons/outline';
 import HomeScreen from '../screens/HomeScreen';
 import LibraryScreen from '../screens/LibraryScreen';
-import ProfileScreen from '../screens/ProfileScreen';
 import AddLinkScreen from '../screens/AddLinkScreen';
+import ProfileScreen from '../screens/ProfileScreen';
+import { colors } from '../components/ui/theme';
 
-// Define our navigation types
+// Main tab parameter list
 export type MainTabParamList = {
   Home: undefined;
   Library: undefined;
@@ -14,6 +15,7 @@ export type MainTabParamList = {
   Profile: undefined;
 };
 
+// Create the bottom tab navigator
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 export default function MainTabNavigator() {
@@ -21,52 +23,67 @@ export default function MainTabNavigator() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
-
-          if (route.name === 'Home') {
-            iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === 'Library') {
-            iconName = focused ? 'library' : 'library-outline';
-          } else if (route.name === 'AddLink') {
-            iconName = focused ? 'add-circle' : 'add-circle-outline';
-          } else if (route.name === 'Profile') {
-            iconName = focused ? 'person' : 'person-outline';
+          // Add icons based on route name
+          switch (route.name) {
+            case 'Home':
+              return <HomeIcon size={size} color={color} />;
+            case 'Library':
+              return <FolderIcon size={size} color={color} />;
+            case 'AddLink':
+              return <PlusIcon size={size} color={color} />;
+            case 'Profile':
+              return <UserIcon size={size} color={color} />;
+            default:
+              return null;
           }
-
-          // You can return any component here
-          return <Ionicons name={iconName as any} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#6366f1', // Indigo color to match the web app
-        tabBarInactiveTintColor: 'gray',
-        headerShown: true,
-        headerTitleStyle: {
-          fontWeight: 'bold',
+        tabBarActiveTintColor: colors.primary[600],
+        tabBarInactiveTintColor: colors.gray[400],
+        headerShown: false,
+        tabBarStyle: {
+          borderTopWidth: 1,
+          borderTopColor: colors.gray[200],
+          height: 60,
+          paddingBottom: 8,
+          paddingTop: 8,
         },
-        headerTintColor: '#6366f1',
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '500',
+        },
       })}
     >
       <Tab.Screen 
         name="Home" 
-        component={HomeScreen} 
-        options={{ title: 'LinkOrbit' }}
+        component={HomeScreen}
+        options={{
+          title: "Home",
+        }}
       />
       <Tab.Screen 
         name="Library" 
-        component={LibraryScreen} 
-        options={{ title: 'My Library' }}
+        component={LibraryScreen}
+        options={{
+          title: "Library",
+        }}
       />
       <Tab.Screen 
         name="AddLink" 
-        component={AddLinkScreen} 
-        options={{ 
-          title: 'Add Link',
-          tabBarLabel: 'Add'
+        component={AddLinkScreen}
+        options={{
+          title: "Add",
+          tabBarLabelStyle: {
+            fontSize: 14,
+            fontWeight: '600',
+          },
         }}
       />
       <Tab.Screen 
         name="Profile" 
-        component={ProfileScreen} 
-        options={{ title: 'Profile' }}
+        component={ProfileScreen}
+        options={{
+          title: "Profile",
+        }}
       />
     </Tab.Navigator>
   );
