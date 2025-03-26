@@ -255,17 +255,44 @@ export default function ProfilePage() {
                           onSubmit={profileForm.handleSubmit(onProfileSubmit)}
                           className="space-y-4"
                         >
-                          <div className="flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-6 mb-6">
-                            <div className="h-20 w-20 rounded-full bg-blue-500 flex items-center justify-center text-white text-xl font-bold mb-3">
+                          <div className="flex flex-col items-center justify-center bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50 rounded-lg p-8 mb-8 shadow-sm">
+                            <div className="h-24 w-24 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-2xl font-bold mb-4 shadow-md transform hover:scale-105 transition-transform duration-300 border-4 border-white">
                               <span>{user?.username?.charAt(0).toUpperCase() || "U"}</span>
                             </div>
-                            <h3 className="font-medium text-lg">{user?.display_name || user?.username}</h3>
-                            <p className="text-sm text-gray-500 mt-1 text-center max-w-xs">
+                            <h3 className="font-semibold text-xl text-gray-800">{user?.display_name || user?.username}</h3>
+                            <p className="text-sm text-gray-500 mt-2 text-center max-w-xs">
                               {user?.email}
                             </p>
-                            <div className="flex items-center space-x-2 mt-3">
-                              <div className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs">
+                            <div className="flex items-center space-x-3 mt-4">
+                              <div className="px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 text-xs font-medium">
                                 Active User
+                              </div>
+                              {user?.is_premium && (
+                                <div className="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-medium">
+                                  Premium Member
+                                </div>
+                              )}
+                            </div>
+                            
+                            <div className="w-full max-w-md mt-6 grid grid-cols-3 gap-4 text-center">
+                              <div className="bg-white p-3 rounded-lg shadow-sm">
+                                <div className="text-xl font-bold text-indigo-600">
+                                  {user?.saved_links_count || 0}
+                                </div>
+                                <div className="text-xs text-gray-500 mt-1">Saved Links</div>
+                              </div>
+                              <div className="bg-white p-3 rounded-lg shadow-sm">
+                                <div className="text-xl font-bold text-indigo-600">
+                                  {user?.custom_tabs_count || 0}
+                                </div>
+                                <div className="text-xs text-gray-500 mt-1">Custom Tabs</div>
+                              </div>
+                              <div className="bg-white p-3 rounded-lg shadow-sm">
+                                <div className="text-xl font-bold text-indigo-600">
+                                  {user?.created_at ? 
+                                    Math.floor((new Date().getTime() - new Date(user.created_at).getTime()) / (1000 * 60 * 60 * 24)) : 0}
+                                </div>
+                                <div className="text-xs text-gray-500 mt-1">Days Active</div>
                               </div>
                             </div>
                           </div>
